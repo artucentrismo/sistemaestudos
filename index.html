@@ -6,7 +6,7 @@
 
 <style>
 :root{--bg:#f3f5fa;--cd:#fff;--tx:#0e1a3a;--mu:#6b7794;--ac:#1b2f6b;--ln:#e3e8f2;--g:#2e9e6b;--rd:#d64545;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px)}
-@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#070d1f;--cd:#0f1a38;--tx:#eef1fa;--mu:#8a96b8;--ac:#7f9bff;--ln:#1c2850;--g:#4cc790;--rd:#ff7676}}
+@media(prefers-color-scheme:dark){:root:not([data-theme]){--bg:#070d1f;--cd:#0f1a38;--tx:#eef1fa;--mu:#8a96b8;--ac:#7f9bff;--ln:#1c2850;--g:#4cc790;--rd:#ff7676}}
 :root[data-theme="dark"]{--bg:#070d1f;--cd:#0f1a38;--tx:#eef1fa;--mu:#8a96b8;--ac:#7f9bff;--ln:#1c2850;--g:#4cc790;--rd:#ff7676}
 :root[data-theme="light"]{--bg:#f3f5fa;--cd:#fff;--tx:#0e1a3a;--mu:#6b7794;--ac:#1b2f6b;--ln:#e3e8f2;--g:#2e9e6b;--rd:#d64545}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -18,7 +18,7 @@ h1{font-family:"New York",Georgia,"Times New Roman",serif;font-size:34px;font-we
 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px}
 .tile{background:var(--cd);border-radius:18px;padding:16px}.tile b{display:block;font-family:"New York",Georgia,serif;font-size:28px;margin-top:4px}
 .btn{width:100%;padding:16px;border:0;border-radius:14px;background:var(--ac);color:#fff;font-size:17px;font-weight:600;margin-top:16px}
-@media(prefers-color-scheme:dark){:root:not([data-theme="light"]) .btn{color:#070d1f}}
+@media(prefers-color-scheme:dark){:root:not([data-theme]) .btn{color:#070d1f}}
 .btn.s{background:var(--ln);color:var(--tx)}.btn:disabled{opacity:.35}
 .lk{background:none;border:0;color:var(--ac);font-size:16px;padding:8px 6px}.lk.r{color:var(--rd)}
 .bar{height:6px;background:var(--ln);border-radius:3px;overflow:hidden;margin-top:10px}.bar i{display:block;height:100%;background:var(--ac)}
@@ -108,6 +108,101 @@ input,select,textarea{font:inherit;font-size:17px;padding:13px;border-radius:12p
 .anki-grade-grid button b,.anki-grade-grid button small{display:block}
 .anki-grade-grid button small{font-size:10px;color:var(--mu);margin-top:5px}
 @media(max-width:430px){.anki-stats{grid-template-columns:repeat(2,1fr)}.anki-actions{grid-template-columns:1fr 1fr}.anki-actions .anki-primary{grid-column:1/-1}.anki-toolbar{grid-template-columns:1fr}.anki-note{gap:4px}.anki-note button{padding:7px 6px}.anki-grade-grid{gap:5px}.anki-grade-grid button{font-size:13px}}
+
+.theme-choice{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.theme-choice button{border:1px solid var(--ln);background:var(--bg);color:var(--tx);border-radius:12px;padding:12px 7px;font:inherit;font-size:14px;font-weight:650}
+.theme-choice button.active{background:var(--ac);border-color:var(--ac);color:#fff;box-shadow:0 0 0 2px color-mix(in srgb,var(--ac) 18%,transparent)}
+.anki-local-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--g);margin-right:5px}
+.anki-welcome{display:flex;align-items:center;justify-content:space-between;padding:20px 4px 18px}
+.anki-welcome h2{font-size:30px;margin:4px 0}
+.anki-welcome p{margin:0;color:var(--mu);font-size:14px}
+.anki-eyebrow{font-size:10px;letter-spacing:.14em;font-weight:800;color:var(--ac)}
+.anki-welcome-icon{width:56px;height:56px;border-radius:18px;background:color-mix(in srgb,var(--ac) 13%,var(--cd));display:grid;place-items:center;color:var(--ac);font-size:30px}
+.anki-stats>div{border:1px solid var(--ln);box-shadow:0 2px 8px rgba(10,20,40,.035)}
+.anki-actions{grid-template-columns:1.45fr 1fr 1fr;gap:9px}
+.anki-actions button{min-height:48px;cursor:pointer;transition:transform .15s,opacity .15s}
+.anki-actions button:active,.anki-tree-item:active{transform:scale(.98)}
+.anki-actions button:disabled{opacity:.4}
+.anki-deck-tree{margin:18px 0 14px;padding:12px;background:var(--cd);border:1px solid var(--ln);border-radius:18px}
+.anki-tree-heading{display:flex;justify-content:space-between;padding:2px 8px 9px;color:var(--mu);font-size:10px;font-weight:800;letter-spacing:.12em}
+.anki-tree-heading span{font-weight:500;letter-spacing:0}
+.anki-tree-item{display:flex;align-items:center;gap:10px;width:100%;padding:11px 12px 11px calc(12px + var(--deck-depth,0)*17px);border:0;border-radius:11px;background:transparent;color:var(--tx);text-align:left;font:inherit;font-size:14px;cursor:pointer}
+.anki-tree-item.active{background:color-mix(in srgb,var(--ac) 12%,var(--cd));color:var(--ac);font-weight:750}
+.anki-tree-icon{width:20px;color:var(--ac);font-size:16px;flex:none}
+.anki-tree-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.anki-tree-arrow{color:var(--mu)}
+.anki-toolbar{grid-template-columns:1fr auto;align-items:center}
+.anki-toolbar input{min-width:0;border-radius:13px}
+.anki-toolbar button{white-space:nowrap}
+.anki-section-head{margin-top:22px}
+.anki-list{border:1px solid var(--ln);padding:3px 14px}
+.anki-note{gap:8px;padding:14px 0}
+.anki-note-copy b{font-size:14px;white-space:normal;line-height:1.35}
+.anki-note-copy small{line-height:1.45}
+.anki-note button{min-width:36px;min-height:36px;border-radius:10px;background:var(--bg);cursor:pointer}
+.anki-note button:hover,.anki-toolbar button:hover,.anki-footer-actions button:hover{border-color:var(--ac)}
+.anki-form{border:1px solid var(--ln);box-shadow:0 8px 28px rgba(10,20,40,.06);padding:20px}
+.anki-form-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.anki-form-title small{color:var(--ac);font-size:10px;font-weight:800;letter-spacing:.14em}
+.anki-form-title h3{font-size:21px;margin:3px 0 0}
+.anki-icon-button{width:38px;height:38px;border:1px solid var(--ln);border-radius:12px;background:var(--bg);color:var(--tx);font-size:23px;cursor:pointer}
+.anki-form label{margin:14px 0;color:var(--tx);font-size:13px}
+.anki-form input,.anki-form select{background:var(--bg);border:1px solid var(--ln);border-radius:12px;padding:13px;font-size:15px}
+.anki-field-card{border:1px solid var(--ln);border-radius:16px;padding:14px;margin:14px 0;background:var(--bg)}
+.anki-front-field{border-left:4px solid var(--ac)}
+.anki-back-field{border-left:4px solid var(--g)}
+.anki-field-heading{display:flex;align-items:center;gap:10px;margin-bottom:9px}
+.anki-field-number{width:28px;height:28px;border-radius:9px;background:color-mix(in srgb,var(--ac) 13%,var(--cd));color:var(--ac);display:grid;place-items:center;font-size:11px;font-weight:800}
+.anki-back-field .anki-field-number{background:color-mix(in srgb,var(--g) 13%,var(--cd));color:var(--g)}
+.anki-field-heading b,.anki-field-heading small{display:block}
+.anki-field-heading b{font-size:14px}
+.anki-field-heading small{color:var(--mu);font-size:11px;margin-top:2px}
+.anki-field-card textarea{background:var(--cd);border:1px solid var(--ln);border-radius:12px;padding:14px;min-height:130px;line-height:1.55;font-size:16px;resize:vertical;margin:0}
+.anki-back-field textarea{min-height:110px}
+.anki-field-card textarea:focus,.anki-form input:focus,.anki-form select:focus{outline:2px solid color-mix(in srgb,var(--ac) 35%,transparent);border-color:var(--ac)}
+.anki-field-footer{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-top:9px;color:var(--mu);font-size:11px}
+.anki-field-footer button{border:1px solid var(--ln);border-radius:9px;padding:7px 9px;background:var(--cd);color:var(--ac);font:inherit;font-size:11px;font-weight:700}
+.anki-form .anki-primary{margin-top:8px}
+.anki-muted{line-height:1.5}
+.anki-deck-form{margin:14px 0}
+.anki-danger-zone{border-top:1px solid var(--ln);margin-top:22px;padding-top:16px}
+.anki-danger-zone p{font-size:13px;line-height:1.5;color:var(--mu)}
+.anki-danger-button{width:100%;border:1px solid color-mix(in srgb,var(--rd) 35%,var(--ln));background:color-mix(in srgb,var(--rd) 8%,var(--cd));color:var(--rd);border-radius:12px;padding:12px;font:inherit;font-weight:700}
+.anki-secondary{border:1px solid var(--ln);border-radius:12px;background:var(--bg);color:var(--tx);padding:12px 16px;font:inherit}
+.anki-empty-inline{padding:26px 12px;text-align:center}
+.anki-empty-inline b,.anki-empty-inline span{display:block}
+.anki-empty-inline span{font-size:13px;color:var(--mu);margin-top:5px}
+.anki-empty-symbol{font-size:34px;color:var(--ac);margin-bottom:8px}
+.anki-loading{display:flex;align-items:center;justify-content:center;gap:10px;padding:32px;color:var(--mu);font-size:14px}
+.anki-loading span{width:15px;height:15px;border:2px solid var(--ln);border-top-color:var(--ac);border-radius:50%;animation:anki-spin .8s linear infinite}
+@keyframes anki-spin{to{transform:rotate(360deg)}}
+.anki-review-progress{height:5px;background:var(--ln);border-radius:9px;overflow:hidden;margin:13px 0}
+.anki-review-progress i{display:block;height:100%;background:var(--ac);transition:width .2s}
+.anki-review-card{border:1px solid var(--ln);box-shadow:0 8px 28px rgba(10,20,40,.05);padding:24px;min-height:300px}
+.anki-question{font-family:inherit;font-weight:650;font-size:23px;line-height:1.5}
+.anki-answer{font-size:18px;line-height:1.65}
+.anki-answer-divider{height:1px;background:var(--ln);width:100%;margin:8px 0 18px}
+.anki-tap-hint{font-size:12px;color:var(--mu);margin-top:24px}
+.anki-grade-grid button{min-height:72px;cursor:pointer}
+.anki-grade-grid button:nth-of-type(1){border-color:#e58b8b}
+.anki-grade-grid button:nth-of-type(2){border-color:#e7b66a}
+.anki-grade-grid button:nth-of-type(3){border-color:#70bda0}
+.anki-grade-grid button:nth-of-type(4){border-color:#6f9ddd}
+.anki-grade-grid button:active{transform:scale(.98)}
+@media(max-width:430px){
+ .theme-choice button{font-size:12px;padding:11px 3px}
+ .anki-actions{grid-template-columns:1fr 1fr}
+ .anki-actions .anki-primary{grid-column:1/-1}
+ .anki-toolbar{grid-template-columns:1fr}
+ .anki-toolbar button{width:100%}
+ .anki-note{gap:5px}
+ .anki-note button{min-width:32px;padding:6px}
+ .anki-form{padding:15px}
+ .anki-field-card{padding:11px}
+ .anki-field-card textarea{font-size:16px}
+ .anki-question{font-size:21px}
+ .anki-review-card{padding:18px;min-height:260px}
+}
 </style></head><body><main id="app"></main><nav class="tabs" id="nav"></nav>
 <script>
 var AC={"Matemática":"#ff9f0a","Humanas":"#ff453a","Linguagens":"#bf5af2","Naturezas":"#30d158"};
@@ -131,8 +226,8 @@ try{var r=localStorage.getItem(KEY)||localStorage.getItem("ciclo-v2");if(r)S=JSO
 S.cards=S.cards||[];S.red=S.red||[];
 S.subs.forEach(function(s){s.t=s.t.map(function(b){return typeof b==="string"?b.split(" · "):b});if(!s.baseMin)s.baseMin=s.min});
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
-function applyTheme(){var t=S.theme||"system";if(t==="system")document.documentElement.removeAttribute("data-theme");else document.documentElement.setAttribute("data-theme",t)}
-function setTheme(t){S.theme=t;applyTheme();save();render()}
+function applyTheme(){var t=["light","dark","system"].indexOf(S.theme)>=0?S.theme:"system";if(t==="system"){document.documentElement.removeAttribute("data-theme");document.documentElement.style.colorScheme="light dark"}else{document.documentElement.setAttribute("data-theme",t);document.documentElement.style.colorScheme=t}}
+function setTheme(t){if(["light","dark","system"].indexOf(t)<0)t="system";S.theme=t;applyTheme();save();render()}
 function p(x){return x<10?"0"+x:""+x}
 function dk(d){return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate())}
 function esc(x){return String(x).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
@@ -230,7 +325,7 @@ function fqa(){return'<button class="lk" onclick="go(\'prog\')">‹ Voltar</butt
 function sw(on,fn){return'<button class="sw'+(on?' on':'')+'" onclick="'+fn+'"><i></i></button>'}
 function backupLocal(){var data={format:"ciclo-local-backup-v1",exportedAt:new Date().toISOString(),state:S,anki:localStorage.getItem("ciclo-anki-local-v1")};var blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="ciclo-backup-"+dk(new Date())+".json";a.click();setTimeout(function(){URL.revokeObjectURL(url)},1000)}
 function restoreLocal(){var input=document.createElement("input");input.type="file";input.accept=".json,application/json";input.onchange=function(){var file=input.files&&input.files[0];if(!file)return;var reader=new FileReader();reader.onload=function(){try{var data=JSON.parse(reader.result);if(data.format!=="ciclo-local-backup-v1"||!data.state||!Array.isArray(data.state.subs)||!Array.isArray(data.state.log))throw new Error("Arquivo não reconhecido como backup do Ciclo.");if(!confirm("Substituir os dados deste navegador pelo backup selecionado?"))return;localStorage.setItem(KEY,JSON.stringify(data.state));if(data.anki)localStorage.setItem("ciclo-anki-local-v1",data.anki);else localStorage.removeItem("ciclo-anki-local-v1");location.reload()}catch(e){alert(e.message||"Não foi possível restaurar o backup.")}};reader.readAsText(file)};input.click()}
-function cfg(){var h='<h1>Ajustes</h1><h2>Aparência</h2><div class="card"><div class="row"><span class="f">Modo escuro</span>'+sw((S.theme||"system")==="dark",'setTheme((S.theme||"system")==="dark"?"light":"dark")')+'</div><div class="mu sm">Tema atual: '+((S.theme||"system")==="system"?"automático":S.theme==="dark"?"escuro":"claro")+'. A escolha fica salva neste aparelho.</div><button class="lk" onclick="setTheme(\'system\')">Usar tema do aparelho</button></div><h2>Metas</h2><div class="card"><div class="row"><span class="f">Meta de tempo por dia</span>'+sw(gOn(),'S.goalOn=!gOn();save();render()')+'</div>'+(gOn()?'<div class="row"><span class="f mu">Minutos por dia</span><input type="number" inputmode="numeric" value="'+S.goal+'" onchange="setG(this.value)" style="width:100px;margin:0"></div>':'')+'<div class="row"><span class="f">Meta de questões por dia</span>'+sw(qOn(),'S.qgoalOn=!qOn();save();render()')+'</div>'+(qOn()?'<div class="row"><span class="f mu">Questões por dia</span><input type="number" inputmode="numeric" value="'+(S.qgoal||30)+'" onchange="S.qgoal=Math.max(1,parseInt(this.value)||30);save();render()" style="width:100px;margin:0"></div>':'')+'</div><h2>Matérias do ciclo</h2><div class="card">';
+function cfg(){var h='<h1>Ajustes</h1><h2>Aparência</h2><div class="card"><div class="mu sm" style="margin-bottom:12px">Escolha como o Ciclo deve aparecer. A opção escolhida fica salva neste aparelho.</div><div class="theme-choice"><button class="'+((S.theme||"system")==="light"?"active":"")+'" onclick="setTheme(\'light\')">☀ Claro</button><button class="'+((S.theme||"system")==="dark"?"active":"")+'" onclick="setTheme(\'dark\')">☾ Escuro</button><button class="'+((S.theme||"system")==="system"?"active":"")+'" onclick="setTheme(\'system\')">◐ Automático</button></div><div class="mu sm" style="margin-top:10px">Tema selecionado: '+((S.theme||"system")==="system"?"automático":S.theme==="dark"?"escuro":"claro")+'</div></div><h2>Metas</h2><div class="card"><div class="row"><span class="f">Meta de tempo por dia</span>'+sw(gOn(),'S.goalOn=!gOn();save();render()')+'</div>'+(gOn()?'<div class="row"><span class="f mu">Minutos por dia</span><input type="number" inputmode="numeric" value="'+S.goal+'" onchange="setG(this.value)" style="width:100px;margin:0"></div>':'')+'<div class="row"><span class="f">Meta de questões por dia</span>'+sw(qOn(),'S.qgoalOn=!qOn();save();render()')+'</div>'+(qOn()?'<div class="row"><span class="f mu">Questões por dia</span><input type="number" inputmode="numeric" value="'+(S.qgoal||30)+'" onchange="S.qgoal=Math.max(1,parseInt(this.value)||30);save();render()" style="width:100px;margin:0"></div>':'')+'</div><h2>Matérias do ciclo</h2><div class="card">';
 S.subs.forEach(function(s,i){h+='<div class="row"><span class="dot" style="background:'+AC[s.a]+'"></span><div class="f" onclick="si='+i+';go(\'sub\')"><div>'+esc(s.n)+'</div><div class="mu sm">'+fm(s.min)+' · '+s.t.length+' blocos</div></div><button class="pill" onclick="si='+i+';go(\'sub\')">Editar</button><button class="ib" onclick="mv('+i+',-1)">▲</button><button class="ib" onclick="mv('+i+',1)">▼</button></div>'});
 h+='</div><h2>Nova matéria</h2><div class="card"><input id="nn" placeholder="Nome"><select id="na">'+Object.keys(AC).map(function(a){return'<option>'+a+'</option>'}).join('')+'</select><button class="btn" onclick="addS()">Criar e adicionar blocos</button></div><h2>Dados neste aparelho</h2><div class="card"><p class="mu sm">Seu progresso e seus baralhos ficam neste navegador. Baixe backups regularmente para não perder seus dados se limpar o histórico ou trocar de aparelho.</p><button class="btn s" onclick="backupLocal()">Baixar backup completo</button><button class="btn s" onclick="restoreLocal()">Restaurar backup</button></div><button class="lk r" onclick="reset()">Apagar tudo e recomeçar</button>';return h}
 function sub(){var s=S.subs[si];
