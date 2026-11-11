@@ -70,9 +70,10 @@ function noteItemsHtml() {
   }).join('')||'<div class="anki-empty-inline"><b>Nenhuma nota por aqui</b><span>Crie uma nota ou ajuste sua pesquisa.</span></div>')+'</div>';
 }
 function noteListHtml() {
-  return '<div class="anki-section-head"><b>Notas e cartões</b><div class="anki-section-tools"><span id="anki-note-count">'+notesCache.length+' notas</span><button id="anki-search-toggle" class="anki-search-toggle" aria-label="Pesquisar notas e cartões" title="Pesquisar notas e cartões">⌕</button></div></div>'+
+  const query=searchText.trim();
+  return '<div class="anki-section-head"><b>Notas e cartões</b><div class="anki-section-tools"><span id="anki-note-count">'+(query?'Resultados da pesquisa':'Pesquisa fechada')+'</span><button id="anki-search-toggle" class="anki-search-toggle" aria-label="Pesquisar notas e cartões" title="Pesquisar notas e cartões">⌕</button></div></div>'+
     (searchOpen?'<div class="anki-search-row"><input id="anki-search" type="search" placeholder="Pesquisar pergunta, resposta, matéria ou tag..." value="'+esc(searchText)+'" aria-label="Pesquisar notas e cartões"><button id="anki-search-close" aria-label="Fechar pesquisa">×</button></div>':'')+
-    '<div id="anki-note-results">'+noteItemsHtml()+'</div>';
+    (searchOpen&&query?'<div id="anki-note-results">'+noteItemsHtml()+'</div>':(searchOpen?'<p class="anki-search-hint">Digite para localizar uma nota ou cartão. A lista só aparece quando você pesquisar.</p>':''));
 }
 function deckPanelHtml() {
   if(!deckPanelMode)return '';
@@ -93,8 +94,8 @@ function shell(decks, stats) {
     '<div class="anki-stats"><div><small>Cartões</small><b>'+stats.total+'</b></div><div><small>Para revisar</small><b>'+stats.due+'</b></div><div><small>Revisões · 30 dias</small><b>'+stats.reviews30d+'</b></div><div><small>Acertos · 30 dias</small><b>'+(stats.accuracy30d===null?'—':stats.accuracy30d+'%')+'</b></div></div>'+
     '<div class="anki-actions"><button class="anki-primary" id="anki-review" '+(stats.due?'':'disabled')+'>Revisar agora <span>· '+stats.due+'</span></button><button id="anki-new">＋ Nova nota</button><button id="anki-deck-new">＋ Baralho</button></div>'+
     deckTreeHtml(decks)+deckPanelHtml()+
-    '<div id="anki-form-wrap"></div>'+
     '<div class="anki-toolbar"><button id="anki-deck-manage" '+(selectedDeck?'':'disabled')+'>⚙ Gerenciar selecionado</button></div>'+
+    '<div id="anki-form-wrap"></div>'+
     '<div id="anki-note-list">'+noteListHtml()+'</div>'+
     '<div class="anki-footer-actions"><button id="anki-export">Exportar TSV</button><button id="anki-import">Importar TSV</button><button id="anki-local-import">Importar cartões antigos</button></div>'+
     '<p id="anki-message" aria-live="polite"></p>';
@@ -144,7 +145,7 @@ function bindSearch() {
   const close=document.getElementById('anki-search-close');
   if(close)close.onclick=()=>{searchOpen=false;searchText='';const list=document.getElementById('anki-note-list');if(list){list.innerHTML=noteListHtml();bindSearch();bindNoteActions();}};
   const input=document.getElementById('anki-search');
-  if(input)input.oninput=()=>{searchText=input.value;const results=document.getElementById('anki-note-results');if(results)results.innerHTML=noteItemsHtml();const count=document.getElementById('anki-note-count');if(count){const q=searchText.trim().toLocaleLowerCase('pt-BR');const n=notesCache.filter(note=>{const deck=decksCache.find(d=>d.id===note.deck_id);return [note.fields?.Front||'',note.fields?.Back||'',(note.tags||[]).join(' '),deck?deckPath(deck,decksCache):''].join(' ').toLocaleLowerCase('pt-BR').includes(q)}).length;count.textContent=n+' notas';}bindNoteActions();};
+  if(input)input.oninput=()=>{searchText=input.value;const list=document.getElementById('anki-note-list');if(list){list.innerHTML=noteListHtml();bindSearch();bindNoteActions();const next=document.getElementById('anki-search');if(next){next.focus();next.setSelectionRange(searchText.length,searchText.length);}}};
 }
 async function showDeckForm(mode) { deckPanelMode=mode; await render(); document.getElementById(mode==='new'?'anki-deck-name':'anki-deck-rename')?.focus(); }
 function bindDeckPanel() {
