@@ -1,18 +1,49 @@
 # Ciclo de Estudos
 
-Web app gratuito de ciclo de estudos para o ENEM, pensado para iPad.
+Aplicação web gratuita de ciclo de estudos para o ENEM, otimizada para celular e iPad.
 
-## O que faz
-- Ciclo de matérias em blocos de 15 min, retomando de onde parou
-- Blocos com 1 a 3 assuntos (filtro de questões)
-- Questões, metas opcionais, calendário, níveis e conquistas
-- Redação com competências do ENEM
-- Cards de revisão com importar e exportar texto
+## Versão básica local-first
 
-## Como rodar
-Abra o `index.html` no navegador. Os dados ficam salvos no próprio aparelho (localStorage).
+Esta versão não exige cadastro, login, banco de dados ou serviço pago. O Ciclo e o Anki salvam os dados no armazenamento local (\`localStorage\`) do navegador. Cada pessoa usa seus próprios dados no próprio navegador; não há sincronização entre dispositivos nem compartilhamento de progresso entre amigos.
 
-## Próximos passos
-- Login e dados na nuvem com Supabase
-- Importar e exportar `.apkg` (Anki)
-- Agendamento de cards com FSRS
+**Importante:** o site do GitHub Pages é público e pode ser aberto por qualquer pessoa com o link. O que fica local é o progresso de cada navegador, não o acesso ao site. Não use este modo para guardar dados em computadores compartilhados. Baixe backups regularmente em Ajustes → Dados neste aparelho.
+
+## Recursos
+
+- Ciclo de matérias em blocos de 15 minutos
+- Registro de acertos, erros, metas, calendário e redações
+- Escore adaptativo de urgência por matéria
+- Ajuste de tempo por matéria ao completar cada volta
+- Reforço de blocos com desempenho crítico e ocultação temporária de blocos dominados
+- XP, níveis, sequência, escudos de sequência e missão de retorno
+- Tema claro, escuro ou automático
+- Anki local com baralhos, notas Básicas, reversas e Cloze
+- Revisões com FSRS-7, tags, busca, suspensão, estatísticas básicas e importação/exportação TSV
+- Backup e restauração dos dados do Ciclo e do Anki em JSON
+
+## Dados e privacidade
+
+- Os dados ficam no navegador e não são enviados para o Supabase.
+- Limpar os dados do site, trocar de navegador ou de aparelho pode apagar ou deixar os dados inacessíveis.
+- Use **Ajustes → Baixar backup completo** antes de trocar de dispositivo ou limpar o navegador.
+- **Restaurar backup** substitui os dados locais atuais pelos dados do arquivo escolhido.
+
+## Limitações desta versão
+
+- Não há login, sincronização em nuvem ou controle de acesso por convite.
+- O Anki ainda não importa/exporta \`.apkg\`; por enquanto, oferece TSV.
+- O agendador FSRS-7 é carregado de uma biblioteca pública via CDN, portanto a primeira inicialização do Anki exige internet.
+- A evolução visual do Canto de Estudos e a trilha de checkpoints ainda serão ampliadas em versões futuras.
+- Não há paridade completa com Anki Desktop (tipos de nota customizáveis, mídia/áudio/LaTeX, estatísticas avançadas e todos os recursos de agendamento).
+
+## Desenvolvimento
+
+O projeto usa HTML, CSS e JavaScript nativo, sem etapa de build. Os módulos em \`js/\` são carregados como ES modules.
+
+Para testar localmente, sirva a pasta por HTTP (por exemplo, com a extensão Live Server ou \`python -m http.server\`). Não abra \`index.html\` diretamente com \`file://\`, pois os módulos ES precisam de origem HTTP/HTTPS.
+
+## Publicação
+
+Site: https://artucentrismo.github.io/sistemaestudos/
+
+A hospedagem estática do GitHub Pages não exige um servidor próprio. Como o repositório é público, qualquer pessoa pode acessar o site; cada navegador mantém seus próprios dados locais.

@@ -2,9 +2,13 @@
 <html lang="pt-BR"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Ciclo</title>
+
+
 <style>
 :root{--bg:#f3f5fa;--cd:#fff;--tx:#0e1a3a;--mu:#6b7794;--ac:#1b2f6b;--ln:#e3e8f2;--g:#2e9e6b;--rd:#d64545;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px)}
 @media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#070d1f;--cd:#0f1a38;--tx:#eef1fa;--mu:#8a96b8;--ac:#7f9bff;--ln:#1c2850;--g:#4cc790;--rd:#ff7676}}
+:root[data-theme="dark"]{--bg:#070d1f;--cd:#0f1a38;--tx:#eef1fa;--mu:#8a96b8;--ac:#7f9bff;--ln:#1c2850;--g:#4cc790;--rd:#ff7676}
+:root[data-theme="light"]{--bg:#f3f5fa;--cd:#fff;--tx:#0e1a3a;--mu:#6b7794;--ac:#1b2f6b;--ln:#e3e8f2;--g:#2e9e6b;--rd:#d64545}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{margin:0;background:var(--bg);color:var(--tx);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif;-webkit-font-smoothing:antialiased}
 main{max-width:680px;margin:0 auto;padding:22px 20px 120px}
@@ -35,6 +39,75 @@ input,select,textarea{font:inherit;font-size:17px;padding:13px;border-radius:12p
 .opt{text-align:left;background:var(--cd);border:2px solid transparent;border-radius:18px;padding:20px;margin-top:12px;font-size:16px;width:100%;color:var(--tx)}.opt.on{border-color:var(--ac)}.opt b{display:block;font-size:19px;margin-bottom:4px}
 .bars{display:flex;gap:8px;align-items:flex-end;height:90px}.bars div{flex:1;text-align:center;font-size:12px;color:var(--mu)}.bars i{display:block;background:var(--ac);border-radius:6px;min-height:4px;margin-bottom:4px}
 .pill{background:var(--ac);color:var(--cd);border:0;border-radius:999px;padding:10px 20px;font-size:16px;font-weight:700}.hero{background:#1b2f6b;color:#fff;border-radius:22px;padding:22px;margin-bottom:14px}.badge{width:64px;height:64px;border-radius:20px;background:rgba(255,255,255,.18);display:grid;place-items:center;font-size:30px;font-weight:700;font-family:Georgia,serif}.ach{display:inline-block;border-radius:14px;padding:8px 12px;margin:4px 6px 4px 0;font-size:15px;background:color-mix(in srgb,#ffb703 22%,transparent)}.ach.no{background:var(--ln);opacity:.5;filter:grayscale(1)}.pl{display:inline-block;background:color-mix(in srgb,var(--ac) 14%,transparent);color:var(--ac);border-radius:999px;padding:6px 14px;font-weight:700;font-size:15px}.sw{width:52px;height:32px;border-radius:16px;border:0;background:var(--ln);position:relative;flex:none}.sw i{position:absolute;top:2px;left:2px;width:28px;height:28px;border-radius:50%;background:#fff;transition:left .15s}.sw.on{background:var(--g)}.sw.on i{left:22px}.lg{font-size:13px;letter-spacing:.2em;text-transform:uppercase;color:var(--ac);font-weight:700;margin-bottom:6px}
+
+#accountbar{max-width:680px;margin:0 auto;padding:12px 20px 0;display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:13px;color:var(--mu)}
+.account-brand{font-weight:800;letter-spacing:.14em;color:var(--ac);text-transform:uppercase}
+.account-actions{display:flex;align-items:center;gap:10px;min-width:0}
+#account-status{max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#account-open{border:1px solid var(--ln);background:var(--cd);color:var(--tx);border-radius:999px;padding:8px 12px;font:inherit;font-weight:600}
+#account-modal{display:none;position:fixed;inset:0;z-index:1000;background:rgba(5,10,25,.62);padding:20px;align-items:center;justify-content:center}
+#account-modal.visible{display:flex}
+.account-dialog{position:relative;width:min(100%,420px);max-height:90vh;overflow:auto;background:var(--cd);color:var(--tx);border-radius:22px;padding:26px;box-shadow:0 20px 80px rgba(0,0,0,.25)}
+.account-dialog h2{margin:4px 36px 6px 0}
+.account-muted{color:var(--mu);font-size:14px;line-height:1.5}
+.account-close{position:absolute;right:16px;top:12px;border:0;background:var(--bg);color:var(--tx);width:34px;height:34px;border-radius:50%;font-size:22px}
+.account-tabs{display:flex;gap:8px;margin:18px 0}
+.account-tabs button{flex:1;padding:10px;border:1px solid var(--ln);background:var(--bg);color:var(--tx);border-radius:10px}
+.account-tabs button.selected{background:var(--ac);color:white;border-color:var(--ac)}
+.account-dialog label{display:block;font-size:13px;font-weight:600;margin:12px 0;color:var(--mu)}
+.account-dialog input{display:block}
+.account-primary,.account-secondary{width:100%;padding:13px;border:0;border-radius:12px;margin-top:12px;font:inherit;font-weight:700;background:var(--ac);color:white}
+.account-secondary{background:var(--ln);color:var(--tx)}
+.account-link{display:block;margin:12px auto 0;border:0;background:none;color:var(--ac);padding:8px}
+#account-message{font-size:13px;line-height:1.5;margin-top:12px}
+#account-conflict{border-top:1px solid var(--ln);margin-top:16px;padding-top:12px;font-size:14px}
+@media(max-width:430px){#accountbar{padding-left:14px;padding-right:14px}#account-status{max-width:105px}.account-dialog{padding:22px}}
+
+#anki-v2{margin-top:14px}
+.anki-topline{display:flex;justify-content:space-between;color:var(--mu);font-size:10px;letter-spacing:.1em;font-weight:700;margin-bottom:12px}
+.anki-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.anki-stats>div{background:var(--cd);border-radius:14px;padding:12px;min-width:0}
+.anki-stats small{display:block;color:var(--mu);font-size:11px}
+.anki-stats b{display:block;font-size:23px;margin-top:4px}
+.anki-actions{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:8px}
+.anki-actions button,.anki-toolbar button,.anki-footer-actions button,.anki-note button,.anki-section-head button,.anki-review-head button{border:1px solid var(--ln);border-radius:11px;padding:11px 9px;background:var(--cd);color:var(--tx);font:inherit;font-size:13px}
+.anki-primary{border:0!important;background:var(--ac)!important;color:#fff!important;border-radius:12px;padding:14px 16px;font:inherit;font-weight:700;width:100%}
+.anki-primary:disabled{opacity:.35}
+.anki-toolbar{display:grid;grid-template-columns:1fr 1.4fr;gap:8px;margin:14px 0}
+.anki-toolbar input,.anki-toolbar select,.anki-form input,.anki-form textarea,.anki-form select{margin:0;font-size:14px;padding:11px}
+.anki-section-head{display:flex;align-items:center;justify-content:space-between;margin:20px 0 8px}
+.anki-section-head span,.anki-muted{color:var(--mu);font-size:13px}
+.anki-list{background:var(--cd);border-radius:16px;padding:4px 14px}
+.anki-note{display:flex;align-items:center;gap:6px;padding:12px 0;border-bottom:1px solid var(--ln)}
+.anki-note:last-child{border-bottom:0}
+.anki-note-copy{flex:1;min-width:0}
+.anki-note-copy b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:14px}
+.anki-note-copy small{display:block;color:var(--mu);font-size:11px;margin-top:4px}
+.anki-note button{padding:7px 9px;min-width:32px}
+.anki-footer-actions{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
+.anki-footer-actions button{font-size:12px}
+.anki-form,.anki-review-card,.anki-empty{background:var(--cd);border-radius:18px;padding:18px;margin-top:14px}
+.anki-form label{display:block;color:var(--mu);font-size:12px;font-weight:700;margin:12px 0}
+.anki-form textarea{display:block;width:100%;margin-top:6px;resize:vertical}
+.anki-form input,.anki-form select{display:block;width:100%;margin-top:6px}
+.anki-empty{text-align:center;padding:28px 18px}
+.anki-empty h2{margin:0 0 8px}
+.anki-empty p{color:var(--mu);font-size:14px;line-height:1.5}
+.anki-message,.anki-error{font-size:13px;margin:10px 0;color:var(--g)}
+.anki-error{color:var(--rd)}
+.anki-review-head{display:flex;justify-content:space-between;align-items:center;color:var(--mu);font-size:13px}
+.anki-review-card{min-height:260px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;margin:16px 0}
+.anki-review-card small{color:var(--mu);font-size:12px}
+.anki-question{font-family:Georgia,serif;font-size:25px;line-height:1.45;white-space:pre-wrap;margin:28px 0}
+.anki-answer{font-size:19px;line-height:1.5;white-space:pre-wrap}
+.anki-cloze-gap{color:var(--ac)}
+.anki-cloze-answer{color:var(--g)}
+.anki-grade-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.anki-grade-grid p{grid-column:1/-1;color:var(--mu);text-align:center;font-size:13px}
+.anki-grade-grid button{border:1px solid var(--ln);background:var(--cd);color:var(--tx);border-radius:12px;padding:12px 4px;font:inherit}
+.anki-grade-grid button b,.anki-grade-grid button small{display:block}
+.anki-grade-grid button small{font-size:10px;color:var(--mu);margin-top:5px}
+@media(max-width:430px){.anki-stats{grid-template-columns:repeat(2,1fr)}.anki-actions{grid-template-columns:1fr 1fr}.anki-actions .anki-primary{grid-column:1/-1}.anki-toolbar{grid-template-columns:1fr}.anki-note{gap:4px}.anki-note button{padding:7px 6px}.anki-grade-grid{gap:5px}.anki-grade-grid button{font-size:13px}}
 </style></head><body><main id="app"></main><nav class="tabs" id="nav"></nav>
 <script>
 var AC={"Matemática":"#ff9f0a","Humanas":"#ff453a","Linguagens":"#bf5af2","Naturezas":"#30d158"};
@@ -56,15 +129,27 @@ var D=[
 var cd=null,cm=0,rv=null,cf=null,imsg="",KEY="ciclo-v3",S={ob:0,goal:120,subs:[],cur:0,laps:0,log:[]},tab="home",ss=null,si=0,eb=null,qa=null,obStep=0,obPlan=1,$=function(i){return document.getElementById(i)};
 try{var r=localStorage.getItem(KEY)||localStorage.getItem("ciclo-v2");if(r)S=JSON.parse(r)}catch(e){}
 S.cards=S.cards||[];S.red=S.red||[];
-S.subs.forEach(function(s){s.t=s.t.map(function(b){return typeof b==="string"?b.split(" · "):b})});
+S.subs.forEach(function(s){s.t=s.t.map(function(b){return typeof b==="string"?b.split(" · "):b});if(!s.baseMin)s.baseMin=s.min});
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function applyTheme(){var t=S.theme||"system";if(t==="system")document.documentElement.removeAttribute("data-theme");else document.documentElement.setAttribute("data-theme",t)}
+function setTheme(t){S.theme=t;applyTheme();save();render()}
 function p(x){return x<10?"0"+x:""+x}
 function dk(d){return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate())}
 function esc(x){return String(x).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
 function fm(m){return m>=60?Math.floor(m/60)+"h"+(m%60?p(m%60):""):m+" min"}
 function nb(s){return Math.max(1,Math.round(s.min/15))}
 function ch(a){return a.map(function(x){return'<span class="chip">'+esc(x)+'</span>'}).join("")}
-function idx(s){var a=[],L=s.t.length;if(!L)return a;for(var i=0;i<Math.min(nb(s),L);i++)a.push((s.ptr+i)%L);return a}
+function blockLogs(s,bi){var key=s.t[bi].join(" · ");return S.log.filter(function(l){return l.n===s.n&&l.b===key&&(l.source==="block"||l.m===15)}).slice(-5)}
+function blockAccuracy(s,bi){var a=blockLogs(s,bi),ok=a.reduce(function(v,l){return v+(l.ac||0)},0),all=a.reduce(function(v,l){return v+(l.ac||0)+(l.er||0)},0);return all?ok/all:.65}
+function subjectAccuracy(s){var a=S.log.filter(function(l){return l.n===s.n&&(l.source==="block"||l.source==="questions")}).slice(-5),ok=a.reduce(function(v,l){return v+(l.ac||0)},0),all=a.reduce(function(v,l){return v+(l.ac||0)+(l.er||0)},0);return all?ok/all:.65}
+function urgency(s){var a=S.log.filter(function(l){return l.n===s.n&&(l.ac||l.er||l.m)}),last=a.length?new Date(a[a.length-1].d+"T12:00:00"):new Date(),days=a.length?Math.max(0,Math.floor((new Date(dk(new Date())+"T12:00:00")-last)/86400000)):0;return(1.5-subjectAccuracy(s))*(1+Math.log(1+days))}
+function urgencyNotice(current){var currentU=urgency(current),best=null;S.subs.forEach(function(s){if(s===current)return;var u=urgency(s);if(!best||u>best.u)best={s:s,u:u}});if(best&&best.u>=2.5*currentU)return'<div class="card" style="border:1px solid var(--rd)"><div class="up" style="color:var(--rd)">Alta urgência</div><b>'+esc(best.s.n)+'</b><div class="mu sm">A urgência está '+(best.u/currentU).toFixed(1)+'× acima da matéria atual. Considere antecipá-la.</div></div>';return''}
+function dailyGoalMet(key){var snapDay=(S.day||{})[key],g=snapDay?snapDay.g:(gOn()?S.goal:0),q=snapDay?snapDay.q:(qOn()?(S.qgoal||30):0),m=minsOn(key),n=qs(function(l){return l.d===key}).t;if(g&&m<g)return false;if(q&&n<q)return false;return g||q?true:m>=15}
+function streak(){var d=new Date(),n=0;if(!dailyGoalMet(dk(d)))d.setDate(d.getDate()-1);while(dailyGoalMet(dk(d))||(S.game&&S.game.freezeDates||[]).indexOf(dk(d))>=0){n++;d.setDate(d.getDate()-1)}return n}
+function xpMultiplier(){var today=dk(new Date());if(S.game&&S.game.returnMissionDate===today)return 2;return streak()>=3?1.1:1}
+function gameCheck(){S.game=S.game||{shields:0,shieldMilestone:0,freezeDates:[],lastSeenDate:dk(new Date())};S.game.shields=Math.max(0,Math.min(3,S.game.shields||0));S.game.freezeDates=S.game.freezeDates||[];var today=dk(new Date()),last=S.game.lastSeenDate||today;if(last<today){var d=new Date(last+"T12:00:00");while(d<new Date(today+"T12:00:00")){var key=dk(d);if(!dailyGoalMet(key)&&S.game.shields>0){S.game.shields--;if(S.game.freezeDates.indexOf(key)<0)S.game.freezeDates.push(key)}d.setDate(d.getDate()+1)}}S.game.lastSeenDate=today;var milestone=Math.floor(streak()/5);if(milestone>(S.game.shieldMilestone||0)){if(S.game.shields<3)S.game.shields++;S.game.shieldMilestone=milestone}var lastGoal=null;for(var i=1;i<=30;i++){var pdate=new Date();pdate.setDate(pdate.getDate()-i);if(dailyGoalMet(dk(pdate))){lastGoal=dk(pdate);break}}var inactive=lastGoal?Math.floor((new Date(today+"T12:00:00")-new Date(lastGoal+"T12:00:00"))/86400000):30;if(lastGoal&&inactive>=3&&!S.game.returnMissionDate)S.game.returnMission=true}
+function gameBadge(){var g=S.game||{};return'<div class="mu sm" style="margin:0 0 12px">🛡️ '+(g.shields||0)+' escudos'+(g.returnMission?' · Missão de retorno: complete 1 bloco para ganhar 2× XP':'')+'</div>'}
+function idx(s){var a=[],L=s.t.length;if(!L)return a;var count=Math.min(nb(s),L);for(var i=0;i<L&&a.length<count;i++){var bi=(s.ptr+i)%L,logs=blockLogs(s,bi),last=logs.slice(-2),acc1=last[0]?((last[0].ac||0)/Math.max(1,(last[0].ac||0)+(last[0].er||0))):0,acc2=last[1]?((last[1].ac||0)/Math.max(1,(last[1].ac||0)+(last[1].er||0))):0,dominated=last.length===2&&last[0].lap!==undefined&&last[1].lap===last[0].lap+1&&acc1>=.85&&acc2>=.85;if(!dominated)a.push(bi)}if(!a.length)a.push(s.ptr%L);var chosen=a.slice();chosen.forEach(function(bi){var logs=blockLogs(s,bi),last=logs[logs.length-1];if(last&&last.lap===S.laps-1&&blockAccuracy(s,bi)<.5&&chosen.length<count+1)chosen.push(bi)});return chosen}
 function minsOn(k){return S.log.filter(function(l){return l.d===k}).reduce(function(a,l){return a+l.m},0)}
 function streak(){var d=new Date(),n=0;function h(){var k=dk(d);return S.log.some(function(l){return l.d===k})}if(!h())d.setDate(d.getDate()-1);while(h()){n++;d.setDate(d.getDate()-1)}return n}
 function qs(f){var a=0,e=0;S.log.forEach(function(l){if(!f||f(l)){a+=l.ac;e+=l.er}});return{a:a,e:e,t:a+e,p:a+e?Math.round(a/(a+e)*100):null}}
@@ -79,13 +164,13 @@ function go(t){tab=t;eb=null;qa=null;render()}
 function start(){ss={k:0,ac:[],er:[]};tab="sess";render()}
 function setK(i){ss.k=ss.k===i+1?i:i+1;render()}
 function stp(f,i,v){ss[f][i]=Math.max(0,(ss[f][i]||0)+v);render()}
-function adv(skip){var s=S.subs[S.cur];if(!skip&&ss.k){snap(dk(new Date()));var ix=idx(s),L=s.t.length;for(var i=0;i<ss.k;i++)S.log.push({d:dk(new Date()),n:s.n,a:s.a,b:s.t[ix[i]].join(" · "),m:15,ac:ss.ac[i]||0,er:ss.er[i]||0});if(s.ptr+ss.k>=L)s.rounds=(s.rounds||0)+1;s.ptr=(s.ptr+ss.k)%L}
-s.last=skip?"skip":"ok";S.cur=(S.cur+1)%S.subs.length;if(S.cur===0){S.laps++;S.subs.forEach(function(x){x.last=null})}ss=null;tab="home";save();render()}
+function adv(skip){var s=S.subs[S.cur];if(!skip&&ss.k){snap(dk(new Date()));if(S.game&&S.game.returnMission){S.game.returnMission=false;S.game.returnMissionDate=dk(new Date())}var ix=idx(s),L=s.t.length,oldPtr=s.ptr,completed=ix.slice(0,ss.k);for(var i=0;i<completed.length;i++){var bi=completed[i],ac=ss.ac[i]||0,er=ss.er[i]||0,base=15+2*(ac+er)+ac;S.log.push({d:dk(new Date()),n:s.n,a:s.a,b:s.t[bi].join(" · "),m:15,ac:ac,er:er,source:"block",lap:S.laps,xp:Math.round(base*xpMultiplier())})}if(completed.length){s.ptr=(completed[completed.length-1]+1)%Math.max(1,L);if(s.ptr<=oldPtr)s.rounds=(s.rounds||0)+1}}
+s.last=skip?"skip":"ok";S.cur=(S.cur+1)%S.subs.length;if(S.cur===0){S.laps++;S.subs.forEach(function(x){x.last=null;var ar=subjectAccuracy(x),base=x.baseMin||x.min;if(ar<.55)x.min=Math.min(120,base*1.5);else if(ar<=.80)x.min=base;else x.min=Math.max(15,base*.66);x.min=Math.round(x.min)})}gameCheck();ss=null;tab="home";save();render()}
 function goal(m){S.goal=m;save();render()}
-function chm(i,v){S.subs[i].min=Math.min(180,Math.max(15,S.subs[i].min+v));save();render()}
+function chm(i,v){S.subs[i].min=Math.min(180,Math.max(15,S.subs[i].min+v));S.subs[i].baseMin=S.subs[i].min;save();render()}
 function mv(i,v){var j=i+v;if(j<0||j>=S.subs.length)return;var c=S.subs[S.cur];var t=S.subs[i];S.subs[i]=S.subs[j];S.subs[j]=t;S.cur=S.subs.indexOf(c);save();render()}
 function rmS(i){if(!confirm("Remover "+S.subs[i].n+"?"))return;S.subs.splice(i,1);if(S.cur>=S.subs.length)S.cur=0;tab="cfg";save();render()}
-function addS(){var n=$("nn").value.trim();if(!n)return;S.subs.push({n:n,a:$("na").value,min:45,t:[],ptr:0,rounds:0});si=S.subs.length-1;tab="sub";save();render()}
+function addS(){var n=$("nn").value.trim();if(!n)return;S.subs.push({n:n,a:$("na").value,min:45,baseMin:45,t:[],ptr:0,rounds:0});si=S.subs.length-1;tab="sub";save();render()}
 function setN(v){if(v.trim()){S.subs[si].n=v.trim();save()}}
 function setA(v){S.subs[si].a=v;save();render()}
 function eB(bi){eb={bi:bi,arr:bi<0?[]:S.subs[si].t[bi].slice()};render();setTimeout(function(){var e=$("ci");e&&e.focus()},50)}
@@ -96,7 +181,7 @@ function dB(i){var s=S.subs[si];s.t.splice(i,1);if(s.ptr>=s.t.length)s.ptr=0;eb=
 function mB(i,v){var s=S.subs[si],j=i+v;if(j<0||j>=s.t.length)return;var t=s.t[i];s.t[i]=s.t[j];s.t[j]=t;if(s.ptr===i)s.ptr=j;else if(s.ptr===j)s.ptr=i;save();render()}
 function setP(i){S.subs[si].ptr=i;save();render()}
 function nq(){qa={d:dk(new Date())};tab="qa";render()}
-function svQ(){var ac=+$("qa1").value||0,er=+$("qe1").value||0;if(!ac&&!er)return;var s=S.subs[+$("qs1").value];snap($("qd").value||dk(new Date()));S.log.push({d:$("qd").value||dk(new Date()),n:s.n,a:s.a,b:$("qb").value.trim(),m:+$("qm").value||0,ac:ac,er:er});save();go("prog")}
+function svQ(){var ac=+$("qa1").value||0,er=+$("qe1").value||0;if(!ac&&!er)return;var s=S.subs[+$("qs1").value];snap($("qd").value||dk(new Date()));var base=2*(ac+er)+ac;S.log.push({d:$("qd").value||dk(new Date()),n:s.n,a:s.a,b:$("qb").value.trim(),m:+$("qm").value||0,ac:ac,er:er,source:"questions",xp:Math.round(base*xpMultiplier())});gameCheck();save();go("prog")}
 function dL(i){S.log.splice(i,1);save();render()}
 function reset(){if(confirm("Apagar tudo e recomeçar?")){S={ob:0,goal:120,subs:[],cur:0,laps:0,log:[],cards:[],red:[]};obStep=0;tab="home";save();render()}}
 function setQ(f,i,v){ss[f][i]=Math.max(0,parseInt(v)||0)}
@@ -110,9 +195,9 @@ return h+'</div>'}
 function home(){if(!S.subs.length)return'<h1>Início</h1><div class="card"><p class="mu">Nenhuma matéria ainda.</p><button class="btn" onclick="go(\'cfg\')">Adicionar matéria</button></div>';
 var s=S.subs[S.cur],nx=S.subs[(S.cur+1)%S.subs.length],t=minsOn(dk(new Date())),pc=Math.min(100,Math.round(t/S.goal*100)),ix=idx(s),q=qs(function(l){return l.d===dk(new Date())});
 var dt=new Date().toLocaleDateString("pt-BR",{weekday:"long",day:"numeric",month:"long"});
-return'<div class="up">'+dt+'</div><h1>Início</h1><div style="margin:8px 0 14px"><span class="pl">⭐ Nível '+lvl(xpT())+' · '+TT[Math.min(TT.length-1,Math.floor((lvl(xpT())-1)/2))]+'</span></div><div class="grid"><div class="tile"><span class="up">Sequência</span><b>'+streak()+'</b><span class="mu sm">dias</span></div><div class="tile"><span class="up">Hoje</span><b>'+fm(t)+'</b><span class="mu sm">'+(gOn()?'meta '+fm(S.goal):'tempo')+'</span></div><div class="tile"><span class="up">Questões</span><b>'+q.t+'</b><span class="mu sm">hoje'+(qOn()?' · meta '+(S.qgoal||30):'')+'</span></div></div>'
+return'<div class="up">'+dt+'</div><h1>Início</h1>'+gameBadge()+urgencyNotice(s)+'<div style="margin:8px 0 14px"><span class="pl">⭐ Nível '+lvl(xpT())+' · '+TT[Math.min(TT.length-1,Math.floor((lvl(xpT())-1)/2))]+'</span></div><div class="grid"><div class="tile"><span class="up">Sequência</span><b>'+streak()+'</b><span class="mu sm">dias</span></div><div class="tile"><span class="up">Hoje</span><b>'+fm(t)+'</b><span class="mu sm">'+(gOn()?'meta '+fm(S.goal):'tempo')+'</span></div><div class="tile"><span class="up">Questões</span><b>'+q.t+'</b><span class="mu sm">hoje'+(qOn()?' · meta '+(S.qgoal||30):'')+'</span></div></div>'
 +(gOn()?'<div class="bar" style="margin:0 0 18px"><i style="width:'+pc+'%"></i></div>':'')
-+'<div class="card"><div class="up">Agora · matéria '+(S.cur+1)+' de '+S.subs.length+'</div><h1 style="margin-top:8px">'+esc(s.n)+'</h1><div class="mu">'+fm(s.min)+' · '+ix.length+' bloco'+(ix.length!==1?'s':'')+(s.rounds?' · aprofundamento':'')+'</div>'
++'<div class="card"><div class="up">Agora · matéria '+(S.cur+1)+' de '+S.subs.length+'</div><h1 style="margin-top:8px">'+esc(s.n)+'</h1><div class="mu">'+fm(s.min)+' · '+ix.length+' bloco'+(ix.length!==1?'s':'')+(s.rounds?' · aprofundamento':'')+' · urgência '+urgency(s).toFixed(2)+'</div>'
 +'<div style="margin-top:12px">'+(ix.length?ix.map(function(i){return'<div class="row"><span class="dot" style="background:'+AC[s.a]+'"></span><span class="f">'+ch(s.t[i])+'</span></div>'}).join(''):'<p class="mu">Esta matéria não tem blocos. Adicione em Ajustes.</p>')+'</div>'
 +(ix.length?'<button class="btn" onclick="start()">Começar</button>':'<button class="btn" onclick="si=S.cur;go(\'sub\')">Adicionar blocos</button>')+'</div>'
 +'<div class="mu" style="text-align:center">A seguir: '+esc(nx.n)+' · '+fm(nx.min)+'</div>'+ciclo()}
@@ -124,9 +209,9 @@ function ciclo(){var h='<h2>Ciclo</h2><div class="mu" style="margin-bottom:12px"
 S.subs.forEach(function(s,i){h+='<div class="row"><span class="dot" style="background:'+AC[s.a]+'"></span><div class="f"><div'+(i===S.cur?' style="font-weight:700;color:var(--ac)"':'')+'>'+(i===S.cur?'▶ ':'')+esc(s.n)+'</div><div class="mu sm">'+fm(s.min)+' · bloco '+Math.min(s.ptr+1,s.t.length)+' de '+s.t.length+(s.rounds?' · volta '+(s.rounds+1):'')+'</div><div class="bar" style="height:4px;margin-top:6px"><i style="width:'+(s.t.length?Math.round(s.ptr/s.t.length*100):0)+'%"></i></div></div>'+(s.last==="ok"?'<span style="color:var(--g)">✓</span>':s.last==="skip"?'<span class="mu sm">pulada</span>':'')+'</div>'});
 return h+'</div>'}
 var TT=["Iniciante","Aprendiz","Estudioso","Focado","Dedicado","Veterano","Mestre","Lenda"];
-function xpT(){var m=0,q=0,a=0;S.log.forEach(function(l){m+=l.m;q+=l.ac+l.er;a+=l.ac});return m+q*2+a+S.red.length*50}
-function lvl(x){return Math.floor((1+Math.sqrt(1+x/12.5))/2)}
-function xpF(L){return 50*L*(L-1)}
+function xpT(){var total=S.log.reduce(function(sum,l){if(typeof l.xp==="number")return sum+l.xp;return sum+(l.source==="block"?15+2*((l.ac||0)+(l.er||0))+(l.ac||0):l.source==="questions"?2*((l.ac||0)+(l.er||0))+(l.ac||0):Math.max(0,l.m||0)+2*((l.ac||0)+(l.er||0))+(l.ac||0))},0);return total+S.red.reduce(function(sum,r){return sum+(typeof r.xp==="number"?r.xp:50)},0)}
+function lvl(x){return Math.floor(1+Math.sqrt(Math.max(0,x)/25))}
+function xpF(L){return 25*(L-1)*(L-1)}
 function best(){var o={};S.log.forEach(function(l){o[l.d]=1});var b=0,c=0,pr=null;Object.keys(o).sort().forEach(function(x){var d=new Date(x+"T12:00:00");c=pr&&Math.round((d-pr)/864e5)===1?c+1:1;pr=d;b=Math.max(b,c)});return b}
 function hero(){var x=xpT(),L=lvl(x),a=xpF(L),b=xpF(L+1);return'<div class="hero"><div style="display:flex;align-items:center;gap:16px"><div class="badge">'+L+'</div><div><div class="up" style="color:rgba(255,255,255,.7)">Nível '+L+'</div><div style="font-family:Georgia,serif;font-size:27px">'+TT[Math.min(TT.length-1,Math.floor((L-1)/2))]+'</div></div></div><div class="bar" style="background:rgba(255,255,255,.22);height:12px;margin-top:16px"><i style="width:'+Math.round((x-a)/(b-a)*100)+'%;background:#ffd166"></i></div><div style="font-size:14px;margin-top:8px;opacity:.9">'+x+' XP · faltam '+(b-x)+' para o nível '+(L+1)+'</div><div style="font-size:12px;margin-top:6px;opacity:.65">1 XP por minuto, 2 por questão, +1 por acerto, 50 por redação</div></div>'}
 function mis(l,v,g){var ok=v>=g;return'<div style="margin-top:14px"><div style="display:flex;justify-content:space-between"><span>'+l+(ok?' ✓':'')+'</span><b>'+v+' / '+g+'</b></div><div class="bar" style="height:10px"><i style="width:'+Math.min(100,Math.round(v/g*100))+'%;background:color-mix(in srgb,var(--g) '+Math.min(100,Math.round(v/g*100))+'%,var(--ac))"></i></div></div>'}
@@ -143,9 +228,11 @@ Object.keys(AC).forEach(function(a){var z=qs(function(l){return l.a===a});h+='<d
 return h+'</div>'}
 function fqa(){return'<button class="lk" onclick="go(\'prog\')">‹ Voltar</button><h1>Registrar questões</h1><div class="card"><div class="up">Matéria</div><select id="qs1">'+S.subs.map(function(s,i){return'<option value="'+i+'">'+esc(s.n)+'</option>'}).join('')+'</select><div class="up" style="margin-top:16px">Assuntos do filtro (opcional)</div><input id="qb" placeholder="Ex: Estatística, Fração"><div class="grid" style="margin:16px 0 0"><div><div class="up">Acertos</div><input id="qa1" type="number" min="0" inputmode="numeric" value="0"></div><div><div class="up">Erros</div><input id="qe1" type="number" min="0" inputmode="numeric" value="0"></div><div><div class="up">Minutos</div><input id="qm" type="number" min="0" inputmode="numeric" value="15"></div></div><div class="up" style="margin-top:16px">Data</div><input id="qd" type="date" value="'+qa.d+'"><button class="btn" onclick="svQ()">Salvar</button></div>'}
 function sw(on,fn){return'<button class="sw'+(on?' on':'')+'" onclick="'+fn+'"><i></i></button>'}
-function cfg(){var h='<h1>Ajustes</h1><h2>Metas</h2><div class="card"><div class="row"><span class="f">Meta de tempo por dia</span>'+sw(gOn(),'S.goalOn=!gOn();save();render()')+'</div>'+(gOn()?'<div class="row"><span class="f mu">Minutos por dia</span><input type="number" inputmode="numeric" value="'+S.goal+'" onchange="setG(this.value)" style="width:100px;margin:0"></div>':'')+'<div class="row"><span class="f">Meta de questões por dia</span>'+sw(qOn(),'S.qgoalOn=!qOn();save();render()')+'</div>'+(qOn()?'<div class="row"><span class="f mu">Questões por dia</span><input type="number" inputmode="numeric" value="'+(S.qgoal||30)+'" onchange="S.qgoal=Math.max(1,parseInt(this.value)||30);save();render()" style="width:100px;margin:0"></div>':'')+'</div><h2>Matérias do ciclo</h2><div class="card">';
+function backupLocal(){var data={format:"ciclo-local-backup-v1",exportedAt:new Date().toISOString(),state:S,anki:localStorage.getItem("ciclo-anki-local-v1")};var blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="ciclo-backup-"+dk(new Date())+".json";a.click();setTimeout(function(){URL.revokeObjectURL(url)},1000)}
+function restoreLocal(){var input=document.createElement("input");input.type="file";input.accept=".json,application/json";input.onchange=function(){var file=input.files&&input.files[0];if(!file)return;var reader=new FileReader();reader.onload=function(){try{var data=JSON.parse(reader.result);if(data.format!=="ciclo-local-backup-v1"||!data.state||!Array.isArray(data.state.subs)||!Array.isArray(data.state.log))throw new Error("Arquivo não reconhecido como backup do Ciclo.");if(!confirm("Substituir os dados deste navegador pelo backup selecionado?"))return;localStorage.setItem(KEY,JSON.stringify(data.state));if(data.anki)localStorage.setItem("ciclo-anki-local-v1",data.anki);else localStorage.removeItem("ciclo-anki-local-v1");location.reload()}catch(e){alert(e.message||"Não foi possível restaurar o backup.")}};reader.readAsText(file)};input.click()}
+function cfg(){var h='<h1>Ajustes</h1><h2>Aparência</h2><div class="card"><div class="row"><span class="f">Modo escuro</span>'+sw((S.theme||"system")==="dark",'setTheme((S.theme||"system")==="dark"?"light":"dark")')+'</div><div class="mu sm">Tema atual: '+((S.theme||"system")==="system"?"automático":S.theme==="dark"?"escuro":"claro")+'. A escolha fica salva neste aparelho.</div><button class="lk" onclick="setTheme(\'system\')">Usar tema do aparelho</button></div><h2>Metas</h2><div class="card"><div class="row"><span class="f">Meta de tempo por dia</span>'+sw(gOn(),'S.goalOn=!gOn();save();render()')+'</div>'+(gOn()?'<div class="row"><span class="f mu">Minutos por dia</span><input type="number" inputmode="numeric" value="'+S.goal+'" onchange="setG(this.value)" style="width:100px;margin:0"></div>':'')+'<div class="row"><span class="f">Meta de questões por dia</span>'+sw(qOn(),'S.qgoalOn=!qOn();save();render()')+'</div>'+(qOn()?'<div class="row"><span class="f mu">Questões por dia</span><input type="number" inputmode="numeric" value="'+(S.qgoal||30)+'" onchange="S.qgoal=Math.max(1,parseInt(this.value)||30);save();render()" style="width:100px;margin:0"></div>':'')+'</div><h2>Matérias do ciclo</h2><div class="card">';
 S.subs.forEach(function(s,i){h+='<div class="row"><span class="dot" style="background:'+AC[s.a]+'"></span><div class="f" onclick="si='+i+';go(\'sub\')"><div>'+esc(s.n)+'</div><div class="mu sm">'+fm(s.min)+' · '+s.t.length+' blocos</div></div><button class="pill" onclick="si='+i+';go(\'sub\')">Editar</button><button class="ib" onclick="mv('+i+',-1)">▲</button><button class="ib" onclick="mv('+i+',1)">▼</button></div>'});
-h+='</div><h2>Nova matéria</h2><div class="card"><input id="nn" placeholder="Nome"><select id="na">'+Object.keys(AC).map(function(a){return'<option>'+a+'</option>'}).join('')+'</select><button class="btn" onclick="addS()">Criar e adicionar blocos</button></div><button class="lk r" onclick="reset()">Apagar tudo e recomeçar</button>';return h}
+h+='</div><h2>Nova matéria</h2><div class="card"><input id="nn" placeholder="Nome"><select id="na">'+Object.keys(AC).map(function(a){return'<option>'+a+'</option>'}).join('')+'</select><button class="btn" onclick="addS()">Criar e adicionar blocos</button></div><h2>Dados neste aparelho</h2><div class="card"><p class="mu sm">Seu progresso e seus baralhos ficam neste navegador. Baixe backups regularmente para não perder seus dados se limpar o histórico ou trocar de aparelho.</p><button class="btn s" onclick="backupLocal()">Baixar backup completo</button><button class="btn s" onclick="restoreLocal()">Restaurar backup</button></div><button class="lk r" onclick="reset()">Apagar tudo e recomeçar</button>';return h}
 function sub(){var s=S.subs[si];
 if(eb)return'<button class="lk" onclick="eb=null;render()">‹ Cancelar</button><h1>'+(eb.bi<0?'Novo bloco':'Editar bloco')+'</h1><div class="mu" style="margin-bottom:14px">Um bloco = 15 min. Coloque de 1 a 3 assuntos, como no seu filtro de questões.</div><div class="card"><div>'+(eb.arr.length?eb.arr.map(function(x,i){return'<span class="chip">'+esc(x)+'<button onclick="rmC('+i+')">✕</button></span>'}).join(''):'<span class="mu">Nenhum assunto ainda</span>')+'</div><input id="ci" placeholder="Digite um assunto e toque em Adicionar" onkeydown="if(event.key===\'Enter\')addC()"><button class="btn s" onclick="addC()">Adicionar assunto</button><button class="btn" onclick="svB()">Salvar bloco</button>'+(eb.bi>=0?'<button class="lk r" style="margin-top:10px" onclick="dB('+eb.bi+')">Excluir bloco</button>':'')+'</div>';
 var h='<button class="lk" onclick="go(\'cfg\')">‹ Ajustes</button><h1>Matéria</h1><div class="card"><div class="up">Nome</div><input value="'+esc(s.n)+'" onchange="setN(this.value)"><div class="up" style="margin-top:16px">Área</div><select onchange="setA(this.value)">'+Object.keys(AC).map(function(a){return'<option'+(a===s.a?' selected':'')+'>'+a+'</option>'}).join('')+'</select><div class="st2" style="display:flex;justify-content:space-between;align-items:center;margin-top:16px"><div><div class="up">Tempo por volta</div><div style="font-size:19px;margin-top:4px">'+fm(s.min)+' · '+nb(s)+' bloco'+(nb(s)>1?'s':'')+'</div></div><span><button class="ib" style="width:44px;height:44px;font-size:22px" onclick="chm(si,-15)">−</button> <button class="ib" style="width:44px;height:44px;font-size:22px" onclick="chm(si,15)">+</button></span></div></div><h2>Blocos</h2><div class="card">';
@@ -168,11 +255,9 @@ if(wc.length){var av5=[0,1,2,3,4].map(function(i){return Math.round(wc.reduce(fu
 h+='<h2>Nova redação</h2><div class="card"><div class="up">Tema</div><input id="rt" placeholder="Tema da redação"><div class="up" style="margin-top:14px">Plataforma</div><input id="rp" placeholder="Ex: Ferreto"><div class="up" style="margin-top:14px">Competências (0 a 200, opcional)</div><div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px">'+[1,2,3,4,5].map(function(i){return'<input id="c'+i+'" type="number" inputmode="numeric" placeholder="C'+i+'" style="text-align:center;padding:10px 4px">'}).join('')+'</div><div class="grid" style="margin:14px 0 0"><div><div class="up">Minutos</div><input id="rm" type="number" inputmode="numeric" value="60"></div><div><div class="up">Nota total</div><input id="rn" type="number" inputmode="numeric" placeholder="ou soma"></div><div><div class="up">Data</div><input id="rd" type="date" value="'+dk(new Date())+'"></div></div><button class="btn" onclick="svR()">Salvar redação (+50 XP)</button></div><div class="card">';
 R.map(function(r,i){return[r,i]}).reverse().forEach(function(x){var r=x[0];h+='<div class="row"><div class="f"><div>'+esc(r.t)+'</div><div class="mu sm">'+r.d.slice(8)+'/'+r.d.slice(5,7)+(r.p?' · '+esc(r.p):'')+' · '+r.m+' min'+(r.c?' · '+r.c.join('/'):'')+'</div></div><b>'+(r.nota===null?'–':r.nota)+'</b><button class="lk r" onclick="S.red.splice('+x[1]+',1);save();render()">✕</button></div>'});
 if(!R.length)h+='<p class="mu">Nenhuma redação ainda.</p>';return h+'</div>'}
-function svR(){var t=$("rt").value.trim();if(!t)return;var a=[1,2,3,4,5].map(function(i){return $("c"+i).value}),has=a.some(function(v){return v!==""}),c=has?a.map(function(v){return Math.min(200,Math.max(0,+v||0))}):null,n=$("rn").value,nota=c?c.reduce(function(x,y){return x+y},0):(n===""?null:Math.min(1000,+n));S.red.push({t:t,p:$("rp").value.trim(),m:+$("rm").value||0,nota:nota,c:c,d:$("rd").value||dk(new Date())});save();render()}
+function svR(){var t=$("rt").value.trim();if(!t)return;var a=[1,2,3,4,5].map(function(i){return $("c"+i).value}),has=a.some(function(v){return v!==""}),c=has?a.map(function(v){return Math.min(200,Math.max(0,+v||0))}):null,n=$("rn").value,nota=c?c.reduce(function(x,y){return x+y},0):(n===""?null:Math.min(1000,+n));S.red.push({t:t,p:$("rp").value.trim(),m:+$("rm").value||0,nota:nota,c:c,d:$("rd").value||dk(new Date()),xp:Math.round(50*xpMultiplier())});gameCheck();save();render()}
 function due(){var t=dk(new Date());return S.cards.filter(function(c){return c.due<=t})}
-function cards(){var dv=due().length,h='<h1>Cards</h1><div class="mu" style="margin-bottom:14px">Revisão espaçada, só para os seus cards</div><div class="grid" style="grid-template-columns:1fr 1fr"><div class="tile"><span class="up">Para hoje</span><b>'+dv+'</b></div><div class="tile"><span class="up">Total</span><b>'+S.cards.length+'</b></div></div><button class="btn" style="margin-top:0" onclick="rv={q:due().map(function(c){return c.id}),show:0};go(\'rev\')"'+(dv?'':' disabled')+'>Revisar agora</button><button class="btn s" onclick="cf={id:null};go(\'cf\')">+ Novo card</button><button class="btn s" onclick="imsg=\'\';go(\'io\')">Importar e exportar</button><h2>Todos os cards</h2><div class="card">';
-S.cards.slice().reverse().forEach(function(c){h+='<div class="row" onclick="cf={id:\''+c.id+'\'};go(\'cf\')"><div class="f"><div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(c.f)+'</div><div class="mu sm">'+esc(c.m||"Geral")+' · '+(c.due<=dk(new Date())?'para hoje':'em '+c.due.slice(8)+'/'+c.due.slice(5,7))+'</div></div><span class="mu">›</span></div>'});
-if(!S.cards.length)h+='<p class="mu">Nenhum card ainda.</p>';return h+'</div>'}
+function cards(){return '<h1>Anki</h1><p class="mu" style="margin-bottom:14px">Baralhos, cartões e revisões salvos neste aparelho.</p><div id="anki-v2"><p class="mu">Carregando Anki…</p></div>'}
 function cff(){var c=cf.id?S.cards.filter(function(x){return x.id===cf.id})[0]:{f:"",v:"",m:""};
 return'<button class="lk" onclick="go(\'cards\')">‹ Cards</button><h1>'+(cf.id?'Editar card':'Novo card')+'</h1><div class="card"><div class="up">Frente</div><textarea id="cF" style="min-height:90px">'+esc(c.f)+'</textarea><div class="up" style="margin-top:14px">Verso (opcional com lacuna {{c1::resposta}})</div><textarea id="cV" style="min-height:90px">'+esc(c.v)+'</textarea><div class="up" style="margin-top:14px">Matéria</div><select id="cM"><option value="">Geral</option>'+S.subs.map(function(s){return'<option'+(s.n===c.m?' selected':'')+'>'+esc(s.n)+'</option>'}).join('')+'</select><button class="btn" onclick="svC()">Salvar card</button>'+(cf.id?'<button class="lk r" style="margin-top:10px" onclick="S.cards=S.cards.filter(function(x){return x.id!==cf.id});save();go(\'cards\')">Excluir card</button>':'')+'</div>'}
 function svC(){var f=$("cF").value.trim(),v=$("cV").value.trim();if(!f||(!v&&!isC(f)))return;if(cf.id){var c=S.cards.filter(function(x){return x.id===cf.id})[0];c.f=f;c.v=v;c.m=$("cM").value}else S.cards.push({id:""+Date.now()+Math.floor(Math.random()*999),f:f,v:v,m:$("cM").value,due:dk(new Date()),iv:0,ef:2.5,rep:0});save();go("cards")}
@@ -192,8 +277,10 @@ function render(){var a=$("app"),n=$("nav");
 if(!S.ob){a.innerHTML=ob();n.style.display="none";return}
 n.style.display="flex";
 a.innerHTML=tab==="sess"&&ss?sess():tab==="sub"?sub():tab==="qa"?fqa():tab==="red"?red():tab==="cards"?cards():tab==="rev"?rev():tab==="cf"?cff():tab==="io"?iov():tab==="ciclo"?ciclo():tab==="prog"?prog():tab==="cfg"?cfg():home();
-var T=[["home","◉","Início"],["cards","▤","Cards"],["red","✎","Redação"],["prog","▦","Progresso"],["cfg","⚙︎","Ajustes"]],on=tab==="sess"?"home":tab==="sub"?"cfg":tab==="qa"?"prog":tab==="rev"||tab==="cf"||tab==="io"?"cards":tab;
+var T=[["home","◉","Início"],["cards","▤","Anki"],["red","✎","Redação"],["prog","▦","Progresso"],["cfg","⚙︎","Ajustes"]],on=tab==="sess"?"home":tab==="sub"?"cfg":tab==="qa"?"prog":tab==="rev"||tab==="cf"||tab==="io"?"cards":tab;
 n.innerHTML=T.map(function(x){return'<button class="'+(on===x[0]?'a':'')+'" onclick="go(\''+x[0]+'\')"><b>'+x[1]+'</b>'+x[2]+'</button>'}).join('');
 if(!(eb||qa))window.scrollTo(0,0)}
+gameCheck();
+applyTheme();
 render();
-</script></body></html>
+</script>\n\n<script type="module" src="./js/anki-ui.js"></script>\n</body></html>
