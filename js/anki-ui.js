@@ -105,8 +105,8 @@ async function render() {
   try {
     const {decks,stats}=await loadData();
     if(!decks.length) {
-      el.innerHTML='<div class="anki-empty"><div class="anki-empty-symbol">✳</div><h2>Vamos criar sua biblioteca?</h2><p>Comece com um baralho para cada matéria e organize os assuntos em subbaralhos.</p><button class="anki-primary" id="anki-first-deck">Criar meu primeiro baralho</button></div>';
-      document.getElementById('anki-first-deck').onclick=()=>showDeckForm('new');
+      el.innerHTML='<div class="anki-empty"><div class="anki-empty-symbol">✳</div><h2>Vamos criar sua biblioteca?</h2><p>Comece com um baralho para cada matéria e organize os assuntos em subbaralhos.</p><section class="anki-form"><label>Nome do primeiro baralho<input id="anki-first-deck-name" placeholder="Ex.: Biologia" maxlength="70"></label><button class="anki-primary" id="anki-first-deck">Criar meu primeiro baralho</button></section></div>';
+      document.getElementById('anki-first-deck').onclick=async()=>{const name=document.getElementById('anki-first-deck-name').value.trim();if(!name)return;try{const deck=await createDeck(name);selectedDeck=deck.id;await render();}catch(e){const p=el.querySelector('p');if(p)p.textContent=e.message;}};
     } else { el.innerHTML=shell(decks,stats); bind(decks); }
   } catch(error) {
     el.innerHTML='<div class="anki-empty"><h2>Não foi possível carregar o Anki</h2><p>'+esc(error.message)+'</p><button id="anki-retry" class="anki-secondary">Tentar novamente</button></div>';
