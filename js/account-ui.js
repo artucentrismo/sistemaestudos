@@ -121,7 +121,7 @@ async function syncAfterLogin() {
   const local = localSnapshot();
   const owner = localStorage.getItem('ciclo-owner');
   const sameOwner = !owner || owner === session.user.id;
-  if (remote.state && sameOwner && hasLocalData(local)) {
+  if (remote.state && sameOwner && hasLocalData(local) && stableStringify(remote.state) !== stableStringify(local)) {
     pendingConflict = { remote: remote.state, local };
     $('account-conflict').hidden = false;
     $('account-form').hidden = true;
