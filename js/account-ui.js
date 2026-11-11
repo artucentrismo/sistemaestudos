@@ -114,7 +114,9 @@ async function sendReset() {
 async function syncAfterLogin() {
   const remote = await loadCloudState();
   const local = localSnapshot();
-  if (remote.state && hasLocalData(local)) {
+  const owner = localStorage.getItem('ciclo-owner');
+  const sameOwner = !owner || owner === session.user.id;
+  if (remote.state && sameOwner && hasLocalData(local)) {
     pendingConflict = { remote: remote.state, local };
     $('account-conflict').hidden = false;
     $('account-form').hidden = true;
@@ -123,7 +125,7 @@ async function syncAfterLogin() {
     return;
   }
   if (remote.state) applyState(remote.state);
-  else if (local) await saveCloudState(local);
+  else if (!owner && local) await saveCloudState(local);
   finishLogin();
 }
 function applyState(state) {
@@ -142,6 +144,7 @@ async function resolveConflict(choice) {
   } catch (error) { message(error.message || 'Falha ao sincronizar.', true); }
 }
 function finishLogin() {
+  if (session?.user?.id) localStorage.setItem('ciclo-owner', session.user.id);
   $('account-conflict').hidden = true;
   $('account-form').hidden = false;
   $('account-message').textContent = '';
@@ -157,7 +160,8 @@ function paintAccount() {
     try {
       await signOut();
       session = null;
-      paintAccount();
+      localStorage.removeItem('ciclo-v3');
+      window.location.reload();
     } catch (error) { alert(error.message || 'Não foi possível sair.'); }
   };
 }
@@ -188,11 +192,19 @@ async function boot() {
     session = await getCurrentSession();
     if (session) {
       const remote = await loadCloudState();
-      if (remote.state) applyState(remote.state);
-      else {
-        const local = localSnapshot();
-        if (local) await saveCloudState(local);
-      }
+      const local = localSnapshot();
+      const owner = localStorage.getItem('ciclo-owner');
+      const sameOwner = !owner || owner === session.user.id;
+      if (remote.state && sameOwner && hasLocalData(local) && JSON.stringify(remote.state) !== JSON.stringify(local)) {
+        pendingConflict = { remote: remote.state, local };
+        openModal();
+        $('account-conflict').hidden = false;
+        $('account-form').hidden = true;
+        $('account-forgot').hidden = true;
+        message('Há dados locais e na nuvem. Escolha qual versão manter.');
+      } else if (remote.state) applyState(remote.state);
+      else if (!owner && local) await saveCloudState(local);
+      if (!pendingConflict) localStorage.setItem('ciclo-owner', session.user.id);
     }
   } catch (error) {
     console.warn('Ciclo account initialization:', error);
