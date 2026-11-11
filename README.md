@@ -18,7 +18,7 @@ Aplicação web gratuita de ciclo de estudos para o ENEM, com experiência otimi
 
 ## Anki integrado
 - Baralhos privados por usuário
-- Notas Básicas e Cloze (omissão)
+- Notas Básicas, Básicas e reverso, e Cloze (omissão com vários cartões gerados por lacuna)
 - Tags e busca
 - Revisões Again / Hard / Good / Easy com FSRS-7
 - Prévia do próximo agendamento, histórico de revisões e estatísticas básicas
@@ -55,6 +55,6 @@ O schema inicial e as quatro migrações seguintes já foram aplicados ao projet
 O GitHub Pages da versão atual continua apontando para a branch `main`. O trabalho novo está isolado em `feat/accounts-anki-foundation` e na PR #1. Só publique depois de configurar as URLs de autenticação e concluir os testes de cadastro, login, recuperação, sincronização e isolamento de duas contas.
 
 ## Limitações conhecidas / próximos incrementos
-O Anki atual é uma implementação própria com FSRS-7 e cobre o fluxo principal de baralhos, notas, revisão e TSV. Ainda não é uma reprodução integral do Anki Desktop: tipos de nota totalmente customizáveis, cartões reversos gerados por templates, editor rico com mídia/áudio/LaTeX, limites diários avançados, estatísticas detalhadas e compatibilidade `.apkg` precisam de etapas próprias. Não importe material importante sem manter uma cópia de segurança.
+O Anki atual é uma implementação própria com FSRS-7 e cobre o fluxo principal de baralhos, notas, revisão e TSV. Ainda não é uma reprodução integral do Anki Desktop: tipos de nota e templates totalmente customizáveis, editor rico com mídia/áudio/LaTeX, limites diários avançados, estatísticas detalhadas e compatibilidade `.apkg` precisam de etapas próprias. Não importe material importante sem manter uma cópia de segurança.
 
 Os cards antigos ficam no armazenamento local até que a pessoa use **Migrar cards antigos deste aparelho** no Anki novo.
