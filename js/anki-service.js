@@ -77,13 +77,21 @@ export async function addNote({ deckId, front, back, tags = [], cardType = 'basi
   }
   return note;
 }
-export async function updateNote(noteId, { front, back, tags = [] }) {
+export async function updateNote(noteId, { front, back, tags = [], cardType = 'basic' }) {
   const { supabase, user } = await context();
+  if (!front.trim()) throw new Error('A frente do cartão é obrigatória.');
+  if (cardType === 'cloze' && !/\\{\\{c\\d+::.+?\\}\\}/s.test(front))
+    throw new Error('Use uma lacuna no formato {{c1::resposta}}.');
+  if (cardType !== 'cloze' && !back.trim()) throw new Error('O verso do cartão é obrigatório.');
   const { error } = await supabase.from('anki_notes').update({
     fields: { Front: front.trim(), Back: back.trim() },
     tags: tags.map(t => t.trim()).filter(Boolean), updated_at: new Date().toISOString()
   }).eq('id', noteId).eq('user_id', user.id);
   if (error) throw error;
+  const { error: cardError } = await supabase.from('anki_cards').update({
+    card_type: cardType, updated_at: new Date().toISOString()
+  }).eq('note_id', noteId).eq('user_id', user.id);
+  if (cardError) throw cardError;
 }
 export async function deleteNote(noteId) {
   const { supabase, user } = await context();
