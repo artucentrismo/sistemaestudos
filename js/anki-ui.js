@@ -10,7 +10,7 @@ let reviewCards = [];
 let reviewIndex = 0;
 let revealed = false;
 let busy = false;
-let searchText = '';
+let searchText = '';\nlet decksCache = [];
 let noteMode = 'basic';
 const root = () => document.getElementById('anki-v2');
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -25,7 +25,7 @@ function setMessage(text, error=false) {
   if (el) { el.textContent = text; el.className = error ? 'anki-error' : 'anki-message'; }
 }
 async function loadData() {
-  const decks = await listDecks();
+  const decks = await listDecks();\n  decksCache = decks;
   if (!selectedDeck && decks.length) selectedDeck = decks[0].id;
   const stats = await getStats(selectedDeck || null);
   notesCache = await listNotes(selectedDeck || null);
@@ -49,7 +49,7 @@ function shell(decks, stats) {
     <div class="anki-actions">
       <button class="anki-primary" id="anki-review" ${due?'':'disabled'}>Revisar agora · ${due}</button>
       <button id="anki-new">+ Adicionar</button>
-      <button id="anki-deck-new">+ Baralho</button>
+      <button id="anki-deck-new">+ Baralho</button><button id="anki-deck-manage">Gerenciar</button>
     </div>
     <div class="anki-toolbar">
       <select id="anki-deck"><option value="">Todos os baralhos</option>${options}</select>
@@ -112,6 +112,7 @@ function bind(decks) {
   document.getElementById('anki-search').oninput = e => { searchText=e.target.value; const pos=e.target.selectionStart; render().then(()=>{const x=document.getElementById('anki-search');x?.focus();x?.setSelectionRange(pos,pos);}); };
   document.getElementById('anki-new').onclick = () => showForm();
   document.getElementById('anki-deck-new').onclick = newDeck;
+  document.getElementById('anki-deck-manage').onclick = manageDeck;
   document.getElementById('anki-review').onclick = startReview;
   document.getElementById('anki-export').onclick = exportTsv;
   document.getElementById('anki-import').onclick = importTsv;
@@ -123,6 +124,24 @@ async function newDeck() {
   if (!name) return;
   try { const deck=await createDeck(name); selectedDeck=deck.id; await render(); }
   catch (e) { setMessage(e.message,true); }
+}
+async function manageDeck() {
+  const deck = decksCache.find(d => d.id === selectedDeck);
+  if (!deck) return setMessage('Selecione um baralho para gerenciar.', true);
+  const action = prompt('Digite R para renomear ou E para excluir este baralho:', 'R');
+  if (!action) return;
+  try {
+    if (action.toLowerCase() === 'r') {
+      const name = prompt('Novo nome do baralho:', deck.name);
+      if (!name?.trim()) return;
+      await renameDeck(deck.id, name);
+    } else if (action.toLowerCase() === 'e') {
+      if (!confirm('Excluir o baralho "'+deck.name+'" e todos os cartões dele? Esta ação não pode ser desfeita.')) return;
+      await deleteDeck(deck.id);
+      selectedDeck = '';
+    }
+    await render();
+  } catch (e) { setMessage(e.message, true); }
 }
 function showForm(note=null) {
   const wrap=document.getElementById('anki-form-wrap');
