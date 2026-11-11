@@ -122,7 +122,7 @@ export async function deleteNote(noteId) {
 export async function reviewQueue(deckId = null) {
   const { supabase, user } = await context();
   let q = supabase.from('anki_cards')
-    .select('id,note_id,card_type,due_at,fsrs_state,suspended,buried_until')
+    .select('id,note_id,template_ordinal,card_type,due_at,fsrs_state,suspended,buried_until')
     .eq('user_id', user.id).eq('suspended', false)
     .lte('due_at', new Date().toISOString()).order('due_at');
   const { data: cards, error } = await q;
