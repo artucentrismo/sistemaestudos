@@ -250,10 +250,7 @@ h2{font-size:21px;font-weight:750;letter-spacing:-.02em;margin:30px 0 14px}
   transition:transform .16s,filter .16s,box-shadow .16s;
 }
 :root[data-theme="dark"] .btn{color:#14251e}
-:root[data-theme="dark"] .btn.s,
-:root[data-theme="dark"] .account-primary,
-:root[data-theme="dark"] .account-tabs button.selected,
-:root[data-theme="dark"] .theme-choice button.active{color:#14251e}
+:root[data-theme="dark"] .btn.s, :root[data-theme="dark"] .theme-choice button.active{color:#14251e}
 @media(prefers-color-scheme:dark){
   :root:not([data-theme]) .btn.s{color:var(--tx)}
   :root:not([data-theme]) .theme-choice button.active{color:#14251e}
@@ -309,10 +306,6 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--ac);box-
 .backup-download{background:#218768;color:#fff}
 .backup-import{background:#326fc0;color:#fff}
 .game-bonus{border:1px solid color-mix(in srgb,#e5a72e 38%,var(--ln))}
-#accountbar{max-width:1080px;padding:14px clamp(16px,3vw,34px) 0}
-#account-open,.account-dialog,.account-close,.account-tabs button{border-color:var(--ln)}
-#account-open{background:var(--cd);color:var(--tx);cursor:pointer}
-.account-dialog{box-shadow:0 24px 80px rgba(0,0,0,.3)}
 #anki-v2{margin-top:18px}
 .anki-stats>div,.anki-list,.anki-form,.anki-review-card,.anki-empty,.anki-deck-tree{
   background:var(--cd);border-color:var(--ln);color:var(--tx);border-radius:19px;
