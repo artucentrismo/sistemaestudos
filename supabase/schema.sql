@@ -141,6 +141,8 @@ create trigger on_auth_user_created
   after insert on auth.users
   for each row execute procedure public.handle_new_user();
 
+revoke execute on function public.handle_new_user() from public, anon, authenticated;
+
 
 -- Restrict API table grants: anonymous clients cannot query private user data.
 revoke all on table
