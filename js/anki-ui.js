@@ -274,20 +274,22 @@ function install() {
   if(window.tab==='cards')render();
 }
 window.addEventListener('anki:create-from-cycle',async event=>{
-  const detail=event.detail||{},subject=String(detail.subject||'').trim(),topic=String(detail.topic||'').trim();
+  const detail=event.detail||{},subject=String(detail.subject||'').trim(),topic=String(detail.topic||'').split(',').map(part=>part.trim()).filter(Boolean).join(', '),area=String(detail.area||'').trim();
   if(!subject||!topic)return;
   try{
     const allDecks=await listDecks();
     let deck=allDecks.find(d=>!d.parent_id&&d.name.toLocaleLowerCase('pt-BR')===subject.toLocaleLowerCase('pt-BR'));
     if(!deck)deck=await createDeck(subject,'');
-    selectedDeck=deck.id;
+    let subdeck=allDecks.find(d=>d.parent_id===deck.id&&d.name.toLocaleLowerCase('pt-BR')===topic.toLocaleLowerCase('pt-BR'));
+    if(!subdeck)subdeck=await createDeck(topic,'',deck.id);
+    selectedDeck=subdeck.id;
     await render();
     showForm();
     const front=document.getElementById('anki-front'),tags=document.getElementById('anki-tags');
-    if(front)front.value='Explique: '+topic+'?';
-    if(tags)tags.value=['erro-ciclo',subject,...topic.split(/[\s·,/]+/).filter(Boolean)].join(' ');
+    if(front){front.value='';front.placeholder='Cole aqui o enunciado da questão que você errou. Você pode colar o texto completo.';}
+    if(tags)tags.value=['erro-ciclo',...area.split(/[\\s·,/]+/).filter(Boolean)].join(' ');
     const count=document.getElementById('anki-front-count');if(count&&front)count.textContent=front.value.length+' caracteres';
-    setMessage('Flashcard iniciado a partir do erro do ciclo. Complete o verso e salve.');
+    setMessage('Matéria e assunto organizados no baralho. Cole o enunciado na frente, preencha o verso e salve.');
     front?.focus();
   }catch(error){setMessage(error.message,true);}
 });
