@@ -27,7 +27,8 @@ function setMessage(text, error=false) {
   if (el) { el.textContent = text; el.className = error ? 'anki-error' : 'anki-message'; }
 }
 async function loadData() {
-  const decks = await listDecks();\n  decksCache = decks;
+  const decks = await listDecks();
+  decksCache = decks;
   if (!selectedDeck && decks.length) selectedDeck = decks[0].id;
   const stats = await getStats(selectedDeck || null);
   notesCache = await listNotes(selectedDeck || null);
