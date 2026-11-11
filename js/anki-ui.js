@@ -14,6 +14,7 @@ let searchText = '';
 let searchOpen = false;
 let decksCache = [];
 let deckPanelMode = '';
+const collapsedDecks = new Set();
 const root = () => document.getElementById('anki-v2');
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const dateLabel = (iso) => new Date(iso).toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' });
@@ -48,9 +49,22 @@ async function loadData() {
 }
 function deckTreeHtml(decks) {
   if(!decks.length)return '';
+  const rows=decks.map(d=>{
+    const depth=deckDepth(d,decks), children=decks.filter(child=>child.parent_id===d.id);
+    let parent=decks.find(item=>item.id===d.parent_id), hidden=false, guard=0;
+    while(parent && guard++<decks.length) {
+      if(collapsedDecks.has(parent.id)){hidden=true;break;}
+      parent=decks.find(item=>item.id===parent.parent_id);
+    }
+    const collapsed=collapsedDecks.has(d.id);
+    return '<div class="anki-tree-row" style="display:'+(hidden?'none':'flex')+';align-items:center;padding-left:'+(12+depth*17)+'px">'+
+      '<button class="anki-tree-item '+(selectedDeck===d.id?'active':'')+'" data-deck-select="'+esc(d.id)+'" style="flex:1;min-width:0;padding-left:0"><span class="anki-tree-icon">'+(depth?'↳':'▤')+'</span><span class="anki-tree-name">'+esc(d.name)+'</span><span class="anki-tree-arrow">›</span></button>'+
+      (children.length?'<button type="button" class="anki-tree-toggle" data-deck-toggle="'+esc(d.id)+'" aria-expanded="'+(!collapsed)+'" aria-label="'+(collapsed?'Mostrar':'Ocultar')+' subbaralhos de '+esc(d.name)+'" title="'+(collapsed?'Mostrar':'Ocultar')+' subbaralhos" style="flex:0 0 32px;padding:6px;background:transparent;border:0;color:inherit;cursor:pointer">'+(collapsed?'▸':'▾')+'</button>':'')+
+      '</div>';
+  }).join('');
   return '<div class="anki-deck-tree"><div class="anki-tree-heading">SUA BIBLIOTECA <span>'+decks.length+' baralhos</span></div>'+
     '<button class="anki-tree-item '+(!selectedDeck?'active':'')+'" data-deck-select=""> <span class="anki-tree-icon">▦</span><span class="anki-tree-name">Todos os baralhos</span><span class="anki-tree-arrow">›</span></button>'+
-    decks.map(d=>'<button class="anki-tree-item '+(selectedDeck===d.id?'active':'')+'" data-deck-select="'+esc(d.id)+'" style="padding-left:'+(12+deckDepth(d,decks)*17)+'px"><span class="anki-tree-icon">'+(deckDepth(d,decks)?'↳':'▤')+'</span><span class="anki-tree-name">'+esc(d.name)+'</span><span class="anki-tree-arrow">›</span></button>').join('')+'</div>';
+    rows+'</div>';
 }
 function noteItemsHtml() {
   const query=searchText.trim().toLocaleLowerCase('pt-BR');
@@ -136,6 +150,7 @@ function bind(decks) {
   document.getElementById('anki-local-import').onclick=importLegacy;
   bindSearch();
   root().querySelectorAll('[data-deck-select]').forEach(btn=>btn.onclick=async()=>{selectedDeck=btn.dataset.deckSelect;deckPanelMode='';await render();});
+  root().querySelectorAll('[data-deck-toggle]').forEach(btn=>btn.onclick=async event=>{event.stopPropagation();const id=btn.dataset.deckToggle;if(collapsedDecks.has(id))collapsedDecks.delete(id);else collapsedDecks.add(id);await render();});
   bindNoteActions();
   bindDeckPanel();
 }
