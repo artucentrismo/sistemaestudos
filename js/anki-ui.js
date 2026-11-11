@@ -274,23 +274,40 @@ function install() {
   if(window.tab==='cards')render();
 }
 window.addEventListener('anki:create-from-cycle',async event=>{
-  const detail=event.detail||{},subject=String(detail.subject||'').trim(),topic=String(detail.topic||'').split(',').map(part=>part.trim()).filter(Boolean).join(', '),area=String(detail.area||'').trim();
+  const detail=event.detail||{};
+  const subject=String(detail.subject||'').trim();
+  const topics=(Array.isArray(detail.topics)?detail.topics:String(detail.topic||'').split(',')).map(part=>String(part).trim()).filter(Boolean);
+  const topic=topics.join(', ');
+  const area=String(detail.area||'').trim();
   if(!subject||!topic)return;
   try{
-    const allDecks=await listDecks();
-    let deck=allDecks.find(d=>!d.parent_id&&d.name.toLocaleLowerCase('pt-BR')===subject.toLocaleLowerCase('pt-BR'));
-    if(!deck)deck=await createDeck(subject,'');
-    let subdeck=allDecks.find(d=>d.parent_id===deck.id&&d.name.toLocaleLowerCase('pt-BR')===topic.toLocaleLowerCase('pt-BR'));
-    if(!subdeck)subdeck=await createDeck(topic,'',deck.id);
-    selectedDeck=subdeck.id;
+    let decks=await listDecks();
+    let parent=decks.find(d=>!d.parent_id&&d.name.toLocaleLowerCase('pt-BR')===subject.toLocaleLowerCase('pt-BR'));
+    if(!parent)parent=await createDeck(subject,'');
+    decks=await listDecks();
+    parent=decks.find(d=>d.id===parent.id&&!d.parent_id);
+    if(!parent)throw new Error('Não foi possível confirmar o baralho principal da matéria.');
+    const childName=topic;
+    let child=decks.find(d=>d.parent_id===parent.id&&d.name.toLocaleLowerCase('pt-BR')===childName.toLocaleLowerCase('pt-BR'));
+    if(!child)child=await createDeck(childName,'',parent.id);
+    decks=await listDecks();
+    child=decks.find(d=>d.id===child.id&&d.parent_id===parent.id);
+    if(!child)throw new Error('O subbaralho do assunto não foi criado corretamente.');
+    selectedDeck=child.id;
     await render();
     showForm();
-    const front=document.getElementById('anki-front'),tags=document.getElementById('anki-tags');
-    if(front){front.value='';front.placeholder='Cole aqui o enunciado da questão que você errou. Você pode colar o texto completo.';}
-    if(tags)tags.value=['erro-ciclo',...area.split(/[\s·,/]+/).filter(Boolean)].join(' ');
-    const count=document.getElementById('anki-front-count');if(count&&front)count.textContent=front.value.length+' caracteres';
-    setMessage('Matéria e assunto organizados no baralho. Cole o enunciado na frente, preencha o verso e salve.');
+    const front=document.getElementById('anki-front');
+    const back=document.getElementById('anki-back');
+    const tags=document.getElementById('anki-tags');
+    if(front){front.value='';front.defaultValue='';front.placeholder='Cole aqui o enunciado completo da questão que você errou.';}
+    if(back){back.value='';back.defaultValue='';}
+    if(tags)tags.value=['erro-ciclo',...area.split(/[\\s·,/]+/).filter(Boolean)].join(' ');
+    const count=document.getElementById('anki-front-count');
+    if(count&&front)count.textContent='0 caracteres';
+    setMessage('Subbaralho criado em '+subject+'. Cole o enunciado da questão na frente e escreva a explicação no verso.');
     front?.focus();
   }catch(error){setMessage(error.message,true);}
 });
 install();
+window.ankiReady=true;
+window.dispatchEvent(new Event('anki:ready'));
