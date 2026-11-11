@@ -40,7 +40,6 @@
 ## Escopo Anki ainda não coberto
 A tela atual entrega o núcleo de estudo e revisão, mas não é paridade total com o Anki Desktop. Ficam para incrementos seguintes:
 - Tipos de nota customizáveis e editor de templates.
-- Cartões reversos e múltiplos cartões gerados de uma nota.
 - Editor rico, imagens, áudio, LaTeX e armazenamento de mídia.
 - Limites diários configuráveis, enterro por nota e subbaralhos hierárquicos reais.
 - Estatísticas avançadas e exportação/importação `.apkg`.
