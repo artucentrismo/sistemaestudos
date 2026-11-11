@@ -48,50 +48,70 @@ export async function listNotes(deckId) {
   if (!notes.length) return [];
   const ids = notes.map(n => n.id);
   const { data: cards, error: cardError } = await supabase.from('anki_cards')
-    .select('id,note_id,card_type,due_at,fsrs_state,suspended,buried_until')
+    .select('id,note_id,template_ordinal,card_type,due_at,fsrs_state,suspended,buried_until')
     .eq('user_id', user.id).in('note_id', ids);
   if (cardError) throw cardError;
   return notes.map(note => ({ ...note, cards: (cards || []).filter(c => c.note_id === note.id) }));
+}
+async function getOrCreateNoteType(supabase, userId, cardType) {
+  const names = { basic: 'Básico', 'basic-reversed': 'Básico e reverso', cloze: 'Omissão (Cloze)' };
+  const name = names[cardType] || names.basic;
+  const { data: existing, error: lookupError } = await supabase.from('anki_note_types')
+    .select('id').eq('user_id', userId).eq('name', name).maybeSingle();
+  if (lookupError) throw lookupError;
+  if (existing) return existing.id;
+  const { data, error } = await supabase.from('anki_note_types').insert({
+    user_id: userId, name, fields: ['Front','Back'],
+    templates: cardType === 'basic-reversed'
+      ? [{ name: 'Frente → verso' }, { name: 'Verso → frente' }]
+      : cardType === 'cloze' ? [{ name: 'Omissão' }] : [{ name: 'Frente → verso' }]
+  }).select('id').single();
+  if (error) throw error;
+  return data.id;
 }
 export async function addNote({ deckId, front, back, tags = [], cardType = 'basic' }) {
   const { supabase, user } = await context();
   if (!deckId) throw new Error('Escolha um baralho.');
   if (!front.trim()) throw new Error('A frente do cartão é obrigatória.');
   if (cardType !== 'cloze' && !back.trim()) throw new Error('O verso do cartão é obrigatório.');
-  if (cardType === 'cloze' && !/\{\{c\d+::.+?\}\}/s.test(front))
+  const clozeIds = [...new Set([...front.matchAll(/\\{\\{c(\\d+)::/g)].map(m => Number(m[1])))].sort((a,b)=>a-b);
+  if (cardType === 'cloze' && !clozeIds.length)
     throw new Error('Use uma lacuna no formato {{c1::resposta}}.');
+  const noteTypeId = await getOrCreateNoteType(supabase, user.id, cardType);
   const { data: note, error } = await supabase.from('anki_notes').insert({
-    user_id: user.id, deck_id: deckId, fields: { Front: front.trim(), Back: back.trim() },
+    user_id: user.id, deck_id: deckId, note_type_id: noteTypeId,
+    fields: { Front: front.trim(), Back: back.trim() },
     tags: tags.map(t => t.trim()).filter(Boolean)
   }).select().single();
   if (error) throw error;
-  const cardId = crypto.randomUUID();
-  const fsrs = await createFsrsCard(cardId);
-  const { error: cardError } = await supabase.from('anki_cards').insert({
-    id: cardId, user_id: user.id, note_id: note.id, card_type: cardType,
-    due_at: fsrs.dueAt, fsrs_state: fsrs
-  });
-  if (cardError) {
+  let specs;
+  if (cardType === 'cloze') specs = clozeIds.map(id => ({ type: 'cloze', ordinal: id }));
+  else if (cardType === 'basic-reversed') specs = [{ type: 'basic', ordinal: 0 }, { type: 'reverse', ordinal: 1 }];
+  else specs = [{ type: 'basic', ordinal: 0 }];
+  try {
+    const cardRows = await Promise.all(specs.map(async spec => {
+      const cardId = crypto.randomUUID();
+      const fsrs = await createFsrsCard(cardId);
+      return { id: cardId, user_id: user.id, note_id: note.id,
+        template_ordinal: spec.ordinal, card_type: spec.type,
+        due_at: fsrs.dueAt, fsrs_state: fsrs };
+    }));
+    const { error: cardError } = await supabase.from('anki_cards').insert(cardRows);
+    if (cardError) throw cardError;
+  } catch (error) {
     await supabase.from('anki_notes').delete().eq('id', note.id).eq('user_id', user.id);
-    throw cardError;
+    throw error;
   }
   return note;
 }
-export async function updateNote(noteId, { front, back, tags = [], cardType = 'basic' }) {
+export async function updateNote(noteId, { front, back, tags = [] }) {
   const { supabase, user } = await context();
   if (!front.trim()) throw new Error('A frente do cartão é obrigatória.');
-  if (cardType === 'cloze' && !/\\{\\{c\\d+::.+?\\}\\}/s.test(front))
-    throw new Error('Use uma lacuna no formato {{c1::resposta}}.');
-  if (cardType !== 'cloze' && !back.trim()) throw new Error('O verso do cartão é obrigatório.');
   const { error } = await supabase.from('anki_notes').update({
     fields: { Front: front.trim(), Back: back.trim() },
     tags: tags.map(t => t.trim()).filter(Boolean), updated_at: new Date().toISOString()
   }).eq('id', noteId).eq('user_id', user.id);
   if (error) throw error;
-  const { error: cardError } = await supabase.from('anki_cards').update({
-    card_type: cardType, updated_at: new Date().toISOString()
-  }).eq('note_id', noteId).eq('user_id', user.id);
-  if (cardError) throw cardError;
 }
 export async function deleteNote(noteId) {
   const { supabase, user } = await context();
