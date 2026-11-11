@@ -5,6 +5,8 @@
 <style>
 :root{--bg:#f3f5fa;--cd:#fff;--tx:#0e1a3a;--mu:#6b7794;--ac:#1b2f6b;--ln:#e3e8f2;--g:#2e9e6b;--rd:#d64545;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px)}
 @media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#070d1f;--cd:#0f1a38;--tx:#eef1fa;--mu:#8a96b8;--ac:#7f9bff;--ln:#1c2850;--g:#4cc790;--rd:#ff7676}}
+:root[data-theme="dark"]{--bg:#070d1f;--cd:#0f1a38;--tx:#eef1fa;--mu:#8a96b8;--ac:#7f9bff;--ln:#1c2850;--g:#4cc790;--rd:#ff7676}
+:root[data-theme="light"]{--bg:#f3f5fa;--cd:#fff;--tx:#0e1a3a;--mu:#6b7794;--ac:#1b2f6b;--ln:#e3e8f2;--g:#2e9e6b;--rd:#d64545}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{margin:0;background:var(--bg);color:var(--tx);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif;-webkit-font-smoothing:antialiased}
 main{max-width:680px;margin:0 auto;padding:22px 20px 120px}
@@ -58,6 +60,8 @@ try{var r=localStorage.getItem(KEY)||localStorage.getItem("ciclo-v2");if(r)S=JSO
 S.cards=S.cards||[];S.red=S.red||[];
 S.subs.forEach(function(s){s.t=s.t.map(function(b){return typeof b==="string"?b.split(" · "):b})});
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function applyTheme(){var t=S.theme||"system";if(t==="system")document.documentElement.removeAttribute("data-theme");else document.documentElement.setAttribute("data-theme",t)}
+function setTheme(t){S.theme=t;applyTheme();save();render()}
 function p(x){return x<10?"0"+x:""+x}
 function dk(d){return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate())}
 function esc(x){return String(x).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
@@ -143,7 +147,7 @@ Object.keys(AC).forEach(function(a){var z=qs(function(l){return l.a===a});h+='<d
 return h+'</div>'}
 function fqa(){return'<button class="lk" onclick="go(\'prog\')">‹ Voltar</button><h1>Registrar questões</h1><div class="card"><div class="up">Matéria</div><select id="qs1">'+S.subs.map(function(s,i){return'<option value="'+i+'">'+esc(s.n)+'</option>'}).join('')+'</select><div class="up" style="margin-top:16px">Assuntos do filtro (opcional)</div><input id="qb" placeholder="Ex: Estatística, Fração"><div class="grid" style="margin:16px 0 0"><div><div class="up">Acertos</div><input id="qa1" type="number" min="0" inputmode="numeric" value="0"></div><div><div class="up">Erros</div><input id="qe1" type="number" min="0" inputmode="numeric" value="0"></div><div><div class="up">Minutos</div><input id="qm" type="number" min="0" inputmode="numeric" value="15"></div></div><div class="up" style="margin-top:16px">Data</div><input id="qd" type="date" value="'+qa.d+'"><button class="btn" onclick="svQ()">Salvar</button></div>'}
 function sw(on,fn){return'<button class="sw'+(on?' on':'')+'" onclick="'+fn+'"><i></i></button>'}
-function cfg(){var h='<h1>Ajustes</h1><h2>Metas</h2><div class="card"><div class="row"><span class="f">Meta de tempo por dia</span>'+sw(gOn(),'S.goalOn=!gOn();save();render()')+'</div>'+(gOn()?'<div class="row"><span class="f mu">Minutos por dia</span><input type="number" inputmode="numeric" value="'+S.goal+'" onchange="setG(this.value)" style="width:100px;margin:0"></div>':'')+'<div class="row"><span class="f">Meta de questões por dia</span>'+sw(qOn(),'S.qgoalOn=!qOn();save();render()')+'</div>'+(qOn()?'<div class="row"><span class="f mu">Questões por dia</span><input type="number" inputmode="numeric" value="'+(S.qgoal||30)+'" onchange="S.qgoal=Math.max(1,parseInt(this.value)||30);save();render()" style="width:100px;margin:0"></div>':'')+'</div><h2>Matérias do ciclo</h2><div class="card">';
+function cfg(){var h='<h1>Ajustes</h1><h2>Aparência</h2><div class="card"><div class="row"><span class="f">Modo escuro</span>'+sw((S.theme||"system")==="dark",'setTheme((S.theme||"system")==="dark"?"light":"dark")')+'</div><div class="mu sm">Tema atual: '+((S.theme||"system")==="system"?"automático":S.theme==="dark"?"escuro":"claro")+'. A escolha fica salva neste aparelho.</div><button class="lk" onclick="setTheme(\'system\')">Usar tema do aparelho</button></div><h2>Metas</h2><div class="card"><div class="row"><span class="f">Meta de tempo por dia</span>'+sw(gOn(),'S.goalOn=!gOn();save();render()')+'</div>'+(gOn()?'<div class="row"><span class="f mu">Minutos por dia</span><input type="number" inputmode="numeric" value="'+S.goal+'" onchange="setG(this.value)" style="width:100px;margin:0"></div>':'')+'<div class="row"><span class="f">Meta de questões por dia</span>'+sw(qOn(),'S.qgoalOn=!qOn();save();render()')+'</div>'+(qOn()?'<div class="row"><span class="f mu">Questões por dia</span><input type="number" inputmode="numeric" value="'+(S.qgoal||30)+'" onchange="S.qgoal=Math.max(1,parseInt(this.value)||30);save();render()" style="width:100px;margin:0"></div>':'')+'</div><h2>Matérias do ciclo</h2><div class="card">';
 S.subs.forEach(function(s,i){h+='<div class="row"><span class="dot" style="background:'+AC[s.a]+'"></span><div class="f" onclick="si='+i+';go(\'sub\')"><div>'+esc(s.n)+'</div><div class="mu sm">'+fm(s.min)+' · '+s.t.length+' blocos</div></div><button class="pill" onclick="si='+i+';go(\'sub\')">Editar</button><button class="ib" onclick="mv('+i+',-1)">▲</button><button class="ib" onclick="mv('+i+',1)">▼</button></div>'});
 h+='</div><h2>Nova matéria</h2><div class="card"><input id="nn" placeholder="Nome"><select id="na">'+Object.keys(AC).map(function(a){return'<option>'+a+'</option>'}).join('')+'</select><button class="btn" onclick="addS()">Criar e adicionar blocos</button></div><button class="lk r" onclick="reset()">Apagar tudo e recomeçar</button>';return h}
 function sub(){var s=S.subs[si];
@@ -195,5 +199,6 @@ a.innerHTML=tab==="sess"&&ss?sess():tab==="sub"?sub():tab==="qa"?fqa():tab==="re
 var T=[["home","◉","Início"],["cards","▤","Cards"],["red","✎","Redação"],["prog","▦","Progresso"],["cfg","⚙︎","Ajustes"]],on=tab==="sess"?"home":tab==="sub"?"cfg":tab==="qa"?"prog":tab==="rev"||tab==="cf"||tab==="io"?"cards":tab;
 n.innerHTML=T.map(function(x){return'<button class="'+(on===x[0]?'a':'')+'" onclick="go(\''+x[0]+'\')"><b>'+x[1]+'</b>'+x[2]+'</button>'}).join('');
 if(!(eb||qa))window.scrollTo(0,0)}
+applyTheme();
 render();
 </script></body></html>
