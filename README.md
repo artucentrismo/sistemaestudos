@@ -38,7 +38,7 @@ Projeto: `ciclo-estudos`
 - URL: `https://bjcmbzirgronavynbknh.supabase.co`
 - Plano criado: Free
 
-O schema está em `supabase/schema.sql`; migrações adicionais ficam em `supabase/migrations/`.
+O snapshot de schema está em `supabase/schema.sql`. Para recriar o banco em outro projeto usando Supabase CLI, aplique os arquivos de `supabase/migrations/` em ordem cronológica; o primeiro arquivo já cria o schema inicial. Não aplique o snapshot separadamente antes das migrações.
 
 ### Configuração obrigatória de autenticação
 No Supabase Dashboard, abra **Authentication → URL Configuration** e configure:
@@ -49,7 +49,7 @@ No Supabase Dashboard, abra **Authentication → URL Configuration** e configure
 Confirme que a confirmação de e-mail está habilitada. Para envio confiável de e-mails em produção, configure um SMTP próprio nas configurações de Auth. A recuperação de senha usa a mesma URL do GitHub Pages.
 
 ### Aplicar o banco
-O schema inicial e a migração de integridade referencial já foram aplicados ao projeto Supabase conectado. Para outro ambiente, aplique primeiro `supabase/schema.sql` e depois as migrações em ordem.
+O schema inicial e as quatro migrações seguintes já foram aplicados ao projeto Supabase conectado. Para outro ambiente, use a pasta de migrações em ordem cronológica.
 
 ## Publicação
 O GitHub Pages da versão atual continua apontando para a branch `main`. O trabalho novo está isolado em `feat/accounts-anki-foundation` e na PR #1. Só publique depois de configurar as URLs de autenticação e concluir os testes de cadastro, login, recuperação, sincronização e isolamento de duas contas.
