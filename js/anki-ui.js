@@ -42,7 +42,7 @@ function shell(decks, stats) {
   });
   const due = stats.due;
   return `
-    <div class="anki-topline"><span>REPETIÇÃO ESPAÇADA · FSRS-7</span><span>Conta privada</span></div>
+    <div class="anki-topline"><span>REPETIÇÃO ESPAÇADA · FSRS-7</span><span>Dados locais</span></div>
     <div class="anki-stats">
       <div><small>Cartões</small><b>${stats.total}</b></div>
       <div><small>Para revisar</small><b>${due}</b></div>
@@ -106,7 +106,7 @@ async function render() {
       bind(decks);
     }
   } catch (error) {
-    el.innerHTML = '<div class="anki-empty"><h2>Não foi possível carregar o Anki</h2><p>'+esc(error.message)+'</p><p>Confira se você está conectado à sua conta.</p><button id="anki-retry">Tentar novamente</button></div>';
+    el.innerHTML = '<div class="anki-empty"><h2>Não foi possível carregar o Anki</h2><p>'+esc(error.message)+'</p><p>Seus dados são salvos neste navegador.</p><button id="anki-retry">Tentar novamente</button></div>';
     document.getElementById('anki-retry').onclick = render;
   } finally { busy = false; }
 }
