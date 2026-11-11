@@ -47,13 +47,12 @@ function accountShell() {
       </div>
     </div>`;
   document.body.appendChild(modal);
-  $('account-open').addEventListener('click', () => openModal());
   $('account-close').addEventListener('click', closeModal);
   modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
   $('tab-login').addEventListener('click', () => setMode('login'));
   $('tab-signup').addEventListener('click', () => setMode('signup'));
   $('account-forgot').addEventListener('click', sendReset);
-  $('account-form').addEventListener('submit', submitAuth);
+  $('account-form').onsubmit = submitAuth;
   $('use-cloud').addEventListener('click', () => resolveConflict('cloud'));
   $('use-device').addEventListener('click', () => resolveConflict('device'));
 }
@@ -131,7 +130,15 @@ async function syncAfterLogin() {
   }
   if (remote.state) applyState(remote.state);
   else if (local && (!owner || owner === session.user.id)) await saveCloudState(local);
+  else if (owner && owner !== session.user.id) resetLocalStateForNewAccount();
   finishLogin();
+}
+function resetLocalStateForNewAccount() {
+  const fresh = { ob: 0, goal: 120, subs: [], cur: 0, laps: 0, log: [], cards: [], red: [] };
+  window.S = fresh;
+  localStorage.setItem('ciclo-v3', JSON.stringify(fresh));
+  window.applyTheme?.();
+  window.render?.();
 }
 function applyState(state) {
   window.S = state;
@@ -209,6 +216,7 @@ async function boot() {
         message('Há dados locais e na nuvem. Escolha qual versão manter.');
       } else if (remote.state) applyState(remote.state);
       else if (local && (!owner || owner === session.user.id)) await saveCloudState(local);
+      else if (owner && owner !== session.user.id) resetLocalStateForNewAccount();
       if (!pendingConflict) localStorage.setItem('ciclo-owner', session.user.id);
     }
   } catch (error) {
