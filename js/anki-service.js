@@ -78,8 +78,10 @@ export async function createDeck(name, description = '', parentId = null) {
 }
 export async function renameDeck(deckId, name) {
   const clean = String(name || '').trim();
-  if (!clean) throw new Error('Dê um nome ao baralho.');
-  const db=read(), deck=requireDeck(db,deckId); deck.name=clean; deck.updated_at=now(); write(db);
+  if (!clean || clean.includes('::')) throw new Error('Informe apenas o nome deste baralho, sem ::.');
+  const db=read(), deck=requireDeck(db,deckId);
+  if (db.decks.some(d => d.id !== deckId && d.name.toLocaleLowerCase('pt-BR') === clean.toLocaleLowerCase('pt-BR') && (d.parent_id || null) === (deck.parent_id || null))) throw new Error('Já existe um baralho com esse nome neste nível.');
+  deck.name=clean; deck.updated_at=now(); write(db);
 }
 export async function deleteDeck(deckId) {
   const db=read(); requireDeck(db,deckId);
