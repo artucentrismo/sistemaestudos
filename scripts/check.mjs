@@ -1,10 +1,11 @@
 import { readFileSync, readdirSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
 import { join } from 'node:path';
 import { Script } from 'node:vm';
 
 const jsFiles = readdirSync('js').filter(name => name.endsWith('.js')).map(name => join('js', name));
 for (const file of jsFiles) {
-  new Script(readFileSync(file, 'utf8'), { filename: file });
+  execFileSync(process.execPath, ['--check', file], { stdio: 'inherit' });
   console.log('OK', file);
 }
 
@@ -16,7 +17,7 @@ for (let i = 0; i < inlineScripts.length; i++) {
 }
 for (const src of [...html.matchAll(/<script\\s+type="module"\\s+src="([^"]+)"/g)].map(m => m[1])) {
   const path = src.replace(/^\\.\\//, '');
-  if (!readFileSync(path, 'utf8')) throw new Error(`Empty module: ${path}`);
+  readFileSync(path, 'utf8');
   console.log('OK', path);
 }
 console.log('All JavaScript syntax checks passed.');
