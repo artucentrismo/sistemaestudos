@@ -12,6 +12,11 @@ const localSnapshot = () => {
   catch { return null; }
 };
 const hasLocalData = (s) => !!(s && ((s.log || []).length || (s.cards || []).length || (s.red || []).length || (s.laps || 0)));
+const stableStringify = (value) => {
+  if (Array.isArray(value)) return '[' + value.map(stableStringify).join(',') + ']';
+  if (value && typeof value === 'object') return '{' + Object.keys(value).sort().map(k => JSON.stringify(k) + ':' + stableStringify(value[k])).join(',') + '}';
+  return JSON.stringify(value);
+};
 
 function accountShell() {
   const header = document.createElement('header');
@@ -125,7 +130,7 @@ async function syncAfterLogin() {
     return;
   }
   if (remote.state) applyState(remote.state);
-  else if (!owner && local) await saveCloudState(local);
+  else if (local && (!owner || owner === session.user.id)) await saveCloudState(local);
   finishLogin();
 }
 function applyState(state) {
@@ -195,7 +200,7 @@ async function boot() {
       const local = localSnapshot();
       const owner = localStorage.getItem('ciclo-owner');
       const sameOwner = !owner || owner === session.user.id;
-      if (remote.state && sameOwner && hasLocalData(local) && JSON.stringify(remote.state) !== JSON.stringify(local)) {
+      if (remote.state && sameOwner && hasLocalData(local) && stableStringify(remote.state) !== stableStringify(local)) {
         pendingConflict = { remote: remote.state, local };
         openModal();
         $('account-conflict').hidden = false;
@@ -203,7 +208,7 @@ async function boot() {
         $('account-forgot').hidden = true;
         message('Há dados locais e na nuvem. Escolha qual versão manter.');
       } else if (remote.state) applyState(remote.state);
-      else if (!owner && local) await saveCloudState(local);
+      else if (local && (!owner || owner === session.user.id)) await saveCloudState(local);
       if (!pendingConflict) localStorage.setItem('ciclo-owner', session.user.id);
     }
   } catch (error) {
