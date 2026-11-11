@@ -4,7 +4,8 @@ import { loadCloudState, saveCloudState } from './cloud-sync.js';
 const SITE_URL = 'https://artucentrismo.github.io/sistemaestudos/';
 let session = null;
 let saveTimer = null;
-let busy = false;\nlet cloudReady = false;
+let busy = false;
+let cloudReady = false;
 
 const $ = (id) => document.getElementById(id);
 const localSnapshot = () => {
@@ -156,6 +157,7 @@ async function resolveConflict(choice) {
   } catch (error) { message(error.message || 'Falha ao sincronizar.', true); }
 }
 function finishLogin() {
+  cloudReady = true;
   if (session?.user?.id) localStorage.setItem('ciclo-owner', session.user.id);
   $('account-conflict').hidden = true;
   $('account-form').hidden = false;
@@ -172,13 +174,14 @@ function paintAccount() {
     try {
       await signOut();
       session = null;
+      cloudReady = false;
       localStorage.removeItem('ciclo-v3');
       window.location.reload();
     } catch (error) { alert(error.message || 'Não foi possível sair.'); }
   };
 }
 function scheduleCloudSave() {
-  if (!session) return;
+  if (!session || !cloudReady) return;
   clearTimeout(saveTimer);
   saveTimer = setTimeout(async () => {
     try {
@@ -217,9 +220,13 @@ async function boot() {
       } else if (remote.state) applyState(remote.state);
       else if (local && (!owner || owner === session.user.id)) await saveCloudState(local);
       else if (owner && owner !== session.user.id) resetLocalStateForNewAccount();
-      if (!pendingConflict) localStorage.setItem('ciclo-owner', session.user.id);
+      if (!pendingConflict) {
+        localStorage.setItem('ciclo-owner', session.user.id);
+        cloudReady = true;
+      }
     }
   } catch (error) {
+    cloudReady = false;
     console.warn('Ciclo account initialization:', error);
   }
   paintAccount();
