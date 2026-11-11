@@ -287,7 +287,7 @@ window.addEventListener('anki:create-from-cycle',async event=>{
     showForm();
     const front=document.getElementById('anki-front'),tags=document.getElementById('anki-tags');
     if(front){front.value='';front.placeholder='Cole aqui o enunciado da questão que você errou. Você pode colar o texto completo.';}
-    if(tags)tags.value=['erro-ciclo',...area.split(/[\\s·,/]+/).filter(Boolean)].join(' ');
+    if(tags)tags.value=['erro-ciclo',...area.split(/[\s·,/]+/).filter(Boolean)].join(' ');
     const count=document.getElementById('anki-front-count');if(count&&front)count.textContent=front.value.length+' caracteres';
     setMessage('Matéria e assunto organizados no baralho. Cole o enunciado na frente, preencha o verso e salve.');
     front?.focus();
