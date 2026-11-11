@@ -62,6 +62,52 @@ input,select,textarea{font:inherit;font-size:17px;padding:13px;border-radius:12p
 #account-message{font-size:13px;line-height:1.5;margin-top:12px}
 #account-conflict{border-top:1px solid var(--ln);margin-top:16px;padding-top:12px;font-size:14px}
 @media(max-width:430px){#accountbar{padding-left:14px;padding-right:14px}#account-status{max-width:105px}.account-dialog{padding:22px}}
+
+#anki-v2{margin-top:14px}
+.anki-topline{display:flex;justify-content:space-between;color:var(--mu);font-size:10px;letter-spacing:.1em;font-weight:700;margin-bottom:12px}
+.anki-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.anki-stats>div{background:var(--cd);border-radius:14px;padding:12px;min-width:0}
+.anki-stats small{display:block;color:var(--mu);font-size:11px}
+.anki-stats b{display:block;font-size:23px;margin-top:4px}
+.anki-actions{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:8px}
+.anki-actions button,.anki-toolbar button,.anki-footer-actions button,.anki-note button,.anki-section-head button,.anki-review-head button{border:1px solid var(--ln);border-radius:11px;padding:11px 9px;background:var(--cd);color:var(--tx);font:inherit;font-size:13px}
+.anki-primary{border:0!important;background:var(--ac)!important;color:#fff!important;border-radius:12px;padding:14px 16px;font:inherit;font-weight:700;width:100%}
+.anki-primary:disabled{opacity:.35}
+.anki-toolbar{display:grid;grid-template-columns:1fr 1.4fr;gap:8px;margin:14px 0}
+.anki-toolbar input,.anki-toolbar select,.anki-form input,.anki-form textarea,.anki-form select{margin:0;font-size:14px;padding:11px}
+.anki-section-head{display:flex;align-items:center;justify-content:space-between;margin:20px 0 8px}
+.anki-section-head span,.anki-muted{color:var(--mu);font-size:13px}
+.anki-list{background:var(--cd);border-radius:16px;padding:4px 14px}
+.anki-note{display:flex;align-items:center;gap:6px;padding:12px 0;border-bottom:1px solid var(--ln)}
+.anki-note:last-child{border-bottom:0}
+.anki-note-copy{flex:1;min-width:0}
+.anki-note-copy b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:14px}
+.anki-note-copy small{display:block;color:var(--mu);font-size:11px;margin-top:4px}
+.anki-note button{padding:7px 9px;min-width:32px}
+.anki-footer-actions{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
+.anki-footer-actions button{font-size:12px}
+.anki-form,.anki-review-card,.anki-empty{background:var(--cd);border-radius:18px;padding:18px;margin-top:14px}
+.anki-form label{display:block;color:var(--mu);font-size:12px;font-weight:700;margin:12px 0}
+.anki-form textarea{display:block;width:100%;margin-top:6px;resize:vertical}
+.anki-form input,.anki-form select{display:block;width:100%;margin-top:6px}
+.anki-empty{text-align:center;padding:28px 18px}
+.anki-empty h2{margin:0 0 8px}
+.anki-empty p{color:var(--mu);font-size:14px;line-height:1.5}
+.anki-message,.anki-error{font-size:13px;margin:10px 0;color:var(--g)}
+.anki-error{color:var(--rd)}
+.anki-review-head{display:flex;justify-content:space-between;align-items:center;color:var(--mu);font-size:13px}
+.anki-review-card{min-height:260px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;margin:16px 0}
+.anki-review-card small{color:var(--mu);font-size:12px}
+.anki-question{font-family:Georgia,serif;font-size:25px;line-height:1.45;white-space:pre-wrap;margin:28px 0}
+.anki-answer{font-size:19px;line-height:1.5;white-space:pre-wrap}
+.anki-cloze-gap{color:var(--ac)}
+.anki-cloze-answer{color:var(--g)}
+.anki-grade-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.anki-grade-grid p{grid-column:1/-1;color:var(--mu);text-align:center;font-size:13px}
+.anki-grade-grid button{border:1px solid var(--ln);background:var(--cd);color:var(--tx);border-radius:12px;padding:12px 4px;font:inherit}
+.anki-grade-grid button b,.anki-grade-grid button small{display:block}
+.anki-grade-grid button small{font-size:10px;color:var(--mu);margin-top:5px}
+@media(max-width:430px){.anki-stats{grid-template-columns:repeat(2,1fr)}.anki-actions{grid-template-columns:1fr 1fr}.anki-actions .anki-primary{grid-column:1/-1}.anki-toolbar{grid-template-columns:1fr}.anki-note{gap:4px}.anki-note button{padding:7px 6px}.anki-grade-grid{gap:5px}.anki-grade-grid button{font-size:13px}}
 </style></head><body><main id="app"></main><nav class="tabs" id="nav"></nav>
 <script>
 var AC={"Matemática":"#ff9f0a","Humanas":"#ff453a","Linguagens":"#bf5af2","Naturezas":"#30d158"};
@@ -199,9 +245,7 @@ R.map(function(r,i){return[r,i]}).reverse().forEach(function(x){var r=x[0];h+='<
 if(!R.length)h+='<p class="mu">Nenhuma redação ainda.</p>';return h+'</div>'}
 function svR(){var t=$("rt").value.trim();if(!t)return;var a=[1,2,3,4,5].map(function(i){return $("c"+i).value}),has=a.some(function(v){return v!==""}),c=has?a.map(function(v){return Math.min(200,Math.max(0,+v||0))}):null,n=$("rn").value,nota=c?c.reduce(function(x,y){return x+y},0):(n===""?null:Math.min(1000,+n));S.red.push({t:t,p:$("rp").value.trim(),m:+$("rm").value||0,nota:nota,c:c,d:$("rd").value||dk(new Date())});save();render()}
 function due(){var t=dk(new Date());return S.cards.filter(function(c){return c.due<=t})}
-function cards(){var dv=due().length,h='<h1>Cards</h1><div class="mu" style="margin-bottom:14px">Revisão espaçada, só para os seus cards</div><div class="grid" style="grid-template-columns:1fr 1fr"><div class="tile"><span class="up">Para hoje</span><b>'+dv+'</b></div><div class="tile"><span class="up">Total</span><b>'+S.cards.length+'</b></div></div><button class="btn" style="margin-top:0" onclick="rv={q:due().map(function(c){return c.id}),show:0};go(\'rev\')"'+(dv?'':' disabled')+'>Revisar agora</button><button class="btn s" onclick="cf={id:null};go(\'cf\')">+ Novo card</button><button class="btn s" onclick="imsg=\'\';go(\'io\')">Importar e exportar</button><h2>Todos os cards</h2><div class="card">';
-S.cards.slice().reverse().forEach(function(c){h+='<div class="row" onclick="cf={id:\''+c.id+'\'};go(\'cf\')"><div class="f"><div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(c.f)+'</div><div class="mu sm">'+esc(c.m||"Geral")+' · '+(c.due<=dk(new Date())?'para hoje':'em '+c.due.slice(8)+'/'+c.due.slice(5,7))+'</div></div><span class="mu">›</span></div>'});
-if(!S.cards.length)h+='<p class="mu">Nenhum card ainda.</p>';return h+'</div>'}
+function cards(){return '<h1>Anki</h1><p class="mu" style="margin-bottom:14px">Baralhos, cartões e revisões sincronizados com sua conta.</p><div id="anki-v2"><p class="mu">Carregando Anki…</p></div>'}
 function cff(){var c=cf.id?S.cards.filter(function(x){return x.id===cf.id})[0]:{f:"",v:"",m:""};
 return'<button class="lk" onclick="go(\'cards\')">‹ Cards</button><h1>'+(cf.id?'Editar card':'Novo card')+'</h1><div class="card"><div class="up">Frente</div><textarea id="cF" style="min-height:90px">'+esc(c.f)+'</textarea><div class="up" style="margin-top:14px">Verso (opcional com lacuna {{c1::resposta}})</div><textarea id="cV" style="min-height:90px">'+esc(c.v)+'</textarea><div class="up" style="margin-top:14px">Matéria</div><select id="cM"><option value="">Geral</option>'+S.subs.map(function(s){return'<option'+(s.n===c.m?' selected':'')+'>'+esc(s.n)+'</option>'}).join('')+'</select><button class="btn" onclick="svC()">Salvar card</button>'+(cf.id?'<button class="lk r" style="margin-top:10px" onclick="S.cards=S.cards.filter(function(x){return x.id!==cf.id});save();go(\'cards\')">Excluir card</button>':'')+'</div>'}
 function svC(){var f=$("cF").value.trim(),v=$("cV").value.trim();if(!f||(!v&&!isC(f)))return;if(cf.id){var c=S.cards.filter(function(x){return x.id===cf.id})[0];c.f=f;c.v=v;c.m=$("cM").value}else S.cards.push({id:""+Date.now()+Math.floor(Math.random()*999),f:f,v:v,m:$("cM").value,due:dk(new Date()),iv:0,ef:2.5,rep:0});save();go("cards")}
@@ -226,4 +270,4 @@ n.innerHTML=T.map(function(x){return'<button class="'+(on===x[0]?'a':'')+'" oncl
 if(!(eb||qa))window.scrollTo(0,0)}
 applyTheme();
 render();
-</script>\n<script type="module" src="./js/account-ui.js"></script>\n</body></html>
+</script>\n<script type="module" src="./js/account-ui.js"></script>\n<script type="module" src="./js/anki-ui.js"></script>\n</body></html>
