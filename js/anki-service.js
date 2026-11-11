@@ -107,6 +107,13 @@ export async function addNote({ deckId, front, back, tags = [], cardType = 'basi
 export async function updateNote(noteId, { front, back, tags = [] }) {
   const { supabase, user } = await context();
   if (!front.trim()) throw new Error('A frente do cartão é obrigatória.');
+  const { data: cardTypes, error: typeError } = await supabase.from('anki_cards')
+    .select('card_type').eq('note_id', noteId).eq('user_id', user.id);
+  if (typeError) throw typeError;
+  if ((cardTypes || []).some(c => c.card_type === 'cloze') && !/\\{\\{c\\d+::.+?\\}\\}/s.test(front))
+    throw new Error('Mantenha ao menos uma lacuna {{c1::resposta}} neste cartão Cloze.');
+  if ((cardTypes || []).some(c => c.card_type !== 'cloze') && !back.trim())
+    throw new Error('O verso do cartão é obrigatório.');
   const { error } = await supabase.from('anki_notes').update({
     fields: { Front: front.trim(), Back: back.trim() },
     tags: tags.map(t => t.trim()).filter(Boolean), updated_at: new Date().toISOString()
@@ -164,7 +171,12 @@ export async function gradeCard(card, grade) {
     scheduled_days: result.revlog.scheduledDays ?? null,
     previous_state: previous, resulting_state: result.card, fsrs_revlog: result.revlog
   });
-  if (logError) throw logError;
+  if (logError) {
+    await supabase.from('anki_cards').update({
+      fsrs_state: previous, due_at: card.due_at, updated_at: new Date().toISOString()
+    }).eq('id', card.id).eq('user_id', user.id);
+    throw logError;
+  }
   return result.card;
 }
 export async function setCardSuspended(cardId, suspended) {
