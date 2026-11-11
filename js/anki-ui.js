@@ -49,7 +49,7 @@ function deckTreeHtml(decks) {
   if(!decks.length)return '';
   return '<div class="anki-deck-tree"><div class="anki-tree-heading">SUA BIBLIOTECA <span>'+decks.length+' baralhos</span></div>'+
     '<button class="anki-tree-item '+(!selectedDeck?'active':'')+'" data-deck-select=""> <span class="anki-tree-icon">▦</span><span class="anki-tree-name">Todos os baralhos</span><span class="anki-tree-arrow">›</span></button>'+
-    decks.map(d=>'<button class="anki-tree-item '+(selectedDeck===d.id?'active':'')+'" data-deck-select="'+esc(d.id)+'" style="--deck-depth:'+deckDepth(d,decks)+'"><span class="anki-tree-icon">'+(deckDepth(d,decks)?'↳':'▤')+'</span><span class="anki-tree-name">'+esc(d.name)+'</span><span class="anki-tree-arrow">›</span></button>').join('')+'</div>';
+    decks.map(d=>'<button class="anki-tree-item '+(selectedDeck===d.id?'active':'')+'" data-deck-select="'+esc(d.id)+'" style="padding-left:'+(12+deckDepth(d,decks)*17)+'px"><span class="anki-tree-icon">'+(deckDepth(d,decks)?'↳':'▤')+'</span><span class="anki-tree-name">'+esc(d.name)+'</span><span class="anki-tree-arrow">›</span></button>').join('')+'</div>';
 }
 function noteListHtml() {
   const visible=notesCache.filter(n=>((n.fields?.Front||'')+' '+(n.fields?.Back||'')+' '+(n.tags||[]).join(' ')).toLowerCase().includes(searchText.toLowerCase()));
