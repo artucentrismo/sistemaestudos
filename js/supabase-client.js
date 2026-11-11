@@ -24,7 +24,7 @@ export async function signUp({ email, password, displayName = '' }) {
   const supabase = await getSupabase();
   return supabase.auth.signUp({
     email: email.trim().toLowerCase(), password,
-    options: { data: { display_name: displayName.trim() } }
+    options: { data: { display_name: displayName.trim() }, emailRedirectTo: 'https://artucentrismo.github.io/sistemaestudos/' }
   });
 }
 export async function signIn({ email, password }) {
