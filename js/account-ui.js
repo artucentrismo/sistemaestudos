@@ -4,7 +4,7 @@ import { loadCloudState, saveCloudState } from './cloud-sync.js';
 const SITE_URL = 'https://artucentrismo.github.io/sistemaestudos/';
 let session = null;
 let saveTimer = null;
-let busy = false;
+let busy = false;\nlet cloudReady = false;
 
 const $ = (id) => document.getElementById(id);
 const localSnapshot = () => {
