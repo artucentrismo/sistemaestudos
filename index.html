@@ -359,6 +359,15 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--ac);box-
 .reset-danger{display:block;width:100%;margin-top:22px;padding:14px 16px;border:1px solid #a83232;border-radius:13px;background:#a83232;color:#fff;font:inherit;font-weight:750;cursor:pointer;box-shadow:0 5px 14px rgba(168,50,50,.18)}.reset-danger:hover{background:#8e2929;border-color:#8e2929}.cycle-error-flashcard{width:100%;margin-top:12px;padding:11px 13px;border:1px solid color-mix(in srgb,var(--ac) 35%,var(--ln));border-radius:11px;background:color-mix(in srgb,var(--ac) 10%,var(--cd));color:var(--ac);font:inherit;font-size:13px;font-weight:750;text-align:left;cursor:pointer}.cycle-error-flashcard:hover{background:color-mix(in srgb,var(--ac) 17%,var(--cd))}
 .btn.btn-next-subject{background:#245e72;color:#fff;border-color:#245e72;box-shadow:0 5px 14px rgba(36,94,114,.22)}
 .btn.btn-next-subject:hover{background:#1d5062;border-color:#1d5062;filter:none}
+.app-brand{appearance:none;-webkit-appearance:none;border:0;padding:0;margin:0;background:transparent;color:inherit;text-align:left;font:inherit;cursor:pointer}
+.app-brand:focus-visible{outline:3px solid var(--ac);outline-offset:5px;border-radius:10px}
+.btn.btn-skip-subject{background:#a65d18;color:#fff;border:1px solid #a65d18;box-shadow:0 5px 14px rgba(166,93,24,.2)}
+.btn.btn-skip-subject:hover{background:#87490f;border-color:#87490f;color:#fff}
+:root[data-theme="dark"] .btn.btn-skip-subject{background:#c17a32;color:#fff;border-color:#c17a32}
+:root[data-theme="dark"] .btn.btn-skip-subject:hover{background:#a96522;border-color:#a96522;color:#fff}
+@media(prefers-color-scheme:dark){:root:not([data-theme]) .btn.btn-skip-subject{background:#c17a32;color:#fff;border-color:#c17a32}}
+@media(prefers-color-scheme:dark){:root:not([data-theme]) .btn.btn-skip-subject:hover{background:#a96522;border-color:#a96522;color:#fff}}
+
 :root[data-theme="dark"] .btn.btn-next-subject{background:#347f96;color:#fff;border-color:#347f96;box-shadow:0 5px 16px rgba(0,0,0,.2)}
 :root[data-theme="dark"] .btn.btn-next-subject:hover{background:#286b80;border-color:#286b80}
 @media(prefers-color-scheme:dark){:root:not([data-theme]) .btn.btn-next-subject{background:#347f96;color:#fff;border-color:#347f96}}
@@ -366,7 +375,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--ac);box-
 
 
 .anki-toolbar{grid-template-columns:1fr}.anki-section-tools{display:flex;align-items:center;gap:10px}.anki-search-toggle{width:38px;height:38px;display:grid;place-items:center;border:1px solid var(--ln);border-radius:11px;background:var(--cd);color:var(--ac);font-size:25px;line-height:1;cursor:pointer}.anki-search-toggle:hover{border-color:var(--ac);background:var(--surface2)}.anki-search-row{display:flex;gap:8px;align-items:center;margin:0 0 10px}.anki-search-row input{margin:0;min-width:0;flex:1;padding:11px 13px;font-size:14px;border-radius:11px}.anki-search-row button{width:40px;height:40px;flex:none;border:1px solid var(--ln);border-radius:11px;background:var(--cd);color:var(--tx);font-size:22px;cursor:pointer}
-</style></head><body><header class="app-topbar"><div class="app-topbar-inner"><div class="app-brand"><span class="app-brand-mark" aria-hidden="true">◈</span><span class="app-brand-copy"><strong>ciclo.</strong><small>Seu espaço de estudos</small></span></div><button class="app-header-backup" type="button" onclick="backupLocal()" aria-label="Baixar backup do Ciclo"><span aria-hidden="true">↓</span> Backup</button></div></header><main id="app"></main><nav class="tabs" id="nav"></nav>
+</style></head><body><header class="app-topbar"><div class="app-topbar-inner"><button class="app-brand" type="button" onclick="go('home')" aria-label="Voltar ao início"><span class="app-brand-mark" aria-hidden="true">◈</span><span class="app-brand-copy"><strong>ciclo.</strong><small>Seu espaço de estudos</small></span></button><button class="app-header-backup" type="button" onclick="backupLocal()" aria-label="Baixar backup do Ciclo"><span aria-hidden="true">↓</span> Backup</button></div></header><main id="app"></main><nav class="tabs" id="nav"></nav>
 <script>
 var AC={"Matemática":"#ff9f0a","Humanas":"#ff453a","Linguagens":"#bf5af2","Naturezas":"#30d158"};
 var D=[
@@ -465,7 +474,7 @@ return'<div class="up">'+dt+'</div><h1>'+(S.profileName?'Olá, '+esc(S.profileNa
 function sess(){var s=S.subs[S.cur],ix=idx(s);
 return'<button class="lk" onclick="ss=null;go(\'home\')">‹ Voltar</button><div class="up" style="margin-top:10px">'+esc(s.a)+'</div><h1>'+esc(s.n)+'</h1><div class="mu" style="margin-bottom:16px">Termine cada bloco e anote as questões</div>'
 +ix.map(function(bi,i){return'<div class="card'+(i<ss.k?' on':'')+'"><div class="row" style="border:0;padding:0" onclick="setK('+i+')"><span class="c">'+(i<ss.k?'✓':'')+'</span><span class="f">'+ch(s.t[bi])+'</span><span class="mu sm">15 min</span></div><div class="stp">'+st('ac',i,'Acertos')+st('er',i,'Erros')+'</div>'+(ss.er[i]>0?'<button class="cycle-error-flashcard" onclick="createCycleFlashcard('+i+')">✳ Criar flashcard deste erro</button>':'')+'</div>'}).join('')
-+'<button class="btn btn-next-subject" onclick="adv(0)"'+(ss.k?'':' disabled')+'>Concluir e ir para a próxima</button><button class="btn" style="background:#248b68" onclick="finishStudy()"'+(ss.k?'':' disabled')+'>✓ Finalizar estudo e baixar backup</button><button class="btn s" onclick="adv(1)">Pular matéria</button>'}
++'<button class="btn btn-next-subject" onclick="adv(0)"'+(ss.k?'':' disabled')+'>Concluir e ir para a próxima</button><button class="btn" style="background:#248b68" onclick="finishStudy()"'+(ss.k?'':' disabled')+'>✓ Finalizar estudo e baixar backup</button><button class="btn s btn-skip-subject" onclick="adv(1)">Pular matéria</button>'}
 function ciclo(){var h='<h2>Ciclo</h2><div class="mu" style="margin-bottom:12px">Volta '+(S.laps+1)+' · '+S.subs.filter(function(x){return x.last==="ok"}).length+' de '+S.subs.length+' matérias feitas</div><div class="bar" style="margin:0 0 18px"><i style="width:'+Math.round(S.cur/Math.max(1,S.subs.length)*100)+'%"></i></div><div class="card">';
 S.subs.forEach(function(s,i){h+='<div class="row"><span class="dot" style="background:'+AC[s.a]+'"></span><div class="f"><div'+(i===S.cur?' style="font-weight:700;color:var(--ac)"':'')+'>'+(i===S.cur?'▶ ':'')+esc(s.n)+'</div><div class="mu sm">'+fm(s.min)+' · bloco '+Math.min(s.ptr+1,s.t.length)+' de '+s.t.length+(s.rounds?' · volta '+(s.rounds+1):'')+'</div><div class="bar" style="height:4px;margin-top:6px"><i style="width:'+(s.t.length?Math.round(s.ptr/s.t.length*100):0)+'%"></i></div></div>'+(s.last==="ok"?'<span style="color:var(--g)">✓</span>':s.last==="skip"?'<span class="mu sm">pulada</span>':'')+'</div>'});
 return h+'</div>'}
