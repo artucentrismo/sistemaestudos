@@ -24,16 +24,16 @@ Esta versão não exige cadastro, login, banco de dados ou serviço pago. O Cicl
 
 ## Dados e privacidade
 
-- Os dados ficam no navegador e não são enviados para o Supabase.
+- Todos os dados de estudo ficam exclusivamente no `localStorage` do navegador. O aplicativo não possui backend, banco de dados remoto, login ou sincronização.
 - Limpar os dados do site, trocar de navegador ou de aparelho pode apagar ou deixar os dados inacessíveis.
 - Use **Ajustes → Baixar backup completo** antes de trocar de dispositivo ou limpar o navegador.
 - **Restaurar backup** substitui os dados locais atuais pelos dados do arquivo escolhido.
 
 ## Limitações desta versão
 
-- Não há login, sincronização em nuvem ou controle de acesso por convite.
+- Não há contas de usuário, login, sincronização em nuvem, API de dados ou compartilhamento de progresso entre pessoas.
 - O Anki ainda não importa/exporta \`.apkg\`; por enquanto, oferece TSV.
-- O agendador FSRS-7 é carregado de uma biblioteca pública via CDN, portanto a primeira inicialização do Anki exige internet.
+- O agendador FSRS-7 é código de uma biblioteca pública carregada via CDN; essa dependência fornece apenas a lógica de repetição espaçada. Dados de estudo não são enviados para ela. A primeira inicialização do Anki exige internet.
 - A evolução visual do Canto de Estudos e a trilha de checkpoints ainda serão ampliadas em versões futuras.
 - Não há paridade completa com Anki Desktop (tipos de nota customizáveis, mídia/áudio/LaTeX, estatísticas avançadas e todos os recursos de agendamento).
 
