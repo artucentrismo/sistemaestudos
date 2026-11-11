@@ -1,62 +1,54 @@
-# Ciclo — plano de evolução
+# Ciclo — plano de evolução e estado da implementação
 
 ## Decisões de produto
-- Cada estudante terá uma conta individual.
+- Cada estudante tem uma conta individual.
 - Dados do Ciclo, redações, metas, histórico e baralhos são privados por padrão.
-- Não haverá baralhos públicos ou compartilhamento nesta primeira versão.
-- O Anki terá notas, tipos de nota, modelos de cartão, baralhos, tags, busca, revisão, estatísticas, importação/exportação e FSRS.
-- A versão publicada atual deve continuar utilizável durante a migração.
+- Não há compartilhamento de baralhos nesta primeira versão.
+- O Anki é uma implementação própria inspirada no fluxo do Anki, com FSRS-7.
 
-## Arquitetura alvo
-- Frontend: HTML/CSS/JavaScript modular, mantendo GitHub Pages.
+## Arquitetura
+- Frontend: HTML/CSS/JavaScript modular, hospedado no GitHub Pages.
 - Identidade e banco: Supabase Auth + PostgreSQL.
-- Segurança: RLS em todas as tabelas acessíveis pelo navegador; nunca distribuir chaves secretas.
-- Estado do Ciclo: migração gradual do localStorage para user_app_state, com backup e resolução explícita de conflitos.
-- Anki: decks, note types, notes, cards e review logs; agendamento FSRS-7 via ts-fsrs.
-- Mídia: Supabase Storage privado, com políticas por usuário, em etapa posterior.
+- Segurança: RLS nas tabelas públicas; chave publishable no navegador; nenhuma chave secreta no repositório.
+- Estado do Ciclo: armazenamento local com sincronização por conta e resolução de conflito.
+- Anki: baralhos, notas, cartões, histórico append-only de revisões e agendamento FSRS-7 via ts-fsrs v6.
 
-## Etapas
+## Concluído nesta branch
+- Projeto Supabase `ciclo-estudos` criado em `sa-east-1`, plano Free.
+- Schema inicial aplicado: profiles, user_app_state, anki_decks, anki_note_types, anki_notes, anki_cards, anki_review_logs.
+- RLS habilitado nas sete tabelas e políticas de isolamento por user_id.
+- Integridade referencial composta para impedir que registros de uma conta apontem para baralhos/notas/cartões de outra conta.
+- Permissão EXECUTE da função SECURITY DEFINER do trigger revogada para os papéis de API; Security Advisor sem alertas depois da correção.
+- Cliente Supabase, cadastro/login/logout, recuperação de senha e sincronização privada.
+- Interface de conta adicionada ao app; migração inicial do localStorage e tratamento de conflitos.
+- Tela de Anki integrada: baralhos, notas básicas e cloze, tags, busca, revisão FSRS-7, suspensão, TSV e estatísticas básicas.
+- Migração manual dos cards locais antigos para um baralho cloud.
+- Tema claro/escuro/automático persistido no estado local e sincronizável.
 
-### 0. Fundação (branch atual)
-- Criar branch isolada.
-- Preparar cliente Supabase e funções de autenticação.
-- Preparar sincronização privada do estado atual do Ciclo.
-- Adicionar adaptador FSRS-7 sem substituir ainda o agendador antigo.
-- Reforçar integridade referencial para impedir referências cruzadas entre contas.
+## Pendências antes de publicar em produção
+1. No Supabase Dashboard, configurar Authentication → URL Configuration:
+   - Site URL: `https://artucentrismo.github.io/sistemaestudos/`
+   - Redirect URLs: `https://artucentrismo.github.io/sistemaestudos/` e `https://artucentrismo.github.io/sistemaestudos/**`
+2. Confirmar fluxo de e-mail e, se necessário, configurar SMTP próprio.
+3. Testar cadastro, confirmação de e-mail, login, logout e recuperação de senha no domínio GitHub Pages.
+4. Testar isolamento com duas contas reais e verificar que uma não lê nem altera registros da outra.
+5. Testar sincronização offline/online, conflito entre local e nuvem e troca de conta no mesmo aparelho.
+6. Testar agendamento FSRS em aprendizagem, revisão e lapsos; validar relógio e fuso.
+7. Fazer revisão funcional em desktop, iPad e celular.
+8. Atualizar a PR #1 e só então fazer merge na branch publicada.
 
-### 1. Backend
-- Selecionar/criar projeto Supabase e configurar URL/chave publishable.
-- Aplicar schema e migrations.
-- Testar RLS com dois usuários: cada um só lê e altera seus próprios registros.
-- Configurar confirmação de e-mail, recuperação de senha e proteções antiabuso.
+## Escopo Anki ainda não coberto
+A tela atual entrega o núcleo de estudo e revisão, mas não é paridade total com o Anki Desktop. Ficam para incrementos seguintes:
+- Tipos de nota customizáveis e editor de templates.
+- Cartões reversos e múltiplos cartões gerados de uma nota.
+- Editor rico, imagens, áudio, LaTeX e armazenamento de mídia.
+- Limites diários configuráveis, enterro por nota e subbaralhos hierárquicos reais.
+- Estatísticas avançadas e exportação/importação `.apkg`.
+- Treino de parâmetros FSRS por histórico individual.
 
-### 2. Migração segura do Ciclo
-- Implementar cadastro/login/logout e recuperação de senha.
-- Definir se haverá modo local para visitantes ou se login será obrigatório.
-- Ao entrar pela primeira vez, oferecer importação dos dados locais para a conta.
-- Não sobrescrever dados da nuvem automaticamente: comparar timestamps e pedir decisão em caso de conflito.
-- Sincronizar redações e progresso somente após autenticação.
-
-### 3. Anki completo
-- Baralhos e sub-baralhos, contagens e limites diários.
-- Tipos de nota configuráveis, campos e modelos de cartão.
-- Cartões Basic, Basic (and reversed), Cloze e cartões gerados por modelos.
-- Editor com formatação, imagens/áudio e LaTeX.
-- Tags, busca, suspensão, enterro, edição em lote e navegador de cartões.
-- Sessão com Again / Hard / Good / Easy, prévia dos intervalos e atalhos.
-- FSRS-7, retenção configurável, passos de aprendizagem/reaprendizagem e histórico imutável.
-- Estatísticas por período, baralho, matéria e estado de aprendizagem.
-- Formato próprio de importação/exportação primeiro; compatibilidade .apkg em etapa dedicada.
-
-### 4. Qualidade e publicação
-- Testes de migração local → nuvem e isolamento entre contas.
-- Testes FSRS com relógio controlado e estados de aprendizagem/reaprendizagem.
-- Acessibilidade, responsividade e uso em iPad.
-- Revisão dos Security/Performance Advisors do Supabase.
-- Publicação por pull request após validação; não publicar mudanças incompletas na branch principal.
-
-## Estado atual
-- A aplicação existente é um único index.html e usa localStorage.
-- O repositório já contém supabase/schema.sql com tabelas de perfis, estado do app e dados do Anki.
-- Nenhum projeto Supabase está conectado/criado até esta etapa.
-- Os módulos em js/ são uma fundação reutilizável; a integração visual no index.html ainda precisa ser feita.
+## Regras de segurança e dados
+- Nunca publicar `service_role` ou `sb_secret`.
+- Manter RLS habilitado em toda tabela acessível pelo cliente.
+- Não substituir o estado da nuvem silenciosamente quando houver dados locais divergentes.
+- Dados de redação, progresso e baralhos permanecem privados.
+- Manter backup antes de migrações e importações em lote.
