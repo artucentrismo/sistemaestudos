@@ -154,7 +154,7 @@ function showForm(note=null) {
     const tags=document.getElementById('anki-tags').value.split(/\s+/).filter(Boolean);
     const type=document.getElementById('anki-type').value;
     try {
-      if (note) await updateNote(note.id,{front,back,tags});
+      if (note) await updateNote(note.id,{front,back,tags,cardType:type});
       else await addNote({deckId:selectedDeck,front,back,tags,cardType:type});
       await render();
     } catch(e) { setMessage(e.message,true); }
