@@ -265,7 +265,7 @@ function render(){var a=$("app"),n=$("nav");
 if(!S.ob){a.innerHTML=ob();n.style.display="none";return}
 n.style.display="flex";
 a.innerHTML=tab==="sess"&&ss?sess():tab==="sub"?sub():tab==="qa"?fqa():tab==="red"?red():tab==="cards"?cards():tab==="rev"?rev():tab==="cf"?cff():tab==="io"?iov():tab==="ciclo"?ciclo():tab==="prog"?prog():tab==="cfg"?cfg():home();
-var T=[["home","◉","Início"],["cards","▤","Cards"],["red","✎","Redação"],["prog","▦","Progresso"],["cfg","⚙︎","Ajustes"]],on=tab==="sess"?"home":tab==="sub"?"cfg":tab==="qa"?"prog":tab==="rev"||tab==="cf"||tab==="io"?"cards":tab;
+var T=[["home","◉","Início"],["cards","▤","Anki"],["red","✎","Redação"],["prog","▦","Progresso"],["cfg","⚙︎","Ajustes"]],on=tab==="sess"?"home":tab==="sub"?"cfg":tab==="qa"?"prog":tab==="rev"||tab==="cf"||tab==="io"?"cards":tab;
 n.innerHTML=T.map(function(x){return'<button class="'+(on===x[0]?'a':'')+'" onclick="go(\''+x[0]+'\')"><b>'+x[1]+'</b>'+x[2]+'</button>'}).join('');
 if(!(eb||qa))window.scrollTo(0,0)}
 applyTheme();
