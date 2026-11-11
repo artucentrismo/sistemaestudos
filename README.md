@@ -17,8 +17,9 @@ Esta versão não exige cadastro, login, banco de dados ou serviço pago. O Cicl
 - Reforço de blocos com desempenho crítico e ocultação temporária de blocos dominados
 - XP, níveis, sequência, escudos de sequência e missão de retorno
 - Tema claro, escuro ou automático
-- Anki local com baralhos, notas Básicas, reversas e Cloze
-- Revisões com FSRS-7, tags, busca, suspensão, estatísticas básicas e importação/exportação TSV
+- Anki local com baralhos hierárquicos e subbaralhos, notas Básicas, reversas e Cloze
+- Editor do Anki com campos separados para frente e verso, inserção de lacunas Cloze, tags, busca, suspensão, estatísticas básicas e importação/exportação TSV
+- Organização em árvore com subbaralhos ilimitados; selecionar um baralho principal inclui automaticamente seus subbaralhos nas notas, estatísticas e revisões
 - Backup e restauração dos dados do Ciclo e do Anki em JSON
 
 ## Dados e privacidade
