@@ -6,7 +6,7 @@ let schedulerPromise;
 async function getScheduler() {
   if (!schedulerPromise) schedulerPromise = (async () => {
     const { DefaultScheduler } = await import('https://esm.sh/ts-fsrs@6.0.0');
-    return DefaultScheduler({
+    return await DefaultScheduler({
       version: 'FSRS-7', desiredRetention: 0.9,
       enableShortTerm: true, learningSteps: ['1m', '10m'],
       relearningSteps: ['10m'], enableFuzz: true, maximumInterval: 36500
