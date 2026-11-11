@@ -186,16 +186,26 @@ async function startReview() {
 }
 function renderReview() {
   const el=root(), card=reviewCards[reviewIndex];
-  if(!card) { el.innerHTML='<div class="anki-empty"><h2>Revisão concluída!</h2><p>Você revisou todos os cartões desta sessão.</p><button class="anki-primary" id="anki-review-done">Voltar aos baralhos</button></div>'; document.getElementById('anki-review-done').onclick=render; return; }
+  if(!card) {
+    el.innerHTML='<div class="anki-empty"><h2>Revisão concluída!</h2><p>Você revisou todos os cartões desta sessão.</p><button class="anki-primary" id="anki-review-done">Voltar aos baralhos</button></div>';
+    document.getElementById('anki-review-done').onclick=render;
+    return;
+  }
   const front=card.note.fields?.Front||'', back=card.note.fields?.Back||'';
   const question = card.card_type === 'reverse' ? back : front;
   const answer = card.card_type === 'reverse' ? front : back;
-  el.innerHTML=\`
-    <div class="anki-review-head"><button id="anki-review-exit">‹ Sair da revisão</button><span>\${reviewIndex+1} / \${reviewCards.length}</span></div>
-    <div class="anki-review-card"><small>\${esc(card.note.tags?.join(' · ')||'Revisão')}</small><div class="anki-question">\${card.card_type==='cloze'?cloze(front,card.template_ordinal,revealed):esc(question).replace(/\\n/g,'<br>')}</div>
-    \${revealed?'<hr><div class="anki-answer">'+(card.card_type==='cloze'?cloze(front,card.template_ordinal,true):esc(answer).replace(/\\n/g,'<br>'))+'</div>':''}</div>
-    \${revealed?'<div class="anki-grade-grid" id="anki-grades"><p>Como foi lembrar?</p></div>':'<button class="anki-primary" id="anki-reveal">Mostrar resposta</button>'}
-    <p id="anki-message" aria-live="polite"></p>\`;
+  const questionHtml = card.card_type === 'cloze'
+    ? cloze(front,card.template_ordinal,revealed)
+    : esc(question).replace(/\n/g,'<br>');
+  const answerHtml = card.card_type === 'cloze'
+    ? cloze(front,card.template_ordinal,true)
+    : esc(answer).replace(/\n/g,'<br>');
+  el.innerHTML =
+    '<div class="anki-review-head"><button id="anki-review-exit">‹ Sair da revisão</button><span>'+(reviewIndex+1)+' / '+reviewCards.length+'</span></div>'+
+    '<div class="anki-review-card"><small>'+esc(card.note.tags?.join(' · ')||'Revisão')+'</small><div class="anki-question">'+questionHtml+'</div>'+
+    (revealed?'<hr><div class="anki-answer">'+answerHtml+'</div>':'')+'</div>'+
+    (revealed?'<div class="anki-grade-grid" id="anki-grades"><p>Como foi lembrar?</p></div>':'<button class="anki-primary" id="anki-reveal">Mostrar resposta</button>')+
+    '<p id="anki-message" aria-live="polite"></p>';
   document.getElementById('anki-review-exit').onclick=render;
   if(!revealed) document.getElementById('anki-reveal').onclick=async()=>{revealed=true;renderReview();await showGradeIntervals(card);};
 }
