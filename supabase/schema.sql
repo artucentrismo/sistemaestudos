@@ -81,6 +81,16 @@ create index if not exists anki_notes_deck_idx on public.anki_notes(user_id, dec
 create index if not exists anki_cards_due_idx on public.anki_cards(user_id, due_at) where suspended = false;
 create index if not exists anki_review_logs_card_idx on public.anki_review_logs(user_id, card_id, reviewed_at desc);
 
+
+create index if not exists anki_note_types_user_fk_idx on public.anki_note_types(user_id);
+create index if not exists anki_notes_deck_fk_idx on public.anki_notes(deck_id);
+create index if not exists anki_notes_deck_owner_fk_idx on public.anki_notes(deck_id,user_id);
+create index if not exists anki_notes_note_type_fk_idx on public.anki_notes(note_type_id);
+create index if not exists anki_notes_note_type_owner_fk_idx on public.anki_notes(note_type_id,user_id);
+create index if not exists anki_cards_note_owner_fk_idx on public.anki_cards(note_id,user_id);
+create index if not exists anki_review_logs_card_fk_idx on public.anki_review_logs(card_id);
+create index if not exists anki_review_logs_card_owner_fk_idx on public.anki_review_logs(card_id,user_id);
+
 alter table public.profiles enable row level security;
 alter table public.user_app_state enable row level security;
 alter table public.anki_decks enable row level security;
@@ -90,25 +100,25 @@ alter table public.anki_cards enable row level security;
 alter table public.anki_review_logs enable row level security;
 
 drop policy if exists "profiles_select_own" on public.profiles;
-create policy "profiles_select_own" on public.profiles for select using (auth.uid() = id);
+create policy "profiles_select_own" on public.profiles for select using ((select auth.uid()) = id);
 drop policy if exists "profiles_insert_own" on public.profiles;
-create policy "profiles_insert_own" on public.profiles for insert with check (auth.uid() = id);
+create policy "profiles_insert_own" on public.profiles for insert with check ((select auth.uid()) = id);
 drop policy if exists "profiles_update_own" on public.profiles;
-create policy "profiles_update_own" on public.profiles for update using (auth.uid() = id) with check (auth.uid() = id);
+create policy "profiles_update_own" on public.profiles for update using ((select auth.uid()) = id) with check ((select auth.uid()) = id);
 
 drop policy if exists "app_state_owner_all" on public.user_app_state;
-create policy "app_state_owner_all" on public.user_app_state for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+create policy "app_state_owner_all" on public.user_app_state for all using ((select auth.uid()) = user_id) with check ((select auth.uid()) = user_id);
 
 drop policy if exists "anki_decks_owner_all" on public.anki_decks;
-create policy "anki_decks_owner_all" on public.anki_decks for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+create policy "anki_decks_owner_all" on public.anki_decks for all using ((select auth.uid()) = user_id) with check ((select auth.uid()) = user_id);
 drop policy if exists "anki_note_types_owner_all" on public.anki_note_types;
-create policy "anki_note_types_owner_all" on public.anki_note_types for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+create policy "anki_note_types_owner_all" on public.anki_note_types for all using ((select auth.uid()) = user_id) with check ((select auth.uid()) = user_id);
 drop policy if exists "anki_notes_owner_all" on public.anki_notes;
-create policy "anki_notes_owner_all" on public.anki_notes for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+create policy "anki_notes_owner_all" on public.anki_notes for all using ((select auth.uid()) = user_id) with check ((select auth.uid()) = user_id);
 drop policy if exists "anki_cards_owner_all" on public.anki_cards;
-create policy "anki_cards_owner_all" on public.anki_cards for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+create policy "anki_cards_owner_all" on public.anki_cards for all using ((select auth.uid()) = user_id) with check ((select auth.uid()) = user_id);
 drop policy if exists "anki_review_logs_owner_all" on public.anki_review_logs;
-create policy "anki_review_logs_owner_all" on public.anki_review_logs for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+create policy "anki_review_logs_owner_all" on public.anki_review_logs for all using ((select auth.uid()) = user_id) with check ((select auth.uid()) = user_id);
 
 -- Criar automaticamente o perfil no cadastro. A função roda com privilégios do banco,
 -- mas só grava o id do próprio usuário que acabou de ser autenticado.
