@@ -130,3 +130,28 @@ drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute procedure public.handle_new_user();
+
+
+-- Restrict API table grants: anonymous clients cannot query private user data.
+revoke all on table
+  public.profiles,
+  public.user_app_state,
+  public.anki_decks,
+  public.anki_note_types,
+  public.anki_notes,
+  public.anki_cards,
+  public.anki_review_logs
+from anon;
+
+grant select, insert, update, delete on table
+  public.profiles,
+  public.user_app_state,
+  public.anki_decks,
+  public.anki_note_types,
+  public.anki_notes,
+  public.anki_cards,
+  public.anki_review_logs
+to authenticated;
+
+alter default privileges in schema public
+  revoke all on tables from anon;
