@@ -246,11 +246,11 @@ body{
   -webkit-font-smoothing:antialiased;
 }
 body:before{
-  content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.18;
+  content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.18;
   background-image:radial-gradient(circle,color-mix(in srgb,var(--ac) 50%,transparent) .7px,transparent 1px);
   background-size:34px 34px;mask-image:linear-gradient(to bottom,#000,transparent 78%);
 }
-main{max-width:1080px;padding:26px clamp(16px,3vw,34px) 140px}
+main{position:relative;z-index:1;max-width:1080px;padding:26px clamp(16px,3vw,34px) 140px}
 h1{font-family:Georgia,"Times New Roman",serif;font-size:clamp(30px,4vw,42px);font-weight:700;letter-spacing:-.035em;line-height:1.12;margin:0 0 8px}
 h2{font-size:21px;font-weight:750;letter-spacing:-.02em;margin:30px 0 14px}
 .up{font-size:11px;letter-spacing:.13em;font-weight:800}
