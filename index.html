@@ -406,7 +406,7 @@ var D=[
 ["Biologia","Naturezas",60,["Introdução à Biologia, Origem da Vida, Bioquímica","Citologia, Núcleo e Divisão Celular, Bioenergética","Biologia Molecular, Engenharia Genética, Genética, Evolução","Taxionomia, Microbiologia, Botânica","Zoologia, Embriologia Animal, Histologia Animal","Fisiologia Animal, Reprodução Humana, Ecologia"]],
 ["Gramática","Linguagens",45,["Classes do Nome · Formação das Palavras · Ortografia","Classes do Verbo · Pronomes · Classes Relacionais","Termos Essenciais · Integrantes · Acessórios","Período Composto · Funções do Que e do Se · Colocação Pronomial","Concordância · Regência e Crase · Coesão e Paralelismo"]]];
 
-var cd=null,cm=0,rv=null,cf=null,imsg="",KEY="ciclo-v3",S={ob:0,goal:120,subs:[],cur:0,laps:0,log:[]},tab="home",ss=null,si=0,eb=null,qa=null,obStep=0,obPlan=1,studyTimerInterval=null,$=function(i){return document.getElementById(i)};
+var cd=null,cm=0,rv=null,cf=null,imsg="",KEY="ciclo-v3",S={ob:0,goal:120,subs:[],cur:0,laps:0,log:[]},tab="home",lastRenderedTab=null,ss=null,si=0,eb=null,qa=null,obStep=0,obPlan=1,studyTimerInterval=null,$=function(i){return document.getElementById(i)};
 try{var r=localStorage.getItem(KEY)||localStorage.getItem("ciclo-v2");if(r)S=JSON.parse(r)}catch(e){}
 S.cards=S.cards||[];S.red=S.red||[];S.blockMinutes=Math.max(1,Math.min(180,parseInt(S.blockMinutes,10)||15));
 S.subs.forEach(function(s){s.t=s.t.map(function(b){return typeof b==="string"?b.split(" · "):b});if(!s.baseMin)s.baseMin=s.min});
@@ -574,7 +574,7 @@ n.style.display="flex";
 a.innerHTML=tab==="sess"&&ss?sess():tab==="sub"?sub():tab==="qa"?fqa():tab==="red"?red():tab==="cards"?cards():tab==="rev"?rev():tab==="cf"?cff():tab==="io"?iov():tab==="ciclo"?ciclo():tab==="prog"?prog():tab==="cfg"?cfg():home();
 var T=[["home","◉","Início"],["cards","▤","Anki"],["red","✎","Redação"],["prog","▦","Progresso"],["cfg","⚙︎","Ajustes"]],on=tab==="sess"?"home":tab==="sub"?"cfg":tab==="qa"?"prog":tab==="rev"||tab==="cf"||tab==="io"?"cards":tab;
 n.innerHTML=T.map(function(x){return'<button class="'+(on===x[0]?'a':'')+'" onclick="go(\''+x[0]+'\')"><b>'+x[1]+'</b>'+x[2]+'</button>'}).join('');
-if(!(eb||qa))window.scrollTo(0,0)}
+if(!(eb||qa)&&tab!==lastRenderedTab){window.scrollTo({top:0,behavior:"instant"});lastRenderedTab=tab}}
 gameCheck();
 applyTheme();
 render();
