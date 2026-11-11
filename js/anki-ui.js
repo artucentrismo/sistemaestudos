@@ -10,8 +10,8 @@ let reviewCards = [];
 let reviewIndex = 0;
 let revealed = false;
 let busy = false;
-let searchText = '';\nlet decksCache = [];
-let noteMode = 'basic';
+let searchText = '';
+let decksCache = [];
 const root = () => document.getElementById('anki-v2');
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const dateLabel = (iso) => {
