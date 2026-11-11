@@ -81,7 +81,7 @@ function formHtml(note=null) {
   return `
     <div class="anki-form">
       <div class="anki-section-head"><b>${note?'Editar nota':'Nova nota'}</b><button id="anki-form-close">Fechar</button></div>
-      <label>Tipo de cartão<select id="anki-type"><option value="basic">Básico (frente e verso)</option><option value="cloze" ${note?.cards?.[0]?.card_type==='cloze'?'selected':''}>Omissão (Cloze)</option></select></label>
+      <label>Tipo de cartão<select id="anki-type" ${note?'disabled':''}><option value="basic">Básico</option><option value="basic-reversed" ${note?.cards?.some(c=>c.card_type==='reverse')?'selected':''}>Básico (e reverso)</option><option value="cloze" ${note?.cards?.[0]?.card_type==='cloze'?'selected':''}>Omissão (Cloze)</option></select></label>
       <label>Frente / Texto<textarea id="anki-front" rows="4" placeholder="Pergunta ou texto com {{c1::lacuna}}">${esc(front)}</textarea></label>
       <label>Verso<textarea id="anki-back" rows="4" placeholder="Resposta ou explicação">${esc(back)}</textarea></label>
       <label>Tags (separadas por espaço)<input id="anki-tags" value="${esc(tags)}" placeholder="biologia enem citologia"></label>
@@ -154,7 +154,7 @@ function showForm(note=null) {
     const tags=document.getElementById('anki-tags').value.split(/\s+/).filter(Boolean);
     const type=document.getElementById('anki-type').value;
     try {
-      if (note) await updateNote(note.id,{front,back,tags,cardType:type});
+      if (note) await updateNote(note.id,{front,back,tags});
       else await addNote({deckId:selectedDeck,front,back,tags,cardType:type});
       await render();
     } catch(e) { setMessage(e.message,true); }
@@ -186,6 +186,8 @@ function renderReview() {
   const el=root(), card=reviewCards[reviewIndex];
   if(!card) { el.innerHTML='<div class="anki-empty"><h2>Revisão concluída!</h2><p>Você revisou todos os cartões desta sessão.</p><button class="anki-primary" id="anki-review-done">Voltar aos baralhos</button></div>'; document.getElementById('anki-review-done').onclick=render; return; }
   const front=card.note.fields?.Front||'', back=card.note.fields?.Back||'';
+  const question = card.card_type === 'reverse' ? back : front;
+  const answer = card.card_type === 'reverse' ? front : back;
   el.innerHTML=`
     <div class="anki-review-head"><button id="anki-review-exit">‹ Sair da revisão</button><span>${reviewIndex+1} / ${reviewCards.length}</span></div>
     <div class="anki-review-card"><small>${esc(card.note.tags?.join(' · ')||'Revisão')}</small><div class="anki-question">${card.card_type==='cloze'?cloze(front,revealed):esc(front).replace(/\n/g,'<br>')}</div>
