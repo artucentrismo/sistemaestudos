@@ -112,7 +112,8 @@ function formHtml(note=null) {
     '<button class="anki-primary" id="anki-save-note">'+(note?'Salvar alterações':'Adicionar à biblioteca')+'</button><p class="anki-muted">Dica: use uma ideia principal por nota para facilitar a memorização.</p></section>';
 }
 async function render() {
-  const el=root(); if(!el||busy)return;
+  const el=root(); if(!el)return;
+  if(busy){await new Promise(resolve=>setTimeout(resolve,25));return render();}
   busy=true; el.innerHTML='<div class="anki-loading"><span></span>Organizando sua biblioteca…</div>';
   try {
     const {decks,stats}=await loadData();
@@ -172,9 +173,10 @@ function bindDeckPanel() {
     catch(e){setMessage(e.message,true);}
   };
 }
-function showForm(note=null) {
+function showForm(note=null, options={}) {
   const wrap=document.getElementById('anki-form-wrap'); if(!wrap)return;
   wrap.innerHTML=formHtml(note);
+  if(options.scrollIntoView)wrap.scrollIntoView({behavior:'instant',block:'start'});
   const close=document.getElementById('anki-form-close');close.onclick=()=>wrap.innerHTML='';
   const front=document.getElementById('anki-front'),back=document.getElementById('anki-back');
   const count=(field,id)=>{const el=document.getElementById(id);if(el)el.textContent=field.value.length+' caracteres';};
@@ -295,7 +297,7 @@ window.addEventListener('anki:create-from-cycle',async event=>{
     if(!child)throw new Error('O subbaralho do assunto não foi criado corretamente.');
     selectedDeck=child.id;
     await render();
-    showForm();
+    showForm(null,{scrollIntoView:true});
     const front=document.getElementById('anki-front');
     const back=document.getElementById('anki-back');
     const tags=document.getElementById('anki-tags');
