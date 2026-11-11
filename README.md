@@ -1,60 +1,49 @@
 # Ciclo de Estudos
 
-Aplicação web gratuita de ciclo de estudos para o ENEM, com experiência otimizada para iPad e celular.
+Aplicação web gratuita de ciclo de estudos para o ENEM, otimizada para celular e iPad.
 
-## Recursos do Ciclo
-- Ciclo de matérias em blocos de 15 minutos, retomando de onde parou
-- Blocos com 1 a 3 assuntos para orientar filtros de questões
-- Registro de questões, metas, calendário, níveis e conquistas
-- Redação com competências do ENEM
-- Preferência de aparência: claro, escuro ou automático
+## Versão básica local-first
 
-## Contas e sincronização
-- Cadastro, login, logout e recuperação de senha via Supabase Auth
-- Sincronização do estado do Ciclo para uma conta individual
-- Dados privados por padrão, protegidos por Row Level Security (RLS)
-- Migração inicial dos dados locais para a nuvem e resolução de conflitos
-- A chave publishable do Supabase é usada no navegador; nenhuma chave service-role/secret deve ser publicada
+Esta versão não exige cadastro, login, banco de dados ou serviço pago. O Ciclo e o Anki salvam os dados no armazenamento local (\`localStorage\`) do navegador. Cada pessoa usa seus próprios dados no próprio navegador; não há sincronização entre dispositivos nem compartilhamento de progresso entre amigos.
 
-## Anki integrado
-- Baralhos privados por usuário
-- Notas Básicas, Básicas e reverso, e Cloze (omissão com vários cartões gerados por lacuna)
-- Tags e busca
-- Revisões Again / Hard / Good / Easy com FSRS-7
-- Prévia do próximo agendamento, histórico de revisões e estatísticas básicas
-- Importação/exportação TSV
-- Suspensão e exclusão de cartões
-- Migração manual dos cards antigos armazenados neste aparelho
+**Importante:** o site do GitHub Pages é público e pode ser aberto por qualquer pessoa com o link. O que fica local é o progresso de cada navegador, não o acesso ao site. Não use este modo para guardar dados em computadores compartilhados. Baixe backups regularmente em Ajustes → Dados neste aparelho.
+
+## Recursos
+
+- Ciclo de matérias em blocos de 15 minutos
+- Registro de acertos, erros, metas, calendário e redações
+- Escore adaptativo de urgência por matéria
+- Ajuste de tempo por matéria ao completar cada volta
+- Reforço de blocos com desempenho crítico e ocultação temporária de blocos dominados
+- XP, níveis, sequência, escudos de sequência e missão de retorno
+- Tema claro, escuro ou automático
+- Anki local com baralhos, notas Básicas, reversas e Cloze
+- Revisões com FSRS-7, tags, busca, suspensão, estatísticas básicas e importação/exportação TSV
+- Backup e restauração dos dados do Ciclo e do Anki em JSON
+
+## Dados e privacidade
+
+- Os dados ficam no navegador e não são enviados para o Supabase.
+- Limpar os dados do site, trocar de navegador ou de aparelho pode apagar ou deixar os dados inacessíveis.
+- Use **Ajustes → Baixar backup completo** antes de trocar de dispositivo ou limpar o navegador.
+- **Restaurar backup** substitui os dados locais atuais pelos dados do arquivo escolhido.
+
+## Limitações desta versão
+
+- Não há login, sincronização em nuvem ou controle de acesso por convite.
+- O Anki ainda não importa/exporta \`.apkg\`; por enquanto, oferece TSV.
+- O agendador FSRS-7 é carregado de uma biblioteca pública via CDN, portanto a primeira inicialização do Anki exige internet.
+- A evolução visual do Canto de Estudos e a trilha de checkpoints ainda serão ampliadas em versões futuras.
+- Não há paridade completa com Anki Desktop (tipos de nota customizáveis, mídia/áudio/LaTeX, estatísticas avançadas e todos os recursos de agendamento).
 
 ## Desenvolvimento
-O projeto usa HTML, CSS e JavaScript nativo, sem etapa de build. Os módulos em `js/` são carregados como ES modules.
 
-Para desenvolvimento local, sirva a pasta por um servidor HTTP local (não abra diretamente via `file://`, pois os módulos ES e o Supabase precisam de origem HTTP/HTTPS).
+O projeto usa HTML, CSS e JavaScript nativo, sem etapa de build. Os módulos em \`js/\` são carregados como ES modules.
 
-## Supabase
-Projeto: `ciclo-estudos`
-- Região: `sa-east-1` (São Paulo)
-- Project ref: `bjcmbzirgronavynbknh`
-- URL: `https://bjcmbzirgronavynbknh.supabase.co`
-- Plano criado: Free
-
-O snapshot de schema está em `supabase/schema.sql`. Para recriar o banco em outro projeto usando Supabase CLI, aplique os arquivos de `supabase/migrations/` em ordem cronológica; o primeiro arquivo já cria o schema inicial. Não aplique o snapshot separadamente antes das migrações.
-
-### Configuração obrigatória de autenticação
-No Supabase Dashboard, abra **Authentication → URL Configuration** e configure:
-
-- Site URL: `https://artucentrismo.github.io/sistemaestudos/`
-- Redirect URLs: `https://artucentrismo.github.io/sistemaestudos/` e `https://artucentrismo.github.io/sistemaestudos/**`
-
-Confirme que a confirmação de e-mail está habilitada. Para envio confiável de e-mails em produção, configure um SMTP próprio nas configurações de Auth. A recuperação de senha usa a mesma URL do GitHub Pages.
-
-### Aplicar o banco
-O schema inicial e as quatro migrações seguintes já foram aplicados ao projeto Supabase conectado. Para outro ambiente, use a pasta de migrações em ordem cronológica.
+Para testar localmente, sirva a pasta por HTTP (por exemplo, com a extensão Live Server ou \`python -m http.server\`). Não abra \`index.html\` diretamente com \`file://\`, pois os módulos ES precisam de origem HTTP/HTTPS.
 
 ## Publicação
-O GitHub Pages da versão atual continua apontando para a branch `main`. O trabalho novo está isolado em `feat/accounts-anki-foundation` e na PR #1. Só publique depois de configurar as URLs de autenticação e concluir os testes de cadastro, login, recuperação, sincronização e isolamento de duas contas.
 
-## Limitações conhecidas / próximos incrementos
-O Anki atual é uma implementação própria com FSRS-7 e cobre o fluxo principal de baralhos, notas, revisão e TSV. Ainda não é uma reprodução integral do Anki Desktop: tipos de nota e templates totalmente customizáveis, editor rico com mídia/áudio/LaTeX, limites diários avançados, estatísticas detalhadas e compatibilidade `.apkg` precisam de etapas próprias. Não importe material importante sem manter uma cópia de segurança.
+Site: https://artucentrismo.github.io/sistemaestudos/
 
-Os cards antigos ficam no armazenamento local até que a pessoa use **Migrar cards antigos deste aparelho** no Anki novo.
+A hospedagem estática do GitHub Pages não exige um servidor próprio. Como o repositório é público, qualquer pessoa pode acessar o site; cada navegador mantém seus próprios dados locais.
