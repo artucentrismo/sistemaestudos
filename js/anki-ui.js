@@ -1,4 +1,4 @@
-import { exportApkg, importApkg } from './anki-apkg.js';
+import { importApkg } from './anki-apkg.js';
 import {
   listDecks, createDeck, renameDeck, deleteDeck, listNotes, addNote,
   updateNote, deleteNote, reviewQueue, previewCard, gradeCard,
@@ -122,7 +122,7 @@ function shell(decks, stats) {
     '<div class="anki-toolbar"><button id="anki-deck-manage" '+(selectedDeck?'':'disabled')+'>⚙ Gerenciar selecionado</button></div>'+
     '<div id="anki-form-wrap"></div>'+
     '<div id="anki-note-list">'+noteListHtml()+'</div>'+
-    '<div class="anki-footer-actions"><button id="anki-export-apkg">Exportar .apkg</button><button id="anki-import-apkg">Importar .apkg</button><button id="anki-export">Exportar TSV</button><button id="anki-import">Importar TSV</button><button id="anki-local-import">Importar cartões antigos</button></div>'+
+    '<div class="anki-footer-actions"><button id="anki-import-apkg">Importar .apkg</button><button id="anki-export">Exportar TSV</button><button id="anki-import">Importar TSV</button><button id="anki-local-import">Importar cartões antigos</button></div>'+
     '<p id="anki-message" aria-live="polite"></p>';
 }
 function formHtml(note=null) {
@@ -161,7 +161,6 @@ function bind(decks) {
   document.getElementById('anki-review').onclick=startReview;
   document.getElementById('anki-export').onclick=exportTsv;
   document.getElementById('anki-import').onclick=importTsv;
-  document.getElementById('anki-export-apkg').onclick=async()=>{try{const r=await exportApkg(selectedDeck||null);setMessage('Pacote Anki exportado: '+r.notes+' notas e '+r.cards+' cartões.');}catch(e){setMessage(e.message,true);}};
   document.getElementById('anki-import-apkg').onclick=()=>{const input=document.createElement('input');input.type='file';input.accept='.apkg';input.onchange=async()=>{const file=input.files?.[0];if(!file)return;try{const r=await importApkg(file,selectedDeck||null);await render();setMessage(r.imported+' notas importadas do Anki'+(r.skipped?' · '+r.skipped+' ignoradas':'')+'.');}catch(e){setMessage(e.message,true);}};input.click();};
   document.getElementById('anki-local-import').onclick=importLegacy;
   bindSearch();
