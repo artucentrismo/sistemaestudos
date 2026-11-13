@@ -88,7 +88,8 @@ export async function exportApkg(deckId=null) {
 }
 export async function importApkg(file,targetDeckId=null) {
   const SQL=await libraries(),zip=await window.JSZip.loadAsync(file);
-  const dbFile=zip.file('collection.anki2')||zip.file('collection.anki21');
+  if(zip.file('collection.anki21b'))throw new Error('Este pacote usa o formato moderno compactado do Anki. No Anki, exporte novamente como .apkg e marque “Suporte a versões antigas do Anki” para importar aqui.');
+  const dbFile=zip.file('collection.anki21')||zip.file('collection.anki2');
   if(!dbFile)throw new Error('Este arquivo não contém um banco de coleção Anki reconhecido.');
   const SQLmod=await SQL,db=new SQLmod.Database(new Uint8Array(await dbFile.async('uint8array')));
   const mediaFile=zip.file('media'),mediaMap=mediaFile?JSON.parse(await mediaFile.async('string')):{};
