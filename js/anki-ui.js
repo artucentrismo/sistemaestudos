@@ -204,7 +204,7 @@ function showForm(note=null, options={}) {
   const wrap=document.getElementById('anki-form-wrap'); if(!wrap)return;
   wrap.innerHTML=formHtml(note);
   if(options.scrollIntoView)wrap.scrollIntoView({behavior:'instant',block:'start'});
-  const close=document.getElementById('anki-form-close');close.onclick=()=>wrap.innerHTML='';\n  document.getElementById('anki-open-occlusion').onclick=()=>showOcclusionEditor(wrap);
+  const close=document.getElementById('anki-form-close');close.onclick=()=>wrap.innerHTML='';\n  document.getElementById('anki-open-occlusion').onclick=()=>showOcclusionEditor(wrap);\n  document.getElementById('anki-open-occlusion').onclick=()=>showOcclusionEditor(wrap);
   const front=document.getElementById('anki-front'),back=document.getElementById('anki-back');
   let media=Array.isArray(note?.media)?note.media.slice():[];
   const drawMedia=field=>{const box=document.getElementById('anki-'+field+'-media');if(!box)return;box.innerHTML=media.filter(m=>m.field===field).map(m=>'<div class="anki-media-item"><img src="'+m.data+'" alt="'+esc(m.name)+'"><span>'+esc(m.name)+'</span><button type="button" data-remove-media="'+esc(m.id)+'" aria-label="Remover imagem">×</button></div>').join('');box.querySelectorAll('[data-remove-media]').forEach(b=>b.onclick=()=>{media=media.filter(m=>m.id!==b.dataset.removeMedia);drawMedia(field);});};
