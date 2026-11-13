@@ -113,7 +113,7 @@ function shell(decks, stats) {
     '<div class="anki-toolbar"><button id="anki-deck-manage" '+(selectedDeck?'':'disabled')+'>⚙ Gerenciar selecionado</button></div>'+
     '<div id="anki-form-wrap"></div>'+
     '<div id="anki-note-list">'+noteListHtml()+'</div>'+
-    '<div class="anki-footer-actions"><button id="anki-export">Exportar TSV</button><button id="anki-import">Importar TSV</button><button id="anki-local-import">Importar cartões antigos</button></div>'+
+    '<div class="anki-footer-actions"><button id="anki-export-apkg">Exportar .apkg</button><button id="anki-import-apkg">Importar .apkg</button><button id="anki-export">Exportar TSV</button><button id="anki-import">Importar TSV</button><button id="anki-local-import">Importar cartões antigos</button></div>'+
     '<p id="anki-message" aria-live="polite"></p>';
 }
 function formHtml(note=null) {
