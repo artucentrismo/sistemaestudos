@@ -264,7 +264,8 @@ function showOcclusionEditor(wrap){
   };
   picker.click();
 }
-\nasync function action(btn) {
+
+async function action(btn) {
   const kind=btn.dataset.action;
   try {
     if(kind==='edit'){const note=notesCache.find(n=>n.id===btn.dataset.id);if(note)showForm(note);}
