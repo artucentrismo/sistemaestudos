@@ -21,8 +21,9 @@ function fieldHtml(text, media, field, mediaMap, zip, index) {
     const parsed = mediaData(item.data);
     if (!parsed) continue;
     const filename = 'ciclo_' + index + '_' + mediaMap.count++ + '.' + parsed.ext;
-    mediaMap.mapping[filename] = String(Object.keys(mediaMap.mapping).length);
-    zip.file(mediaMap.mapping[filename], parsed.bytes);
+    const mediaIndex=String(Object.keys(mediaMap.mapping).length);
+    mediaMap.mapping[mediaIndex]=filename;
+    zip.file(mediaIndex,parsed.bytes);
     html += '<br><img src="' + filename + '">';
   }
   return html;
