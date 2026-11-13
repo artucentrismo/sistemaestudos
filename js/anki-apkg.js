@@ -43,7 +43,7 @@ export async function exportApkg(deckId=null) {
   const includedDecks=deckId?decks.filter(d=>{let p=d;while(p){if(p.id===deckId)return true;p=decks.find(x=>x.id===p.parent_id);}return false;}):decks;
   const deckIdMap=new Map(), deckJson={};
   for (const deck of includedDecks) {
-    const numeric=Number(String(deck.id).replace(/\D/g,'')) || deckIdMap.size+1;
+    const numeric=deckIdMap.size+2;
     deckIdMap.set(deck.id,numeric);
     const parts=[deck.name];let p=decks.find(x=>x.id===deck.parent_id);
     while(p){parts.unshift(p.name);p=decks.find(x=>x.id===p.parent_id);}
