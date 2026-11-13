@@ -223,6 +223,11 @@ export async function importApkg(file,targetDeckId=null) {
       if(!noteCards.length){skipped++;continue;}
       const modelFields=(model.flds||[]).slice().sort((a,b)=>a.ord-b.ord);
       let front=fields[modelFields[0]?.ord??0]||'',back=fields[modelFields[1]?.ord??1]||'';
+      const extraFields=modelFields.slice(2).map(field=>{
+        const value=fields[field.ord]||'';
+        return value?'<br><strong>'+String(field.name||'Campo adicional').replace(/[<>]/g,'')+'</strong><br>'+value:'';
+      }).join('');
+      back+=extraFields;
       const tags=String(note.tags||'').trim().split(/\s+/).filter(Boolean),media=[];
       const replaceImages=async(value,field)=>{
         const regex=/<img[^>]+src=["']([^"']+)["'][^>]*>/gi;let match;
