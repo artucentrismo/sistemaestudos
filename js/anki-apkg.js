@@ -104,17 +104,90 @@ export async function exportApkg(deckId=null) {
   const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=cleanName(deckId?decks.find(d=>d.id===deckId)?.name:'Ciclo')+'.apkg';a.click();setTimeout(()=>URL.revokeObjectURL(url),1500);
   return {notes:allNotes.length,cards:cardTotal};
 }
-export async function importApkg(file,targetDeckId=null) {
-  const SQL=await libraries(),zip=await window.JSZip.loadAsync(file);
-  if(zip.file('collection.anki21b'))throw new Error('Este pacote usa o formato moderno compactado do Anki. No Anki, exporte novamente como .apkg e marque “Suporte a versões antigas do Anki” para importar aqui.');
-  const dbFile=zip.file('collection.anki21')||zip.file('collection.anki2');
+function decodeProto(bytes) {
+  const fields=[];let p=0;
+  const varint=()=>{let v=0n,s=0n;while(p<bytes.length&&s<70n){const b=bytes[p++];v|=BigInt(b&127)<<s;if(!(b&128))return Number(v);s+=7n;}throw new Error('Protobuf inválido no pacote Anki.');};
+  while(p<bytes.length){
+    const tag=varint(),num=tag>>>3,wire=tag&7;
+    if(wire===0){fields.push({num,wire,value:varint()});}
+    else if(wire===1){if(p+8>bytes.length)throw new Error('Protobuf incompleto.');p+=8;}
+    else if(wire===2){const len=varint();if(len<0||p+len>bytes.length)throw new Error('Protobuf incompleto.');fields.push({num,wire,value:bytes.subarray(p,p+len)});p+=len;}
+    else if(wire===5){if(p+4>bytes.length)throw new Error('Protobuf incompleto.');p+=4;}
+    else throw new Error('Formato protobuf não reconhecido.');
+  }
+  return fields;
+}
+function protoString(fields,num){const f=fields.filter(x=>x.num===num&&x.wire===2).at(-1);return f?new TextDecoder().decode(f.value):'';}
+function modernMediaMap(bytes){
+  const result={};let i=0;
+  for(const entry of decodeProto(bytes).filter(x=>x.num===1&&x.wire===2)){
+    const name=protoString(decodeProto(entry.value),1);
+    if(name)result[String(i++)]=name;
+  }
+  return result;
+}
+async function openAnkiDatabase(zip) {
+  const modern=zip.file('collection.anki21b');
+  const legacy21=zip.file('collection.anki21');
+  const dbFile=modern||legacy21||zip.file('collection.anki2');
   if(!dbFile)throw new Error('Este arquivo não contém um banco de coleção Anki reconhecido.');
-  const SQLmod=await SQL,db=new SQLmod.Database(new Uint8Array(await dbFile.async('uint8array')));
-  const mediaFile=zip.file('media'),mediaMap=mediaFile?JSON.parse(await mediaFile.async('string')):{};
+  let bytes=new Uint8Array(await dbFile.async('uint8array'));
+  if(modern){
+    if(!window.fzstd?.decompress)throw new Error('Não foi possível carregar o descompactador do Anki. Atualize a página e tente novamente.');
+    bytes=window.fzstd.decompress(bytes);
+  }
+  const SQLmod=await libraries(),db=new SQLmod.Database(bytes);
+  if(modern){
+    try{
+      db.run("PRAGMA writable_schema=ON; UPDATE sqlite_master SET sql=replace(sql,'COLLATE unicase','COLLATE NOCASE') WHERE sql LIKE '%COLLATE unicase%'; PRAGMA writable_schema=OFF;");
+      const version=db.exec('PRAGMA schema_version')[0]?.values?.[0]?.[0]||1;
+      db.run('PRAGMA schema_version='+(Number(version)+1));
+    }catch{}
+  }
+  return {db,modern};
+}
+export async function importApkg(file,targetDeckId=null) {
+  const zip=await window.JSZip.loadAsync(file);
+  const {db,modern}=await openAnkiDatabase(zip);
+  const mediaFile=zip.file('media');
+  let mediaMap={};
+  if(mediaFile){
+    const mediaBytes=new Uint8Array(await mediaFile.async('uint8array'));
+    try{mediaMap=modern?modernMediaMap(mediaBytes):JSON.parse(new TextDecoder().decode(mediaBytes));}
+    catch{mediaMap={};}
+  }
   const row=(sql,params=[])=>{const stmt=db.prepare(sql);stmt.bind(params);const out=[];while(stmt.step())out.push(stmt.getAsObject());stmt.free();return out;};
   try {
-    const meta=row('SELECT models,decks FROM col LIMIT 1')[0]||{};
-    const models=JSON.parse(meta.models||'{}'),decksJson=JSON.parse(meta.decks||'{}');
+    let models={},decksJson={};
+    if(modern){
+      const ntRows=row('SELECT id,name,config FROM notetypes ORDER BY id');
+      for(const nt of ntRows){
+        const cfg=decodeProto(new Uint8Array(nt.config||[]));
+        const kind=cfg.filter(x=>x.num===1&&x.wire===0).at(-1)?.value||0;
+        models[nt.id]={id:nt.id,name:nt.name,type:Number(kind),flds:[],tmpls:[]};
+      }
+      const fieldRows=row('SELECT ntid,ord,name FROM fields ORDER BY ntid,ord');
+      for(const fld of fieldRows)if(models[fld.ntid])models[fld.ntid].flds.push({name:fld.name,ord:fld.ord});
+      const templateRows=row('SELECT ntid,ord,name,config FROM templates ORDER BY ntid,ord');
+      for(const tpl of templateRows)if(models[tpl.ntid]){
+        const cfg=decodeProto(new Uint8Array(tpl.config||[]));
+        models[tpl.ntid].tmpls.push({name:tpl.name,ord:tpl.ord,qfmt:protoString(cfg,1),afmt:protoString(cfg,2)});
+      }
+      const deckRows=row('SELECT id,name,kind FROM decks ORDER BY id');
+      for(const deck of deckRows){
+        const path=String(deck.name||'Importado').split('\\x1f').join('::');
+        const kind=decodeProto(new Uint8Array(deck.kind||[]));
+        const normal=kind.some(x=>x.num===1&&x.wire===2);
+        decksJson[deck.id]={id:deck.id,name:path,dyn:normal?0:1};
+      }
+      for(const model of Object.values(models)){
+        model.flds.sort((a,b)=>a.ord-b.ord);
+        model.tmpls.sort((a,b)=>a.ord-b.ord);
+      }
+    }else{
+      const meta=row('SELECT models,decks FROM col LIMIT 1')[0]||{};
+      models=JSON.parse(meta.models||'{}');decksJson=JSON.parse(meta.decks||'{}');
+    }
     const noteRows=row('SELECT id,mid,tags,flds FROM notes'),cardRows=row('SELECT nid,did,ord FROM cards');
     const available=await listDecks();
     let importRoot=targetDeckId?available.find(d=>d.id===targetDeckId):null;
@@ -147,7 +220,8 @@ export async function importApkg(file,targetDeckId=null) {
       const model=models[note.mid]||{},fields=String(note.flds||'').split('\\x1f');
       const noteCards=cardsByNote.get(note.id)||[];
       if(!noteCards.length){skipped++;continue;}
-      let front=fields[0]||'',back=fields[1]||'';
+      const modelFields=(model.flds||[]).slice().sort((a,b)=>a.ord-b.ord);
+      let front=fields[modelFields[0]?.ord??0]||'',back=fields[modelFields[1]?.ord??1]||'';
       const tags=String(note.tags||'').trim().split(/\\s+/).filter(Boolean),media=[];
       const replaceImages=async(value,field)=>{
         const regex=/<img[^>]+src=["']([^"']+)["'][^>]*>/gi;let match;
@@ -155,7 +229,10 @@ export async function importApkg(file,targetDeckId=null) {
           const filename=match[1],mapped=Object.entries(mediaMap).find(([key,name])=>name===filename),index=mapped?.[0]??mediaMap[filename];
           const entry=index!==undefined?zip.file(String(index)):zip.file(filename);
           if(!entry)continue;
-          const bytes=await entry.async('uint8array');
+          let bytes=await entry.async('uint8array');
+          if(modern&&window.fzstd?.decompress&&bytes.length>=4&&bytes[0]===0x28&&bytes[1]===0xB5&&bytes[2]===0x2F&&bytes[3]===0xFD){
+            try{bytes=window.fzstd.decompress(bytes);}catch{}
+          }
           let binary='';for(let i=0;i<bytes.length;i++)binary+=String.fromCharCode(bytes[i]);
           const ext=filename.split('.').pop().toLowerCase();
           const mime=({jpg:'image/jpeg',jpeg:'image/jpeg',png:'image/png',gif:'image/gif',webp:'image/webp',svg:'image/svg+xml'})[ext]||'application/octet-stream';
