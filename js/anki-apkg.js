@@ -161,7 +161,7 @@ export async function importApkg(file,targetDeckId=null) {
           const mime=({jpg:'image/jpeg',jpeg:'image/jpeg',png:'image/png',gif:'image/gif',webp:'image/webp',svg:'image/svg+xml'})[ext]||'application/octet-stream';
           media.push({id:'imp-'+note.id+'-'+media.length,name:filename,field,data:'data:'+mime+';base64,'+btoa(binary)});
         }
-        return value.replace(/<img[^>]*>/gi,' ').replace(/<br\\s*\\/?>/gi,'\\n').replace(/<\\/(?:p|div|li)>/gi,'\\n').replace(/<[^>]+>/g,'').trim();
+        return value.replace(/<img[^>]*>/gi,' ').replace(/<[^>]+>/g,'').trim();
       };
       front=await replaceImages(front,'front');back=await replaceImages(back,'back');
       const firstCard=noteCards[0],deckId=deckMap.get(firstCard.did)||importRoot.id;
