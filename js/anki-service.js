@@ -105,9 +105,11 @@ export async function addNote({deckId,front,back,tags=[],cardType='basic',media=
   if(!front) throw new Error('A frente do cartão é obrigatória.');
   if(cardType!=='cloze'&&!back) throw new Error('O verso do cartão é obrigatório.');
   const clozeIds=[...new Set([...front.matchAll(/\{\{c(\d+)::/g)].map(m=>Number(m[1])))].sort((a,b)=>a-b);
-  if(cardType==='cloze'&&!clozeIds.length) throw new Error('Use uma lacuna no formato {{c1::resposta}}.');\n  if(cardType==='image-occlusion'&&(!occlusion||!Array.isArray(occlusion.masks)||!occlusion.masks.length)) throw new Error('Desenhe ao menos uma área para ocultar.');
+  if(cardType==='cloze'&&!clozeIds.length) throw new Error('Use uma lacuna no formato {{c1::resposta}}.');
+  if(cardType==='image-occlusion'&&(!occlusion||!Array.isArray(occlusion.masks)||!occlusion.masks.length)) throw new Error('Desenhe ao menos uma área para ocultar.');
   const note={id:id(),deck_id:deckId,fields:{Front:front,Back:back},media:Array.isArray(media)?media:[],occlusion:cardType==='image-occlusion'?occlusion:null,tags:tags.map(t=>String(t).trim()).filter(Boolean),created_at:now(),updated_at:now()};
-  let specs=cardType==='image-occlusion'?occlusion.masks.map((mask,ordinal)=>({type:'image-occlusion',ordinal})):\n    cardType==='cloze'?clozeIds.map(ordinal=>({type:'cloze',ordinal})):
+  let specs=cardType==='image-occlusion'?occlusion.masks.map((mask,ordinal)=>({type:'image-occlusion',ordinal} )):
+    cardType==='cloze'?clozeIds.map(ordinal=>({type:'cloze',ordinal})):
     cardType==='basic-reversed'?[{type:'basic',ordinal:0},{type:'reverse',ordinal:1}]:[{type:'basic',ordinal:0}];
   const cards=[];
   for(const spec of specs) {
