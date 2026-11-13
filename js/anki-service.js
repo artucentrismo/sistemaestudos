@@ -99,14 +99,14 @@ export async function listNotes(deckId=null) {
     .sort((a,b)=>b.created_at.localeCompare(a.created_at))
     .map(n=>({...n,cards:db.cards.filter(c=>c.note_id===n.id)}));
 }
-export async function addNote({deckId,front,back,tags=[],cardType='basic'}) {
+export async function addNote({deckId,front,back,tags=[],cardType='basic',media=[]}) {
   const db=read(); requireDeck(db,deckId);
   front=String(front||'').trim(); back=String(back||'').trim();
   if(!front) throw new Error('A frente do cartão é obrigatória.');
   if(cardType!=='cloze'&&!back) throw new Error('O verso do cartão é obrigatório.');
   const clozeIds=[...new Set([...front.matchAll(/\{\{c(\d+)::/g)].map(m=>Number(m[1])))].sort((a,b)=>a-b);
   if(cardType==='cloze'&&!clozeIds.length) throw new Error('Use uma lacuna no formato {{c1::resposta}}.');
-  const note={id:id(),deck_id:deckId,fields:{Front:front,Back:back},tags:tags.map(t=>String(t).trim()).filter(Boolean),created_at:now(),updated_at:now()};
+  const note={id:id(),deck_id:deckId,fields:{Front:front,Back:back},media:Array.isArray(media)?media:[],tags:tags.map(t=>String(t).trim()).filter(Boolean),created_at:now(),updated_at:now()};
   let specs=cardType==='cloze'?clozeIds.map(ordinal=>({type:'cloze',ordinal})):
     cardType==='basic-reversed'?[{type:'basic',ordinal:0},{type:'reverse',ordinal:1}]:[{type:'basic',ordinal:0}];
   const cards=[];
@@ -116,7 +116,7 @@ export async function addNote({deckId,front,back,tags=[],cardType='basic'}) {
   }
   db.notes.push(note); db.cards.push(...cards); write(db); return note;
 }
-export async function updateNote(noteId,{front,back,tags=[],deckId}) {
+export async function updateNote(noteId,{front,back,tags=[],deckId,media}) {
   const db=read(), note=db.notes.find(n=>n.id===noteId);
   if(!note) throw new Error('Nota não encontrada.');
   front=String(front||'').trim(); back=String(back||'').trim();
@@ -125,7 +125,7 @@ export async function updateNote(noteId,{front,back,tags=[],deckId}) {
   if(cards.some(c=>c.card_type==='cloze')&&!/\{\{c\d+::.+?\}\}/s.test(front)) throw new Error('Mantenha ao menos uma lacuna {{c1::resposta}} neste cartão Cloze.');
   if(cards.some(c=>c.card_type!=='cloze')&&!back) throw new Error('O verso do cartão é obrigatório.');
   if (deckId && deckId !== note.deck_id) { requireDeck(db, deckId); note.deck_id = deckId; }
-  note.fields={Front:front,Back:back}; note.tags=tags.map(t=>String(t).trim()).filter(Boolean); note.updated_at=now(); write(db);
+  note.fields={Front:front,Back:back}; if(Array.isArray(media))note.media=media; note.tags=tags.map(t=>String(t).trim()).filter(Boolean); note.updated_at=now(); write(db);
 }
 export async function deleteNote(noteId) {
   const db=read(), cardIds=new Set(db.cards.filter(c=>c.note_id===noteId).map(c=>c.id));
