@@ -124,14 +124,21 @@ export async function importApkg(file,targetDeckId=null) {
   let imported=0,skipped=0;
   for(const n of noteRows){
     const model=models[n.mid]||{},fields=String(n.flds||'').split('\x1f'),isCloze=model.type===1;
-    const front=fields[0]||'',back=fields[1]||'',noteCards=cardsByNote.get(n.id)||[];
+    let front=fields[0]||'',back=fields[1]||'';const noteCards=cardsByNote.get(n.id)||[];
     const tags=String(n.tags||'').trim().split(/\s+/).filter(Boolean);
     const media=[];
     const replaceImages=async(value,field)=>{
       const regex=/<img[^>]+src=["']([^"']+)["'][^>]*>/gi;let match;
-      while((match=regex.exec(value))){const filename=match[1],mapped=Object.entries(mediaMap).find(([k,v])=>v===filename),idx=mapped?.[0]??mediaMap[filename],entry=idx!==undefined?zip.file(String(idx)):zip.file(filename);if(!entry)continue;const bytes=await entry.async('uint8array');let binary='';for(let i=0;i<bytes.length;i++)binary+=String.fromCharCode(bytes[i]);const ext=filename.split('.').pop().toLowerCase(),mime=({jpg:'image/jpeg',jpeg:'image/jpeg',png:'image/png',gif:'image/gif',webp:'image/webp'})[ext]||'application/octet-stream';media.push({id:'imp-'+imported+'-'+media.length,name:filename,field,data:'data:'+mime+';base64,'+btoa(binary)});}
+      while((match=regex.exec(value))){
+        const filename=match[1],mapped=Object.entries(mediaMap).find(([k,v])=>v===filename),idx=mapped?.[0]??mediaMap[filename],entry=idx!==undefined?zip.file(String(idx)):zip.file(filename);
+        if(!entry)continue;
+        const bytes=await entry.async('uint8array');let binary='';for(let i=0;i<bytes.length;i++)binary+=String.fromCharCode(bytes[i]);
+        const ext=filename.split('.').pop().toLowerCase(),mime=({jpg:'image/jpeg',jpeg:'image/jpeg',png:'image/png',gif:'image/gif',webp:'image/webp'})[ext]||'application/octet-stream';
+        media.push({id:'imp-'+imported+'-'+media.length,name:filename,field,data:'data:'+mime+';base64,'+btoa(binary)});
+      }
+      return value.replace(/<img[^>]*>/gi,' ').replace(/<br\\s*\\/?>/gi,'\\n').replace(/<\\/p>|<\\/div>/gi,'\\n').replace(/<[^>]*>/g,'').trim();
     };
-    await replaceImages(front,'front');await replaceImages(back,'back');
+    front=await replaceImages(front,'front');back=await replaceImages(back,'back');
     const did=noteCards[0]?.did,targetId=targetDeckId||deckMap.get(did)||target;
     try{await addNote({deckId:targetId,front,back,tags,cardType:isCloze?'cloze':noteCards.length>1?'basic-reversed':'basic',media});imported++;}
     catch{skipped++;}
