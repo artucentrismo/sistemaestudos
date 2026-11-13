@@ -152,7 +152,8 @@ export async function importApkg(file,targetDeckId=null) {
   const mediaFile=zip.file('media');
   let mediaMap={};
   if(mediaFile){
-    const mediaBytes=new Uint8Array(await mediaFile.async('uint8array'));
+    let mediaBytes=new Uint8Array(await mediaFile.async('uint8array'));
+    if(modern&&window.fzstd?.decompress&&mediaBytes.length>=4&&mediaBytes[0]===0x28&&mediaBytes[1]===0xB5&&mediaBytes[2]===0x2F&&mediaBytes[3]===0xFD)mediaBytes=window.fzstd.decompress(mediaBytes);
     try{mediaMap=modern?modernMediaMap(mediaBytes):JSON.parse(new TextDecoder().decode(mediaBytes));}
     catch{mediaMap={};}
   }
@@ -175,7 +176,7 @@ export async function importApkg(file,targetDeckId=null) {
       }
       const deckRows=row('SELECT id,name,kind FROM decks ORDER BY id');
       for(const deck of deckRows){
-        const path=String(deck.name||'Importado').split('\\x1f').join('::');
+        const path=String(deck.name||'Importado').split('\x1f').join('::');
         const kind=decodeProto(new Uint8Array(deck.kind||[]));
         const normal=kind.some(x=>x.num===1&&x.wire===2);
         decksJson[deck.id]={id:deck.id,name:path,dyn:normal?0:1};
@@ -217,12 +218,12 @@ export async function importApkg(file,targetDeckId=null) {
     for(const card of cardRows){if(!cardsByNote.has(card.nid))cardsByNote.set(card.nid,[]);cardsByNote.get(card.nid).push(card);}
     let imported=0,skipped=0;
     for(const note of noteRows){
-      const model=models[note.mid]||{},fields=String(note.flds||'').split('\\x1f');
+      const model=models[note.mid]||{},fields=String(note.flds||'').split('\x1f');
       const noteCards=cardsByNote.get(note.id)||[];
       if(!noteCards.length){skipped++;continue;}
       const modelFields=(model.flds||[]).slice().sort((a,b)=>a.ord-b.ord);
       let front=fields[modelFields[0]?.ord??0]||'',back=fields[modelFields[1]?.ord??1]||'';
-      const tags=String(note.tags||'').trim().split(/\\s+/).filter(Boolean),media=[];
+      const tags=String(note.tags||'').trim().split(/\s+/).filter(Boolean),media=[];
       const replaceImages=async(value,field)=>{
         const regex=/<img[^>]+src=["']([^"']+)["'][^>]*>/gi;let match;
         while((match=regex.exec(value))){
