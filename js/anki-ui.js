@@ -20,7 +20,7 @@ const root = () => document.getElementById('anki-v2');
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const dateLabel = (iso) => new Date(iso).toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' });
 function occlusionHtml(note,ordinal,revealed=false){
-  const image=(note?.media||[]).find(m=>m.field==='front'&&/^data:image\\//i.test(m.data||''));
+  const image=(note?.media||[]).find(m=>m.field==='front'&&String(m.data||'').startsWith('data:image/'));
   if(!image)return '<p>Imagem não encontrada neste cartão.</p>';
   const masks=note.occlusion?.masks||[],target=masks[ordinal],mode=note.occlusion?.mode||'hide-all';
   const visible=masks.filter((m,i)=>revealed?(mode==='hide-all'?i!==ordinal:false):(mode==='hide-all'||i===ordinal));
