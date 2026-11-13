@@ -18,6 +18,14 @@ const collapsedDecks = new Set();
 const root = () => document.getElementById('anki-v2');
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const dateLabel = (iso) => new Date(iso).toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' });
+function occlusionHtml(note,ordinal,revealed=false){
+  const image=(note?.media||[]).find(m=>m.field==='front'&&/^data:image\\//i.test(m.data||''));
+  if(!image)return '<p>Imagem não encontrada neste cartão.</p>';
+  const masks=note.occlusion?.masks||[],target=masks[ordinal],mode=note.occlusion?.mode||'hide-all';
+  const visible=masks.filter((m,i)=>revealed?(mode==='hide-all'?i!==ordinal:false):(mode==='hide-all'||i===ordinal));
+  const overlays=visible.map(m=>'<span style="position:absolute;left:'+(m.x*100)+'%;top:'+(m.y*100)+'%;width:'+(m.w*100)+'%;height:'+(m.h*100)+'%;background:#18264b;border:2px solid #fff;border-radius:4px;box-shadow:0 1px 5px #0005"></span>').join('');
+  return '<div style="position:relative;width:100%;max-width:760px;margin:12px auto"><img src="'+image.data+'" alt="Imagem de estudo" style="display:block;width:100%;height:auto;border-radius:10px">'+overlays+'</div>';
+}
 function mediaHtml(note,field){return (note?.media||[]).filter(m=>m.field===field&&/^data:image\/(png|jpeg|webp|gif);base64,/i.test(m.data||'')).map(m=>'<img src="'+m.data+'" alt="'+esc(m.name||'Imagem do cartão')+'" style="display:block;max-width:100%;max-height:320px;object-fit:contain;margin:10px auto;border-radius:12px">').join('');}
 function readImage(file){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onerror=()=>reject(new Error('Não foi possível ler a imagem.'));reader.onload=()=>{const img=new Image();img.onerror=()=>reject(new Error('Arquivo de imagem inválido.'));img.onload=()=>{const scale=Math.min(1,1600/Math.max(img.width,img.height));const canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(img.width*scale));canvas.height=Math.max(1,Math.round(img.height*scale));canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);resolve(canvas.toDataURL('image/jpeg',.82));};img.src=reader.result;};reader.readAsDataURL(file);});}
 const cloze = (s, target, show) => esc(s).replace(/\{\{c(\d+)::(.*?)(?:::(.*?))?\}\}/gs, (_m, id, answer, hint) =>
@@ -126,7 +134,7 @@ function formHtml(note=null) {
     '<div class="anki-field-card anki-back-field"><div class="anki-field-heading"><span class="anki-field-number">02</span><div><b>Verso</b><small>Resposta, explicação ou exemplo</small></div></div><textarea id="anki-back" rows="5" spellcheck="true" placeholder="Escreva a resposta ou uma explicação clara...">'+esc(back)+'</textarea><div class="anki-field-footer"><span>Prefira respostas curtas e específicas.</span><span id="anki-back-count">0 caracteres</span></div></div>'+
     '<label>Imagens da frente<input id="anki-front-images" type="file" accept="image/*" multiple></label><div id="anki-front-media" class="anki-media-preview"></div>'+
     '<label>Imagens do verso<input id="anki-back-images" type="file" accept="image/*" multiple></label><div id="anki-back-media" class="anki-media-preview"></div>'+
-    '<label>Tags<input id="anki-tags" value="'+esc(tags)+'" placeholder="biologia enem citologia"></label>'+
+    '<button type="button" id="anki-open-occlusion" class="anki-secondary" style="width:100%;margin:8px 0">▧ Criar cartões com oclusão de imagem</button>' +\n    '<label>Tags<input id="anki-tags" value="'+esc(tags)+'" placeholder="biologia enem citologia"></label>'+
     '<button class="anki-primary" id="anki-save-note">'+(note?'Salvar alterações':'Adicionar à biblioteca')+'</button><p class="anki-muted">Dica: use uma ideia principal por nota para facilitar a memorização.</p></section>';
 }
 async function render() {
@@ -196,7 +204,7 @@ function showForm(note=null, options={}) {
   const wrap=document.getElementById('anki-form-wrap'); if(!wrap)return;
   wrap.innerHTML=formHtml(note);
   if(options.scrollIntoView)wrap.scrollIntoView({behavior:'instant',block:'start'});
-  const close=document.getElementById('anki-form-close');close.onclick=()=>wrap.innerHTML='';
+  const close=document.getElementById('anki-form-close');close.onclick=()=>wrap.innerHTML='';\n  document.getElementById('anki-open-occlusion').onclick=()=>showOcclusionEditor(wrap);
   const front=document.getElementById('anki-front'),back=document.getElementById('anki-back');
   let media=Array.isArray(note?.media)?note.media.slice():[];
   const drawMedia=field=>{const box=document.getElementById('anki-'+field+'-media');if(!box)return;box.innerHTML=media.filter(m=>m.field===field).map(m=>'<div class="anki-media-item"><img src="'+m.data+'" alt="'+esc(m.name)+'"><span>'+esc(m.name)+'</span><button type="button" data-remove-media="'+esc(m.id)+'" aria-label="Remover imagem">×</button></div>').join('');box.querySelectorAll('[data-remove-media]').forEach(b=>b.onclick=()=>{media=media.filter(m=>m.id!==b.dataset.removeMedia);drawMedia(field);});};
@@ -220,7 +228,38 @@ function showForm(note=null, options={}) {
     } catch(e){setMessage(e.message,true);save.disabled=false;save.textContent=note?'Salvar alterações':'Adicionar à biblioteca';}
   };
 }
-async function action(btn) {
+
+function showOcclusionEditor(wrap){
+  const picker=document.createElement('input');picker.type='file';picker.accept='image/*';
+  picker.onchange=()=>{
+    const file=picker.files?.[0];if(!file)return;
+    readImage(file).then(data=>{
+      const image=new Image();image.onload=()=>{
+        const panel=document.createElement('section');panel.className='anki-form';panel.style.marginTop='12px';
+        panel.innerHTML='<div class="anki-form-title"><div><small>EDITOR DE IMAGEM</small><h3>Oclusão de imagem</h3></div><button type="button" class="anki-icon-button" data-io-close>×</button></div><p class="anki-muted">Arraste sobre a imagem para criar cada área. Cada área gera um cartão independente.</p><div style="position:relative;width:100%;overflow:hidden;border-radius:12px;background:#111"><canvas style="display:block;width:100%;height:auto;touch-action:none;cursor:crosshair"></canvas></div><label>Modo de revisão<select data-io-mode><option value="hide-all">Ocultar todas · adivinhar uma</option><option value="hide-one">Ocultar uma · adivinhar uma</option></select></label><label>Título ou contexto<input data-io-title placeholder="Ex.: Anatomia do coração"></label><label>Complemento do verso<textarea data-io-extra rows="2" placeholder="Informação adicional (opcional)"></textarea></label><p data-io-count class="anki-muted">0 áreas desenhadas</p><button type="button" class="anki-primary" data-io-save>Gerar cartões de oclusão</button>';
+        wrap.appendChild(panel);
+        const canvas=panel.querySelector('canvas'),ctx=canvas.getContext('2d'),masks=[];
+        canvas.width=image.naturalWidth;canvas.height=image.naturalHeight;
+        let start=null,current=null;
+        const paint=()=>{ctx.clearRect(0,0,canvas.width,canvas.height);ctx.drawImage(image,0,0);ctx.fillStyle='rgba(18,35,75,.88)';ctx.strokeStyle='#fff';ctx.lineWidth=Math.max(2,canvas.width/500);for(const m of masks){const x=m.x*canvas.width,y=m.y*canvas.height,w=m.w*canvas.width,h=m.h*canvas.height;ctx.fillRect(x,y,w,h);ctx.strokeRect(x,y,w,h);}if(current){ctx.fillStyle='rgba(35,105,210,.35)';ctx.strokeStyle='#fff';ctx.fillRect(current.x,current.y,current.w,current.h);ctx.strokeRect(current.x,current.y,current.w,current.h);}};
+        paint();
+        const point=e=>{const r=canvas.getBoundingClientRect();return{x:(e.clientX-r.left)*canvas.width/r.width,y:(e.clientY-r.top)*canvas.height/r.height};};
+        canvas.onpointerdown=e=>{e.preventDefault();canvas.setPointerCapture(e.pointerId);start=point(e);current={x:start.x,y:start.y,w:0,h:0};paint();};
+        canvas.onpointermove=e=>{if(!start)return;const p=point(e);current={x:Math.min(start.x,p.x),y:Math.min(start.y,p.y),w:Math.abs(p.x-start.x),h:Math.abs(p.y-start.y)};paint();};
+        canvas.onpointerup=()=>{if(!start)return;if(current.w>8&&current.h>8)masks.push({x:current.x/canvas.width,y:current.y/canvas.height,w:current.w/canvas.width,h:current.h/canvas.height});start=null;current=null;panel.querySelector('[data-io-count]').textContent=masks.length+' áreas desenhadas';paint();};
+        panel.querySelector('[data-io-close]').onclick=()=>panel.remove();
+        panel.querySelector('[data-io-save]').onclick=async()=>{
+          if(!masks.length){setMessage('Desenhe ao menos uma área na imagem.',true);return;}
+          const save=panel.querySelector('[data-io-save]');save.disabled=true;
+          try{const deckId=document.getElementById('anki-note-deck')?.value||selectedDeck;if(!deckId)throw new Error('Selecione um baralho antes de criar os cartões.');await addNote({deckId,front:panel.querySelector('[data-io-title]').value.trim()||'Oclusão de imagem',back:panel.querySelector('[data-io-extra]').value.trim(),tags:(document.getElementById('anki-tags')?.value||'').split(/\\s+/).filter(Boolean),cardType:'image-occlusion',media:[{id:'io-'+Date.now(),name:file.name,data,field:'front'}],occlusion:{mode:panel.querySelector('[data-io-mode]').value,masks}});await render();setMessage(masks.length+' cartões de oclusão criados.');}
+          catch(e){setMessage(e.message,true);save.disabled=false;}
+        };
+      };image.src=data;
+    }).catch(e=>setMessage(e.message,true));
+  };
+  picker.click();
+}
+\nasync function action(btn) {
   const kind=btn.dataset.action;
   try {
     if(kind==='edit'){const note=notesCache.find(n=>n.id===btn.dataset.id);if(note)showForm(note);}
