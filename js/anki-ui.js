@@ -1,3 +1,4 @@
+import { exportApkg, importApkg } from './anki-apkg.js';
 import {
   listDecks, createDeck, renameDeck, deleteDeck, listNotes, addNote,
   updateNote, deleteNote, reviewQueue, previewCard, gradeCard,
@@ -134,7 +135,8 @@ function formHtml(note=null) {
     '<div class="anki-field-card anki-back-field"><div class="anki-field-heading"><span class="anki-field-number">02</span><div><b>Verso</b><small>Resposta, explicação ou exemplo</small></div></div><textarea id="anki-back" rows="5" spellcheck="true" placeholder="Escreva a resposta ou uma explicação clara...">'+esc(back)+'</textarea><div class="anki-field-footer"><span>Prefira respostas curtas e específicas.</span><span id="anki-back-count">0 caracteres</span></div></div>'+
     '<label>Imagens da frente<input id="anki-front-images" type="file" accept="image/*" multiple></label><div id="anki-front-media" class="anki-media-preview"></div>'+
     '<label>Imagens do verso<input id="anki-back-images" type="file" accept="image/*" multiple></label><div id="anki-back-media" class="anki-media-preview"></div>'+
-    '<button type="button" id="anki-open-occlusion" class="anki-secondary" style="width:100%;margin:8px 0">▧ Criar cartões com oclusão de imagem</button>' +\n    '<label>Tags<input id="anki-tags" value="'+esc(tags)+'" placeholder="biologia enem citologia"></label>'+
+    '<button type="button" id="anki-open-occlusion" class="anki-secondary" style="width:100%;margin:8px 0">▧ Criar cartões com oclusão de imagem</button>' +
+    '<label>Tags<input id="anki-tags" value="'+esc(tags)+'" placeholder="biologia enem citologia"></label>'+
     '<button class="anki-primary" id="anki-save-note">'+(note?'Salvar alterações':'Adicionar à biblioteca')+'</button><p class="anki-muted">Dica: use uma ideia principal por nota para facilitar a memorização.</p></section>';
 }
 async function render() {
@@ -159,6 +161,8 @@ function bind(decks) {
   document.getElementById('anki-review').onclick=startReview;
   document.getElementById('anki-export').onclick=exportTsv;
   document.getElementById('anki-import').onclick=importTsv;
+  document.getElementById('anki-export-apkg').onclick=async()=>{try{const r=await exportApkg(selectedDeck||null);setMessage('Pacote Anki exportado: '+r.notes+' notas e '+r.cards+' cartões.');}catch(e){setMessage(e.message,true);}};
+  document.getElementById('anki-import-apkg').onclick=()=>{const input=document.createElement('input');input.type='file';input.accept='.apkg';input.onchange=async()=>{const file=input.files?.[0];if(!file)return;try{const r=await importApkg(file,selectedDeck||null);await render();setMessage(r.imported+' notas importadas do Anki'+(r.skipped?' · '+r.skipped+' ignoradas':'')+'.');}catch(e){setMessage(e.message,true);}};input.click();};
   document.getElementById('anki-local-import').onclick=importLegacy;
   bindSearch();
   root().querySelectorAll('[data-deck-select]').forEach(btn=>btn.onclick=async()=>{selectedDeck=btn.dataset.deckSelect;deckPanelMode='';await render();});
@@ -279,8 +283,8 @@ function renderReview() {
   if(!card){el.innerHTML='<div class="anki-empty"><div class="anki-empty-symbol">✓</div><h2>Revisão concluída!</h2><p>Você terminou os cartões desta sessão. Muito bem!</p><button class="anki-primary" id="anki-review-done">Voltar à biblioteca</button></div>';document.getElementById('anki-review-done').onclick=()=>{revealed=false;render();};return;}
   const front=card.note.fields?.Front||'',back=card.note.fields?.Back||'';
   const question=card.card_type==='reverse'?back:front,answer=card.card_type==='reverse'?front:back;
-  const questionHtml=(card.card_type==='cloze'?cloze(front,card.template_ordinal,revealed):esc(question).replace(/\n/g,'<br>'))+mediaHtml(card.note,card.card_type==='reverse'?'back':'front');
-  const answerHtml=(card.card_type==='cloze'?cloze(front,card.template_ordinal,true):esc(answer).replace(/\n/g,'<br>'))+mediaHtml(card.note,card.card_type==='reverse'?'front':'back');
+  const questionHtml=card.card_type==='image-occlusion'?esc(front)+'<br>'+occlusionHtml(card.note,card.template_ordinal,false):(card.card_type==='cloze'?cloze(front,card.template_ordinal,revealed):esc(question).replace(/\n/g,'<br>'))+mediaHtml(card.note,card.card_type==='reverse'?'back':'front');
+  const answerHtml=card.card_type==='image-occlusion'?esc(back)+'<br>'+occlusionHtml(card.note,card.template_ordinal,true):(card.card_type==='cloze'?cloze(front,card.template_ordinal,true):esc(answer).replace(/\n/g,'<br>'))+mediaHtml(card.note,card.card_type==='reverse'?'front':'back');
   el.innerHTML='<div class="anki-review-head"><button id="anki-review-exit">← Sair</button><span>Cartão '+(reviewIndex+1)+' de '+reviewCards.length+'</span></div>'+
     '<div class="anki-review-progress"><i style="width:'+((reviewIndex)/reviewCards.length*100)+'%"></i></div>'+
     '<article class="anki-review-card"><small>'+esc(card.note.tags?.join(' · ')||'REVISÃO')+'</small><div class="anki-question">'+questionHtml+'</div>'+
