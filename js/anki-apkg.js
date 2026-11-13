@@ -112,37 +112,67 @@ export async function importApkg(file,targetDeckId=null) {
   const SQLmod=await SQL,db=new SQLmod.Database(new Uint8Array(await dbFile.async('uint8array')));
   const mediaFile=zip.file('media'),mediaMap=mediaFile?JSON.parse(await mediaFile.async('string')):{};
   const row=(sql,params=[])=>{const stmt=db.prepare(sql);stmt.bind(params);const out=[];while(stmt.step())out.push(stmt.getAsObject());stmt.free();return out;};
-  const meta=row('SELECT models,decks FROM col LIMIT 1')[0]||{},models=JSON.parse(meta.models||'{}'),decksJson=JSON.parse(meta.decks||'{}');
-  const noteRows=row('SELECT id,mid,tags,flds FROM notes'),cardRows=row('SELECT nid,did,ord FROM cards');
-  const available=await listDecks();
-  let target=targetDeckId;
-  if(!target){let d=available.find(x=>!x.parent_id&&x.name==='Importados do Anki');if(!d)d=await createDeck('Importados do Anki');target=d.id;}
-  const deckMap=new Map();
-  for(const [id,d] of Object.entries(decksJson)){let found=available.find(x=>!x.parent_id&&x.name===d.name);if(!found){const name=String(d.name||'Importado').split('::').pop();found=await createDeck(name,'',target);}deckMap.set(Number(id),found.id);}
-  const notesById=new Map(noteRows.map(n=>[n.id,n])),cardsByNote=new Map();
-  for(const c of cardRows){if(!cardsByNote.has(c.nid))cardsByNote.set(c.nid,[]);cardsByNote.get(c.nid).push(c);}
-  let imported=0,skipped=0;
-  for(const n of noteRows){
-    const model=models[n.mid]||{},fields=String(n.flds||'').split('\x1f'),isCloze=model.type===1;
-    let front=fields[0]||'',back=fields[1]||'';const noteCards=cardsByNote.get(n.id)||[];
-    const tags=String(n.tags||'').trim().split(/\s+/).filter(Boolean);
-    const media=[];
-    const replaceImages=async(value,field)=>{
-      const regex=/<img[^>]+src=["']([^"']+)["'][^>]*>/gi;let match;
-      while((match=regex.exec(value))){
-        const filename=match[1],mapped=Object.entries(mediaMap).find(([k,v])=>v===filename),idx=mapped?.[0]??mediaMap[filename],entry=idx!==undefined?zip.file(String(idx)):zip.file(filename);
-        if(!entry)continue;
-        const bytes=await entry.async('uint8array');let binary='';for(let i=0;i<bytes.length;i++)binary+=String.fromCharCode(bytes[i]);
-        const ext=filename.split('.').pop().toLowerCase(),mime=({jpg:'image/jpeg',jpeg:'image/jpeg',png:'image/png',gif:'image/gif',webp:'image/webp'})[ext]||'application/octet-stream';
-        media.push({id:'imp-'+imported+'-'+media.length,name:filename,field,data:'data:'+mime+';base64,'+btoa(binary)});
-      }
-      return value.replace(/<img[^>]*>/gi,' ').replace(/<[^>]+>/g,'').trim();
+  try {
+    const meta=row('SELECT models,decks FROM col LIMIT 1')[0]||{};
+    const models=JSON.parse(meta.models||'{}'),decksJson=JSON.parse(meta.decks||'{}');
+    const noteRows=row('SELECT id,mid,tags,flds FROM notes'),cardRows=row('SELECT nid,did,ord FROM cards');
+    const available=await listDecks();
+    let importRoot=targetDeckId?available.find(d=>d.id===targetDeckId):null;
+    if(targetDeckId&&!importRoot)throw new Error('O baralho escolhido para receber a importação não existe mais.');
+    if(!importRoot){
+      importRoot=available.find(d=>!d.parent_id&&d.name==='Importados do Anki');
+      if(!importRoot)importRoot=await createDeck('Importados do Anki');
+    }
+    const childCache=new Map();
+    const ensureChild=async(parentId,name)=>{
+      const key=parentId+'::'+name;
+      if(childCache.has(key))return childCache.get(key);
+      const current=await listDecks();
+      let found=current.find(d=>(d.parent_id||null)===parentId&&d.name.toLocaleLowerCase('pt-BR')===name.toLocaleLowerCase('pt-BR'));
+      if(!found)found=await createDeck(name,'',parentId);
+      childCache.set(key,found.id);return found.id;
     };
-    front=await replaceImages(front,'front');back=await replaceImages(back,'back');
-    const did=noteCards[0]?.did,targetId=targetDeckId||deckMap.get(did)||target;
-    try{await addNote({deckId:targetId,front,back,tags,cardType:isCloze?'cloze':noteCards.length>1?'basic-reversed':'basic',media});imported++;}
-    catch{skipped++;}
-  }
-  db.close();
-  return {imported,skipped};
+    const deckMap=new Map();
+    for(const [rawId,deck] of Object.entries(decksJson)){
+      if(deck.dyn)continue;
+      const parts=String(deck.name||'Importado').split('::').map(x=>x.trim()).filter(Boolean);
+      let parentId=importRoot.id;
+      for(const part of parts)parentId=await ensureChild(parentId,part);
+      deckMap.set(Number(rawId),parentId);
+    }
+    const cardsByNote=new Map();
+    for(const card of cardRows){if(!cardsByNote.has(card.nid))cardsByNote.set(card.nid,[]);cardsByNote.get(card.nid).push(card);}
+    let imported=0,skipped=0;
+    for(const note of noteRows){
+      const model=models[note.mid]||{},fields=String(note.flds||'').split('\\x1f');
+      const noteCards=cardsByNote.get(note.id)||[];
+      if(!noteCards.length){skipped++;continue;}
+      let front=fields[0]||'',back=fields[1]||'';
+      const tags=String(note.tags||'').trim().split(/\\s+/).filter(Boolean),media=[];
+      const replaceImages=async(value,field)=>{
+        const regex=/<img[^>]+src=["']([^"']+)["'][^>]*>/gi;let match;
+        while((match=regex.exec(value))){
+          const filename=match[1],mapped=Object.entries(mediaMap).find(([key,name])=>name===filename),index=mapped?.[0]??mediaMap[filename];
+          const entry=index!==undefined?zip.file(String(index)):zip.file(filename);
+          if(!entry)continue;
+          const bytes=await entry.async('uint8array');
+          let binary='';for(let i=0;i<bytes.length;i++)binary+=String.fromCharCode(bytes[i]);
+          const ext=filename.split('.').pop().toLowerCase();
+          const mime=({jpg:'image/jpeg',jpeg:'image/jpeg',png:'image/png',gif:'image/gif',webp:'image/webp',svg:'image/svg+xml'})[ext]||'application/octet-stream';
+          media.push({id:'imp-'+note.id+'-'+media.length,name:filename,field,data:'data:'+mime+';base64,'+btoa(binary)});
+        }
+        return value.replace(/<img[^>]*>/gi,' ').replace(/<br\\s*\\/?>/gi,'\\n').replace(/<\\/(?:p|div|li)>/gi,'\\n').replace(/<[^>]+>/g,'').trim();
+      };
+      front=await replaceImages(front,'front');back=await replaceImages(back,'back');
+      const firstCard=noteCards[0],deckId=deckMap.get(firstCard.did)||importRoot.id;
+      const isCloze=Number(model.type)===1;
+      const isReverse=!isCloze&&noteCards.length>1&&((model.tmpls||[]).some(t=>String(t.qfmt||'').includes('{{Back}}')));
+      const cardType=isCloze?'cloze':isReverse?'basic-reversed':'basic';
+      try{
+        await addNote({deckId,front,back,tags,cardType,media});
+        imported++;
+      }catch(error){skipped++;}
+    }
+    return {imported,skipped,baralhos:deckMap.size};
+  } finally { db.close(); }
 }
