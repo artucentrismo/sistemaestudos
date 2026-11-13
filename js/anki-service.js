@@ -125,7 +125,7 @@ export async function updateNote(noteId,{front,back,tags=[],deckId,media}) {
   if(!front) throw new Error('A frente do cartão é obrigatória.');
   const cards=db.cards.filter(c=>c.note_id===noteId);
   if(cards.some(c=>c.card_type==='cloze')&&!/\{\{c\d+::.+?\}\}/s.test(front)) throw new Error('Mantenha ao menos uma lacuna {{c1::resposta}} neste cartão Cloze.');
-  if(cards.some(c=>c.card_type!=='cloze')&&!back) throw new Error('O verso do cartão é obrigatório.');
+  if(cards.some(c=>c.card_type!=='cloze'&&c.card_type!=='image-occlusion')&&!back) throw new Error('O verso do cartão é obrigatório.');
   if (deckId && deckId !== note.deck_id) { requireDeck(db, deckId); note.deck_id = deckId; }
   note.fields={Front:front,Back:back}; if(Array.isArray(media))note.media=media; note.tags=tags.map(t=>String(t).trim()).filter(Boolean); note.updated_at=now(); write(db);
 }
