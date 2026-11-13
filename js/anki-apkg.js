@@ -66,13 +66,31 @@ export async function exportApkg(deckId=null) {
   let cardTotal=0;
   for(let i=0;i<allNotes.length;i++){
     const note=allNotes[i], cards=note.cards||[], isCloze=cards.some(c=>c.card_type==='cloze'), isReverse=cards.some(c=>c.card_type==='reverse');
-    const mid=isCloze?clozeId:isReverse?reverseId:basicId, nid=nowId()+i, deckNumeric=deckIdMap.get(note.deck_id)||defaultDeck;
+    const deckNumeric=deckIdMap.get(note.deck_id)||defaultDeck, tags=' '+(note.tags||[]).join(' ')+' ';
+    if(note.occlusion && cards.some(c=>c.card_type==='image-occlusion')){
+      const imageHtml=fieldHtml('',note.media,'front',mediaMap,zip,i).replace(/^<br>/,'');
+      for(const card of cards.filter(c=>c.card_type==='image-occlusion')){
+        const target=card.template_ordinal, masks=note.occlusion.masks||[];
+        const frontMasks=masks.filter((m,j)=>note.occlusion.mode==='hide-all'||j===target);
+        const backMasks=masks.filter((m,j)=>note.occlusion.mode==='hide-all'&&j!==target);
+        const svg=list=>list.length?'<svg viewBox="0 0 100 100" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%">'+list.map(m=>'<rect x="'+(m.x*100)+'" y="'+(m.y*100)+'" width="'+(m.w*100)+'" height="'+(m.h*100)+'" fill="#18264b" stroke="white" stroke-width=".5"/>').join('')+'</svg>':'';
+        const imageBlock='<div style="position:relative;display:inline-block;max-width:100%">'+imageHtml+svg(frontMasks)+'</div>';
+        const answerBlock='<div style="position:relative;display:inline-block;max-width:100%">'+imageHtml+svg(backMasks)+'</div>';
+        const front=(note.fields?.Front||'Oclusão de imagem')+'<br>'+imageBlock;
+        const back=(note.fields?.Back||'')+'<br>'+answerBlock;
+        const nid=nowId()+cardTotal;
+        add.run([nid,'ciclo'+nid,basicId,sec,-1,tags,front+'\\x1f'+back,front.replace(/<[^>]*>/g,'').slice(0,255),0,0,'']);
+        addCard.run([nowId()+cardTotal+1,nid,deckNumeric,0,sec,-1,0,0,0,0,2500,0,0,0,0,0,0,'']);
+        cardTotal++;
+      }
+      continue;
+    }
+    const mid=isCloze?clozeId:isReverse?reverseId:basicId, nid=nowId()+i;
     const front=fieldHtml(note.fields?.Front,note.media,'front',mediaMap,zip,i), back=fieldHtml(note.fields?.Back,note.media,'back',mediaMap,zip,i);
-    const flds=isCloze?front+'\x1f'+back:front+'\x1f'+back;
-    const tags=' '+(note.tags||[]).join(' ')+' ';
+    const flds=front+'\\x1f'+back;
     add.run([nid,'ciclo'+nid,mid,sec,-1,tags,flds,front.replace(/<[^>]*>/g,'').slice(0,255),0,0,'']);
     for(const card of cards){
-      const ord=card.card_type==='reverse'?1:card.card_type==='cloze'?Math.max(0,(card.template_ordinal||1)-1):card.template_ordinal||0;
+      const ord=card.card_type==='reverse'?1:card.card_type==='cloze'?Math.max(0,(card.template_ordinal||1)-1):0;
       addCard.run([nowId()+cardTotal,nid,deckNumeric,ord,sec,-1,0,0,0,0,2500,0,0,0,0,0,0,'']);
       cardTotal++;
     }
