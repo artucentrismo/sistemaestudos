@@ -103,7 +103,7 @@ export async function addNote({deckId,front,back,tags=[],cardType='basic',media=
   const db=read(); requireDeck(db,deckId);
   front=String(front||'').trim(); back=String(back||'').trim();
   if(!front) throw new Error('A frente do cartão é obrigatória.');
-  if(cardType!=='cloze'&&!back) throw new Error('O verso do cartão é obrigatório.');
+  if(cardType!=='cloze'&&cardType!=='image-occlusion'&&!back) throw new Error('O verso do cartão é obrigatório.');
   const clozeIds=[...new Set([...front.matchAll(/\{\{c(\d+)::/g)].map(m=>Number(m[1])))].sort((a,b)=>a-b);
   if(cardType==='cloze'&&!clozeIds.length) throw new Error('Use uma lacuna no formato {{c1::resposta}}.');
   if(cardType==='image-occlusion'&&(!occlusion||!Array.isArray(occlusion.masks)||!occlusion.masks.length)) throw new Error('Desenhe ao menos uma área para ocultar.');
