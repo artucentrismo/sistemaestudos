@@ -18,6 +18,8 @@ const collapsedDecks = new Set();
 const root = () => document.getElementById('anki-v2');
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const dateLabel = (iso) => new Date(iso).toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' });
+function mediaHtml(note,field){return (note?.media||[]).filter(m=>m.field===field&&/^data:image\/(png|jpeg|webp|gif);base64,/i.test(m.data||'')).map(m=>'<img src="'+m.data+'" alt="'+esc(m.name||'Imagem do cartão')+'" style="display:block;max-width:100%;max-height:320px;object-fit:contain;margin:10px auto;border-radius:12px">').join('');}
+function readImage(file){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onerror=()=>reject(new Error('Não foi possível ler a imagem.'));reader.onload=()=>{const img=new Image();img.onerror=()=>reject(new Error('Arquivo de imagem inválido.'));img.onload=()=>{const scale=Math.min(1,1600/Math.max(img.width,img.height));const canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(img.width*scale));canvas.height=Math.max(1,Math.round(img.height*scale));canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);resolve(canvas.toDataURL('image/jpeg',.82));};img.src=reader.result;};reader.readAsDataURL(file);});}
 const cloze = (s, target, show) => esc(s).replace(/\{\{c(\d+)::(.*?)(?:::(.*?))?\}\}/gs, (_m, id, answer, hint) =>
   Number(id) === Number(target) ? (show ? '<b class="anki-cloze-answer">'+answer+'</b>' : '<b class="anki-cloze-gap">['+(hint || '…')+']</b>') : '<b class="anki-cloze-answer">'+answer+'</b>');
 function setMessage(text, error=false) {
@@ -122,6 +124,8 @@ function formHtml(note=null) {
     '<label>Tipo de nota<select id="anki-type" '+(note?'disabled':'')+'><option value="basic" '+(type==='basic'?'selected':'')+'>Básico · pergunta e resposta</option><option value="basic-reversed" '+(type==='basic-reversed'?'selected':'')+'>Básico e cartão reverso</option><option value="cloze" '+(type==='cloze'?'selected':'')+'>Omissão · Cloze</option></select></label>'+
     '<div class="anki-field-card anki-front-field"><div class="anki-field-heading"><span class="anki-field-number">01</span><div><b>Frente</b><small>Pergunta, conceito ou texto de estudo</small></div></div><textarea id="anki-front" rows="6" spellcheck="true" placeholder="Escreva aqui o que você quer lembrar...">'+esc(front)+'</textarea><div class="anki-field-footer"><button type="button" id="anki-insert-cloze">＋ Inserir lacuna Cloze</button><span id="anki-front-count">0 caracteres</span></div></div>'+
     '<div class="anki-field-card anki-back-field"><div class="anki-field-heading"><span class="anki-field-number">02</span><div><b>Verso</b><small>Resposta, explicação ou exemplo</small></div></div><textarea id="anki-back" rows="5" spellcheck="true" placeholder="Escreva a resposta ou uma explicação clara...">'+esc(back)+'</textarea><div class="anki-field-footer"><span>Prefira respostas curtas e específicas.</span><span id="anki-back-count">0 caracteres</span></div></div>'+
+    '<label>Imagens da frente<input id="anki-front-images" type="file" accept="image/*" multiple></label><div id="anki-front-media" class="anki-media-preview"></div>'+
+    '<label>Imagens do verso<input id="anki-back-images" type="file" accept="image/*" multiple></label><div id="anki-back-media" class="anki-media-preview"></div>'+
     '<label>Tags<input id="anki-tags" value="'+esc(tags)+'" placeholder="biologia enem citologia"></label>'+
     '<button class="anki-primary" id="anki-save-note">'+(note?'Salvar alterações':'Adicionar à biblioteca')+'</button><p class="anki-muted">Dica: use uma ideia principal por nota para facilitar a memorização.</p></section>';
 }
@@ -194,6 +198,9 @@ function showForm(note=null, options={}) {
   if(options.scrollIntoView)wrap.scrollIntoView({behavior:'instant',block:'start'});
   const close=document.getElementById('anki-form-close');close.onclick=()=>wrap.innerHTML='';
   const front=document.getElementById('anki-front'),back=document.getElementById('anki-back');
+  let media=Array.isArray(note?.media)?note.media.slice():[];
+  const drawMedia=field=>{const box=document.getElementById('anki-'+field+'-media');if(!box)return;box.innerHTML=media.filter(m=>m.field===field).map(m=>'<div class="anki-media-item"><img src="'+m.data+'" alt="'+esc(m.name)+'"><span>'+esc(m.name)+'</span><button type="button" data-remove-media="'+esc(m.id)+'" aria-label="Remover imagem">×</button></div>').join('');box.querySelectorAll('[data-remove-media]').forEach(b=>b.onclick=()=>{media=media.filter(m=>m.id!==b.dataset.removeMedia);drawMedia(field);});};
+  ['front','back'].forEach(field=>{const input=document.getElementById('anki-'+field+'-images');input.onchange=async()=>{try{for(const file of [...input.files]){if(!file.type.startsWith('image/'))continue;if(file.size>8*1024*1024)throw new Error('Cada imagem deve ter até 8 MB.');const data=await readImage(file);media.push({id:crypto.randomUUID?crypto.randomUUID():String(Date.now()+Math.random()),name:file.name,data,field});}drawMedia(field);input.value='';}catch(e){setMessage(e.message,true);}};drawMedia(field);});
   const count=(field,id)=>{const el=document.getElementById(id);if(el)el.textContent=field.value.length+' caracteres';};
   front.oninput=()=>count(front,'anki-front-count');back.oninput=()=>count(back,'anki-back-count');
   count(front,'anki-front-count');count(back,'anki-back-count');
@@ -203,7 +210,7 @@ function showForm(note=null, options={}) {
   };
   document.getElementById('anki-save-note').onclick=async()=>{
     const save=document.getElementById('anki-save-note');
-    const values={front:front.value,back:back.value,tags:document.getElementById('anki-tags').value.split(/\s+/).filter(Boolean),deckId:document.getElementById('anki-note-deck').value};
+    const values={front:front.value,back:back.value,tags:document.getElementById('anki-tags').value.split(/\s+/).filter(Boolean),deckId:document.getElementById('anki-note-deck').value,media};
     const type=document.getElementById('anki-type').value;
     save.disabled=true;save.textContent='Salvando…';
     try {
@@ -233,8 +240,8 @@ function renderReview() {
   if(!card){el.innerHTML='<div class="anki-empty"><div class="anki-empty-symbol">✓</div><h2>Revisão concluída!</h2><p>Você terminou os cartões desta sessão. Muito bem!</p><button class="anki-primary" id="anki-review-done">Voltar à biblioteca</button></div>';document.getElementById('anki-review-done').onclick=()=>{revealed=false;render();};return;}
   const front=card.note.fields?.Front||'',back=card.note.fields?.Back||'';
   const question=card.card_type==='reverse'?back:front,answer=card.card_type==='reverse'?front:back;
-  const questionHtml=card.card_type==='cloze'?cloze(front,card.template_ordinal,revealed):esc(question).replace(/\n/g,'<br>');
-  const answerHtml=card.card_type==='cloze'?cloze(front,card.template_ordinal,true):esc(answer).replace(/\n/g,'<br>');
+  const questionHtml=(card.card_type==='cloze'?cloze(front,card.template_ordinal,revealed):esc(question).replace(/\n/g,'<br>'))+mediaHtml(card.note,card.card_type==='reverse'?'back':'front');
+  const answerHtml=(card.card_type==='cloze'?cloze(front,card.template_ordinal,true):esc(answer).replace(/\n/g,'<br>'))+mediaHtml(card.note,card.card_type==='reverse'?'front':'back');
   el.innerHTML='<div class="anki-review-head"><button id="anki-review-exit">← Sair</button><span>Cartão '+(reviewIndex+1)+' de '+reviewCards.length+'</span></div>'+
     '<div class="anki-review-progress"><i style="width:'+((reviewIndex)/reviewCards.length*100)+'%"></i></div>'+
     '<article class="anki-review-card"><small>'+esc(card.note.tags?.join(' · ')||'REVISÃO')+'</small><div class="anki-question">'+questionHtml+'</div>'+
