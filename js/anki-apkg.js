@@ -71,7 +71,7 @@ export async function exportApkg(deckId=null) {
     const tags=' '+(note.tags||[]).join(' ')+' ';
     add.run([nid,'ciclo'+nid,mid,sec,-1,tags,flds,front.replace(/<[^>]*>/g,'').slice(0,255),0,0,'']);
     for(const card of cards){
-      const ord=card.card_type==='reverse'?1:card.template_ordinal||0;
+      const ord=card.card_type==='reverse'?1:card.card_type==='cloze'?Math.max(0,(card.template_ordinal||1)-1):card.template_ordinal||0;
       addCard.run([nowId()+cardTotal,nid,deckNumeric,ord,sec,-1,0,0,0,0,2500,0,0,0,0,0,0,'']);
       cardTotal++;
     }
@@ -109,7 +109,7 @@ export async function importApkg(file,targetDeckId=null) {
     const media=[];
     const replaceImages=async(value,field)=>{
       const regex=/<img[^>]+src=["']([^"']+)["'][^>]*>/gi;let match;
-      while((match=regex.exec(value))){const filename=match[1],idx=mediaMap[filename],entry=idx!==undefined?zip.file(String(idx)):zip.file(filename);if(!entry)continue;const bytes=await entry.async('uint8array');let binary='';for(let i=0;i<bytes.length;i++)binary+=String.fromCharCode(bytes[i]);const ext=filename.split('.').pop().toLowerCase(),mime=({jpg:'image/jpeg',jpeg:'image/jpeg',png:'image/png',gif:'image/gif',webp:'image/webp'})[ext]||'application/octet-stream';media.push({id:'imp-'+imported+'-'+media.length,name:filename,field,data:'data:'+mime+';base64,'+btoa(binary)});}
+      while((match=regex.exec(value))){const filename=match[1],mapped=Object.entries(mediaMap).find(([k,v])=>v===filename),idx=mapped?.[0]??mediaMap[filename],entry=idx!==undefined?zip.file(String(idx)):zip.file(filename);if(!entry)continue;const bytes=await entry.async('uint8array');let binary='';for(let i=0;i<bytes.length;i++)binary+=String.fromCharCode(bytes[i]);const ext=filename.split('.').pop().toLowerCase(),mime=({jpg:'image/jpeg',jpeg:'image/jpeg',png:'image/png',gif:'image/gif',webp:'image/webp'})[ext]||'application/octet-stream';media.push({id:'imp-'+imported+'-'+media.length,name:filename,field,data:'data:'+mime+';base64,'+btoa(binary)});}
     };
     await replaceImages(front,'front');await replaceImages(back,'back');
     const did=noteCards[0]?.did,targetId=targetDeckId||deckMap.get(did)||target;
