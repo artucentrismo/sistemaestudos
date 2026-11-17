@@ -266,7 +266,7 @@ function stateDiagnosis(items){
 window.home=function(){
  var S=window.S,rec=candidates()[0],dt=new Date().toLocaleDateString("pt-BR",{weekday:"long",day:"numeric",month:"long"}),today=day(),minutes=window.minsOn(today),q=window.qs(function(l){return l.d===today}).t;
  if(!S.subs.length)return '<div class="up">SEU COPILOTO DE APRENDIZAGEM</div><h1>Vamos começar?</h1><p class="mu">O Ciclo organiza seus estudos e ajuda você a decidir o próximo passo.</p><section class="card" style="max-width:650px"><h2 style="margin:0 0 8px">Prepare seu primeiro ciclo</h2><p class="mu">Adicione suas matérias e assuntos. Você poderá ajustar tudo depois.</p><button class="btn" onclick="go(\'cfg\')">Organizar meus estudos</button></section>';
- var meta=window.gOn()?'<div class="home-support"><h3>Meta diária</h3><b>'+window.fm(minutes)+' / '+window.fm(S.goal)+'</b><div class="bar"><i style="width:'+Math.min(100,minutes/Math.max(1,S.goal)*100)+'%"></i></div></div>':'';
+ var meta=window.gOn()?'<div class="home-support"><h3>Meta diária</h3><b>'+window.fm(minutes)+' / '+window.fm(S.goal)+'</b><div class="bar"><i style="width:'+Math.min(100,minutes/Math.max(1,S.goal)*100)+'%"></i></div>'+(window.qOn()?'<p class="mu sm" style="margin:9px 0 0">'+q+' / '+(S.qgoal||30)+' questões</p>':'')+'</div>':(window.qOn()?'<div class="home-support"><h3>Meta de questões</h3><b>'+q+' / '+(S.qgoal||30)+'</b><div class="bar"><i style="width:'+Math.min(100,q/Math.max(1,S.qgoal||30)*100)+'%"></i></div></div>':'');
  var due=reviewDue(),review='<div class="home-support"><h3>Revisões</h3><b>'+(due?due+" pendentes":"Ver revisões")+'</b><button class="lk" onclick="go(\'cards\')">Revisar agora →</button></div>';
  var diag=stateDiagnosis(allItems()),p=priorities();
  var prioritiesHtml=p.length?p.map(function(x){return '<div class="home-priority"><span>•</span><span>'+e(x.subject.n)+' — '+e(topic(x.block))+'</span></div>'}).join(''):'<div class="mu sm">Suas prioridades aparecerão conforme você estuda.</div>';
@@ -333,14 +333,13 @@ function updateNavigation(){
 window.render=function(){oldRender();updateNavigation()};
 var root=document.getElementById("anki-v2"),ankiObserver;
 function simplifyAnki(){
- var el=document.getElementById("anki-v2");if(!el||el.dataset.ciclo20==="1")return;
+ var el=document.getElementById("anki-v2");if(!el)return;
  var heading=el.querySelector(".anki-welcome h2");if(heading)heading.textContent="Revisão";
  var tagline=el.querySelector(".anki-welcome p");if(tagline)tagline.textContent="Seus cartões no momento certo, sem precisar organizar tudo antes.";
  var top=el.querySelector(".anki-topline");if(top)top.firstElementChild.textContent="REVISÃO ESPAÇADA · FSRS";
  var stats=el.querySelector(".anki-stats");if(stats){var cards=stats.children;if(cards[0])cards[0].querySelector("small").textContent="Cartões";if(cards[1])cards[1].querySelector("small").textContent="Para revisar";if(cards[2])cards[2].querySelector("small").textContent="Revisões recentes";if(cards[3])cards[3].querySelector("small").textContent="Acertos recentes"}
  var actions=el.querySelector(".anki-actions");if(actions){var b=actions.querySelector("#anki-review");if(b)b.textContent="Revisar agora"+(b.disabled?"":" · "+(b.textContent.match(/\d+/)||[""])[0]);}
- el.dataset.ciclo20="1";
 }
-var ankiRoot=document.getElementById("anki-v2");if(ankiRoot){ankiObserver=new MutationObserver(function(){var el=document.getElementById("anki-v2");if(el&&el.dataset.ciclo20!=="1")simplifyAnki()});ankiObserver.observe(ankiRoot,{childList:true,subtree:true})}
+var appRoot=document.getElementById("app");if(appRoot){ankiObserver=new MutationObserver(function(){if(document.getElementById("anki-v2"))simplifyAnki()});ankiObserver.observe(appRoot,{childList:true,subtree:true})}
 window.render();
 })();
