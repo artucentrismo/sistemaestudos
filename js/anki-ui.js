@@ -55,6 +55,7 @@ async function loadData() {
   const decks=await listDecks(); decksCache=decks;
   if(selectedDeck && !decks.some(d=>d.id===selectedDeck)) selectedDeck='';
   const stats=await getStats(selectedDeck||null);
+  try{localStorage.setItem('ciclo-anki-summary-v1',JSON.stringify({total:stats.total,due:stats.due,reviews30d:stats.reviews30d,accuracy30d:stats.accuracy30d,updatedAt:Date.now()}));}catch(_){}
   notesCache=await listNotes(selectedDeck||null);
   return {decks,stats};
 }
