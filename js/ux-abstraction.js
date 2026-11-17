@@ -216,86 +216,90 @@ button,a,summary,input,select,textarea{outline-offset:3px}
 button{min-height:44px;cursor:pointer}
 input,select,textarea{font-size:16px}
 .card,.tile{border:1px solid var(--ln);box-shadow:none;border-radius:16px}
-@media(min-width:701px){body{padding-left:236px}#app{padding-top:34px}.tabs{display:none!important}}
-@media(max-width:700px){
- body{padding-left:0}#app{padding:20px 16px 112px}
- #nav{top:auto;left:0;right:0;bottom:0;width:auto;height:auto;flex-direction:row;justify-content:space-around;gap:2px;padding:7px 8px calc(7px + env(safe-area-inset-bottom));border-right:0;border-top:1px solid var(--ln);background:color-mix(in srgb,var(--cd) 94%,transparent);backdrop-filter:blur(18px)}
- #nav:before{display:none}
- #nav button{flex:1;min-width:0;max-width:none;min-height:54px;display:flex;flex-direction:column;justify-content:center;gap:2px;text-align:center;padding:5px 2px;font-size:11px;border-radius:10px}
- #nav button b{font-size:19px;width:auto}
- #nav .more-menu{bottom:76px;left:auto;right:10px;width:190px;box-shadow:0 12px 30px #0003}
- .home-layout{grid-template-columns:1fr;gap:12px}
- .next-action-card{min-height:calc(100svh - 260px);padding:22px;margin:14px 0}
- .home-secondary{grid-template-columns:1fr 1fr}
- .home-secondary .home-priorities-card{grid-column:1/-1}
- .report-columns{grid-template-columns:1fr}
- .study-v2-count{padding:13px 8px}.study-v2-count button{width:44px;height:44px}
+
+/* Layout responsivo consolidado: breakpoints por viewport, sem classificar
+   todo dispositivo touch como tablet. */
+:root{overflow-x:hidden}
+html,body{width:100%;max-width:100%;min-width:320px}
+body{overflow-x:clip}
+#app{box-sizing:border-box;width:100%;max-width:1120px;min-width:0;margin:0 auto;padding:30px 32px 110px}
+#app *{min-width:0}
+#app img,#app video,#app canvas,#app svg{max-width:100%;height:auto}
+#app table{display:block;width:100%;max-width:100%;overflow-x:auto}
+#app input,#app select,#app textarea{box-sizing:border-box;max-width:100%;min-width:0}
+#app .home-layout{grid-template-columns:minmax(0,1.6fr) minmax(250px,1fr)}
+#app .report-columns{grid-template-columns:repeat(2,minmax(0,1fr))}
+#app .home-primary,#app .home-secondary,#app .home-support,#app .report-box{min-width:0}
+#nav{box-sizing:border-box}
+@media(min-width:1201px){
+ body{padding-left:236px}
+ #app{padding:34px 36px 80px}
+ #nav{position:fixed;z-index:900;left:0;top:0;bottom:0;width:236px;display:flex!important;flex-direction:column;justify-content:flex-start;align-items:stretch;gap:6px;padding:26px 14px;background:var(--cd);border-right:1px solid var(--ln);backdrop-filter:none}
+ #nav:before{content:"CICLO";display:block;font:800 20px Manrope,Inter,sans-serif;letter-spacing:.12em;color:var(--ac);padding:8px 14px 28px}
+ #nav button{display:flex;align-items:center;gap:13px;max-width:none;width:100%;min-height:48px;text-align:left;padding:10px 14px;border-radius:12px;font-size:15px;color:var(--mu)}
+ #nav button b{display:inline-grid;place-items:center;width:24px;font-size:19px}
+ #nav button.a{background:color-mix(in srgb,var(--ac) 9%,var(--cd));color:var(--ac);font-weight:750}
+ #nav .more-menu{position:absolute;left:12px;right:12px;bottom:18px;background:var(--cd);border:1px solid var(--ln);border-radius:14px;padding:8px;box-shadow:0 12px 30px #0002}
+ .tabs{display:none!important}
 }
-@media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}
-/* iPad e tablets: navegação confortável e conteúdo sem colunas comprimidas */
-@media (min-width:701px) and (max-width:1200px){
+@media(min-width:701px) and (max-width:1200px), (pointer:coarse) and (hover:none) and (min-width:701px) and (max-width:1400px){
  body{padding-left:0!important}
- #app{width:100%;max-width:1000px;margin:0 auto;padding:26px 28px 116px}
- #nav{top:auto!important;left:0!important;right:0!important;bottom:0!important;width:100%!important;height:auto!important;min-height:68px;display:flex!important;flex-direction:row!important;justify-content:space-around!important;align-items:stretch!important;gap:6px!important;padding:8px 18px calc(8px + env(safe-area-inset-bottom))!important;border-right:0!important;border-top:1px solid var(--ln)!important;background:color-mix(in srgb,var(--cd) 96%,transparent)!important;backdrop-filter:blur(18px)!important}
- #nav:before{display:none!important}
- #nav button{flex:1 1 0!important;min-width:0!important;max-width:190px!important;width:auto!important;min-height:52px!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:2px!important;text-align:center!important;padding:5px 6px!important;font-size:12px!important;white-space:nowrap}
- #nav button b{width:auto!important;font-size:19px!important;line-height:1.1}
- #nav .more-menu{position:absolute!important;left:auto!important;right:18px!important;bottom:calc(78px + env(safe-area-inset-bottom))!important;width:min(240px,calc(100vw - 36px))!important;max-width:none!important}
- #app .home-layout{grid-template-columns:minmax(0,1.55fr) minmax(250px,1fr);gap:16px}
- #app .report-columns{grid-template-columns:repeat(2,minmax(0,1fr))}
- #app .next-action-card{min-width:0}
- #app .card,#app .tile,#app .report-box,#app .home-support{min-width:0;overflow-wrap:anywhere}
- #app img,#app video,#app canvas,#app svg{max-width:100%;height:auto}
- #app table{display:block;max-width:100%;overflow-x:auto}
- #app input,#app select,#app textarea{max-width:100%}
+ #app{width:100%;max-width:1120px;padding:26px 28px 124px}
+ #nav{position:fixed!important;z-index:1200!important;top:auto!important;left:0!important;right:0!important;bottom:0!important;transform:none!important;width:100%!important;height:auto!important;min-height:68px!important;max-height:calc(88px + env(safe-area-inset-bottom))!important;display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;justify-content:space-around!important;align-items:stretch!important;gap:6px!important;padding:7px 16px calc(7px + env(safe-area-inset-bottom))!important;margin:0!important;border:0!important;border-top:1px solid var(--ln)!important;border-radius:0!important;background:var(--cd)!important;box-shadow:0 -8px 24px rgba(16,24,40,.08)!important;overflow:visible!important}
+ #nav:before{display:none!important;content:none!important}
+ #nav button{box-sizing:border-box;flex:1 1 0!important;width:auto!important;min-width:0!important;max-width:190px!important;height:auto!important;min-height:52px!important;margin:0!important;padding:5px 6px!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:3px!important;text-align:center!important;white-space:nowrap!important;font-size:12px!important;line-height:1.2!important;border-radius:10px!important}
+ #nav button b{display:block!important;width:auto!important;margin:0!important;font-size:19px!important;line-height:1.1!important}
+ #nav .more-menu{position:absolute!important;left:auto!important;right:14px!important;top:auto!important;bottom:calc(78px + env(safe-area-inset-bottom))!important;width:min(250px,calc(100vw - 28px))!important;max-width:none!important;background:var(--cd)!important;border:1px solid var(--ln)!important;border-radius:14px!important;padding:8px!important;box-shadow:0 12px 30px rgba(0,0,0,.18)!important}
+ #nav .more-menu button{width:100%!important;min-height:46px!important;max-width:none!important;flex-direction:row!important;justify-content:flex-start!important;text-align:left!important;font-size:14px!important}
+ #app .home-layout{grid-template-columns:minmax(0,1fr)!important;gap:14px}
+ #app .next-action-card{width:100%;min-height:0;margin:14px 0;padding:26px}
+ #app .home-secondary{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+ #app .home-secondary .home-priorities-card{grid-column:1/-1}
 }
-@media (min-width:701px) and (max-width:900px){
- #app{padding:22px 20px 116px}
- #app .home-layout,#app .report-columns{grid-template-columns:minmax(0,1fr)}
+@media(min-width:901px) and (max-width:1200px){
+ #app .home-layout{grid-template-columns:minmax(0,1.5fr) minmax(260px,1fr)!important}
+ #app .next-action-card{min-height:280px}
+}
+@media(max-width:900px){
+ #app{padding:22px 20px 122px}
+ #app .home-layout,#app .report-columns{grid-template-columns:minmax(0,1fr)!important}
+ #app .next-action-card{min-height:0;padding:24px}
  #app .home-secondary{grid-template-columns:repeat(2,minmax(0,1fr))}
  #app .home-secondary .home-priorities-card{grid-column:1/-1}
- #app .next-action-card{min-height:0;padding:24px}
  #app .study-v2-counts{gap:10px}
  #app .study-v2-count{padding:14px 10px}
 }
-@media (max-width:700px){
- #app{width:100%;max-width:100%;overflow-x:clip}
- #app .home-layout,#app .report-columns{grid-template-columns:minmax(0,1fr)}
- #app .home-secondary{grid-template-columns:repeat(2,minmax(0,1fr))}
- #app .next-action-card{min-height:0}
+@media(max-width:700px), (pointer:coarse) and (hover:none) and (max-width:700px){
+ html,body{min-width:320px}
+ #app{width:100%;max-width:100%;padding:20px 16px calc(122px + env(safe-area-inset-bottom));overflow-x:clip}
+ #nav{position:fixed!important;z-index:1200!important;top:auto!important;left:0!important;right:0!important;bottom:0!important;width:100%!important;height:auto!important;min-height:64px!important;display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;justify-content:space-around!important;gap:2px!important;padding:6px 8px calc(6px + env(safe-area-inset-bottom))!important;border:0!important;border-top:1px solid var(--ln)!important;background:var(--cd)!important;backdrop-filter:blur(18px)}
+ #nav:before{display:none!important}
+ #nav button{flex:1 1 0!important;min-width:0!important;max-width:none!important;min-height:52px!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:2px!important;text-align:center!important;padding:5px 2px!important;font-size:11px!important;white-space:nowrap}
+ #nav button b{display:block!important;width:auto!important;font-size:19px!important}
+ #nav .more-menu{position:absolute!important;left:auto!important;right:10px!important;bottom:calc(72px + env(safe-area-inset-bottom))!important;width:min(210px,calc(100vw - 20px))!important}
+ #app .home-layout,#app .report-columns{grid-template-columns:minmax(0,1fr)!important}
+ #app .home-secondary{grid-template-columns:minmax(0,1fr)!important}
+ #app .home-secondary .home-priorities-card{grid-column:auto}
+ #app .next-action-card{min-height:0;padding:22px}
  #app .study-v2-counts{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #app .anki-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #app .anki-actions{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #app .anki-actions .anki-primary{grid-column:1/-1}
+ #app .anki-toolbar{grid-template-columns:minmax(0,1fr)}
+ #app .anki-toolbar button{width:100%}
+ #app .anki-grade-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #app .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #app .row{flex-wrap:wrap}
+ #app .row>.f{flex:1 1 100%}
+ #app .ciclo-finish-stats{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
-`;
-
-/* Correção dedicada ao iPad: Safari pode reportar viewport maior que 1200px
-   por causa do zoom. O ponteiro coarse identifica tablets mesmo nesse caso. */
-css.textContent += `
-@media (pointer:coarse) and (hover:none), (min-width:701px) and (max-width:1200px){
- html,body{width:100%;max-width:100%;overflow-x:hidden}
- body{padding-left:0!important;margin:0}
- #app{box-sizing:border-box;width:100%!important;max-width:1120px!important;margin:0 auto!important;padding:24px 24px 120px!important;min-width:0}
- #nav{box-sizing:border-box;position:fixed!important;top:auto!important;left:0!important;right:0!important;bottom:0!important;transform:none!important;width:100%!important;height:auto!important;min-height:70px!important;max-height:calc(86px + env(safe-area-inset-bottom))!important;display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;justify-content:space-around!important;align-items:stretch!important;gap:6px!important;padding:7px 16px calc(7px + env(safe-area-inset-bottom))!important;margin:0!important;border:0!important;border-top:1px solid var(--ln)!important;border-radius:0!important;background:var(--cd)!important;box-shadow:0 -8px 24px rgba(16,24,40,.08)!important;overflow:visible!important;z-index:1200!important}
- #nav:before{display:none!important;content:none!important}
- #nav button{box-sizing:border-box;flex:1 1 0!important;width:auto!important;min-width:0!important;max-width:none!important;height:auto!important;min-height:52px!important;margin:0!important;padding:5px 3px!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:3px!important;text-align:center!important;white-space:nowrap!important;font-size:12px!important;line-height:1.2!important;border-radius:10px!important}
- #nav button b{display:block!important;width:auto!important;margin:0!important;font-size:19px!important;line-height:1.1!important}
- #nav .more-menu{position:absolute!important;left:auto!important;right:14px!important;top:auto!important;bottom:calc(78px + env(safe-area-inset-bottom))!important;width:min(250px,calc(100vw - 28px))!important;max-width:none!important;background:var(--cd)!important;border:1px solid var(--ln)!important;border-radius:14px!important;padding:8px!important;box-shadow:0 12px 30px rgba(0,0,0,.18)!important}
- #nav .more-menu button{width:100%!important;min-height:46px!important;flex-direction:row!important;justify-content:flex-start!important;text-align:left!important;font-size:14px!important}
- #app,.home-layout,.home-primary,.home-secondary,.next-action-card,.home-support,.report-box,.report-state{min-width:0!important;max-width:100%}
- #app .home-layout{grid-template-columns:minmax(0,1fr)!important;gap:14px!important}
- #app .next-action-card{width:100%!important;min-height:0!important;margin:14px 0!important;padding:26px!important}
- #app .home-secondary{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:12px!important}
- #app .home-priorities-card{grid-column:1/-1!important}
- #app .report-columns{grid-template-columns:repeat(2,minmax(0,1fr))!important}
- #app img,#app video,#app canvas,#app svg{max-width:100%;height:auto}
- #app table{display:block;max-width:100%;overflow-x:auto}
- #app input,#app select,#app textarea{box-sizing:border-box;max-width:100%}
+@media(max-width:380px){
+ #app{padding-left:12px;padding-right:12px}
+ #app .card{padding:16px}
+ #app .ciclo-finish-dialog{padding:18px}
+ #nav button{font-size:10px!important}
 }
-@media (pointer:coarse) and (hover:none) and (max-width:900px){
- #app{padding:20px 16px 120px!important}
- #app .home-secondary,#app .report-columns{grid-template-columns:minmax(0,1fr)!important}
- #app .next-action-card{padding:22px!important}
-}
-`;
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}
 document.head.appendChild(css);
 function e(v){return window.esc(String(v==null?"":v))}
 function topic(block){return Array.isArray(block)?block.join(" · "):String(block||"")}
@@ -414,7 +418,7 @@ window.toggleMoreNav=function(){
 function updateNavigation(){
  var nav=document.getElementById("nav");if(!nav||!window.S.ob)return;
  var current=window.tab==="sess"?"home":window.tab==="sub"?"cfg":window.tab==="qa"?"prog":["rev","cf","io"].includes(window.tab)?"cards":window.tab;
- var mobile=window.matchMedia("(max-width:1200px), (pointer:coarse) and (hover:none)").matches;
+ var mobile=window.matchMedia("(max-width:1200px), (pointer:coarse) and (hover:none) and (max-width:1400px)").matches;
  var active=mobile&&!["home","ciclo","cards"].includes(current)?"more":current;
  var items=mobile?[["home","◉","Início"],["ciclo","⌁","Ciclo"],["cards","▤","Revisão"],["more","•••","Mais"]]:[["home","◉","Início"],["ciclo","⌁","Ciclo"],["cards","▤","Revisão"],["red","✎","Redação"],["prog","▦","Relatórios"],["cfg","⚙","Ajustes"]];
  nav.innerHTML=items.map(function(x){return '<button class="'+(active===x[0]?"a":"")+'" onclick="'+(x[0]==="more"?"toggleMoreNav()":"go(\'"+x[0]+"\')")+'"><b>'+x[1]+'</b>'+x[2]+'</button>'}).join("");
