@@ -81,24 +81,12 @@ window.finalizeStudyV2=function(){
 };
 window.sess=function(){return originalSess().replace(/ss=null;go\('home'\)/,"timerPause();persistDraft();go('home')")};
 
-/* Início e percurso passam a ser uma única tela. Mantemos a rota antiga
-   como alias para preservar links internos e favoritos. */
-var homeBeforeCycle=window.home;
-window.home=function(){
- var html=homeBeforeCycle();
- html=html.replace('<button onclick="go(\\'ciclo\\')"><b>↻ Ciclo</b><span>Ver matérias e cadernos</span></button>','');
- var cycle=window.ciclo?window.ciclo():"";
- cycle=cycle.replace(/<div class="up">SEU PERCURSO<\\/div>/,"<div class=\\"up\\">SEU PERCURSO</div>").replace("<h1>Ciclo</h1>","<h2 style=\\"margin-top:8px\\">Seu percurso de estudos</h2>").replace("<p class=\\"mu\\">Seu GPS de estudos: agora, próximo e depois.</p>","");
- return html+'<section class="integrated-cycle" style="margin-top:28px">'+cycle+'</section>';
-};
-var goBeforeSidebar=window.go;
-window.go=function(route){if(route==="ciclo")route="home";var result=goBeforeSidebar(route);if(typeof toggleSidebar==="function")toggleSidebar(false);return result};
 window.prog=function(){return '<h1>Relatórios</h1><p class="mu sm">Uma visão organizada da sua evolução, frequência e aprendizagem.</p>'+originalProg()};
 window.save=function(){originalSave();persistDraft()};
 window.start=function(){originalStart();persistDraft()};
 window.stp=function(f,i,v){originalStep(f,i,v);persistDraft()};
 window.setK=function(i){originalSetK(i);persistDraft()};
-window.go=function(t){if(t!=="sess"&&window.ss){if(window.timerPause)window.timerPause();persistDraft()}originalGo(t)};
+window.go=function(t){if(t==="ciclo")t="home";if(t!=="sess"&&window.ss){if(window.timerPause)window.timerPause();persistDraft()}originalGo(t);if(typeof toggleSidebar==="function")toggleSidebar(false)};
 window.adv=function(skip){originalAdv(skip);if(!window.ss)clearDraft()};
 window.restoreLocal=function(){
  var input=document.createElement("input");input.type="file";input.accept=".json,application/json";
@@ -469,6 +457,16 @@ window.ciclo=function(){
  html+='<h2>Próximas sessões</h2><div class="gps-list">'+(next.map(function(x,i){return '<div class="gps-item"><span class="gps-number">'+(i+1)+'</span><div class="gps-copy"><b>'+e(x.s.n)+'</b><small>'+e(topic(x.b))+'</small></div><span class="mu">›</span></div>'}).join('')||'<p class="mu sm">Seu percurso seguinte aparecerá conforme você avança.</p>')+'</div>';
  html+='<details class="report-advanced"><summary>Ver estrutura completa</summary><div style="padding-top:12px">'+S.subs.map(function(s,si){return '<section style="padding:10px 0;border-top:1px solid var(--ln)"><b>'+e(s.n)+'</b>'+s.t.map(function(b,i){return '<div class="report-line">'+(i+1)+'. '+e(topic(b))+(i===s.ptr?' · próximo':'')+'</div>'}).join('')+'</section>'}).join('')+'<button class="btn s" onclick="go(\'cfg\')">Organizar matérias e assuntos</button></div></details>';
  return html;
+};
+
+/* Início e percurso passam a ser uma única tela. */
+var homeBeforeCycle=window.home;
+window.home=function(){
+ var html=homeBeforeCycle();
+ html=html.replace('<button onclick="go(\\'ciclo\\')"><b>↻ Ciclo</b><span>Ver matérias e cadernos</span></button>','');
+ var cycle=window.ciclo?window.ciclo():"";
+ cycle=cycle.replace('<div class="up">SEU PERCURSO</div>','<div class="up">SEU PERCURSO</div>').replace("<h1>Ciclo</h1>","<h2 style=\\"margin-top:8px\\">Seu percurso de estudos</h2>").replace('<p class="mu">Seu GPS de estudos: agora, próximo e depois.</p>','');
+ return html+'<section class="integrated-cycle" style="margin-top:28px">'+cycle+'</section>';
 };
 window.prog=function(){
  var items=allItems(),diag=stateDiagnosis(items),valid=items.filter(function(x){return x.metrics.totalQuestions>0}),ready=diag.kind!=="formation"&&diag.kind!=="empty",strong=ready?valid.filter(function(x){return x.metrics.masteryScore>=80&&x.metrics.passRecords.length>=3&&x.metrics.retention&&x.metrics.retention.score>=75}):[],improving=ready?valid.filter(function(x){return x.metrics.improvementScore>=15}).sort(function(a,b){return b.metrics.improvementScore-a.metrics.improvementScore}):[],weak=ready?valid.filter(function(x){return x.metrics.stuck||x.metrics.masteryScore<60||x.metrics.stagnation}).sort(function(a,b){return a.metrics.masteryScore-b.metrics.masteryScore}).slice(0,4):[];
