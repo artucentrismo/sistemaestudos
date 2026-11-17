@@ -313,13 +313,13 @@ css.textContent += `
  #nav button b{display:inline-grid!important;place-items:center!important;width:25px!important;flex:none!important;font-size:19px!important}
  #nav button.a{background:color-mix(in srgb,var(--ac) 10%,var(--cd))!important;color:var(--ac)!important;font-weight:750!important}
  #app{max-width:1120px!important;margin:0 auto!important}
- .app-topbar-inner{max-width:1120px!important;margin-left:224px!important}
+ .app-topbar-inner{max-width:1120px!important;margin-left:0!important}
  #ciclo-sidebar-toggle{display:none!important}
 }
 @media(min-width:701px) and (max-width:1000px){
  body{padding-left:204px!important}
  #nav{width:204px!important;padding:18px 10px!important}
- .app-topbar-inner{margin-left:204px!important}
+ .app-topbar-inner{margin-left:0!important}
  #app{padding-left:20px!important;padding-right:20px!important}
  #app .home-layout,#app .report-columns{grid-template-columns:minmax(0,1fr)!important}
 }
