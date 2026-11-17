@@ -20,7 +20,9 @@ Simplificar e melhorar o que já existe, preservando funções úteis. O escopo 
 - Fragilidade aparece como **Robustez do conhecimento**.
 - Indicadores sem amostra suficiente geram orientação simples, não mensagens técnicas.
 - O Learning Score não é exibido como métrica bruta; suas conquistas continuam condicionadas a dados válidos.
-- SMS composto continua indisponível enquanto não houver fórmula oficial aprovada.
+- SMS aparece na interface como **Maturidade de Estudos**, com classificação e ponto de atenção.
+- O índice combina domínio médio (40%), consistência (30%), velocidade (15%) e resiliência (15%).
+- Se algum componente não tiver dados suficientes, o índice fica “Em formação”; dados ausentes não viram zero.
 
 ## Gamificação
 XP, níveis, sequência, bônus e escudos permanecem como elementos de motivação secundários. As conquistas passam a valorizar:
@@ -35,3 +37,9 @@ Conquistas desbloqueadas são persistidas no estado local do estudante.
 
 ## Preservação
 Esta atualização reorganiza apresentação, navegação e linguagem. Não altera as fórmulas oficiais do motor, não apaga histórico e não migra o armazenamento para serviço pago. A sessão de estudo, registro manual de questões, cronômetro, calendário, Anki, redação, configurações e backup continuam disponíveis.
+
+
+## Sessão de questões e Maturidade de Estudos
+- Ao adicionar acertos ou erros em um bloco, o Ciclo marca automaticamente aquele bloco como estudado. O controle manual continua disponível.
+- A classificação de dificuldade saiu do fluxo principal e fica recolhida como opção avançada, pois é necessária para a fórmula de Robustez do conhecimento (questões fáceis versus difíceis).
+- A Maturidade de Estudos segue a fórmula aprovada: DM 40%, CS 30%, VS 15% e RS 15%. O modo avançado é liberado automaticamente a partir de 70, com possibilidade de escolha manual local.
