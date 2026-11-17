@@ -80,6 +80,19 @@ window.finalizeStudyV2=function(){
  document.body.appendChild(modal);
 };
 window.sess=function(){return originalSess().replace(/ss=null;go\('home'\)/,"timerPause();persistDraft();go('home')")};
+
+/* Início e percurso passam a ser uma única tela. Mantemos a rota antiga
+   como alias para preservar links internos e favoritos. */
+var homeBeforeCycle=window.home;
+window.home=function(){
+ var html=homeBeforeCycle();
+ html=html.replace('<button onclick="go(\\'ciclo\\')"><b>↻ Ciclo</b><span>Ver matérias e cadernos</span></button>','');
+ var cycle=window.ciclo?window.ciclo():"";
+ cycle=cycle.replace(/<div class="up">SEU PERCURSO<\\/div>/,"<div class=\\"up\\">SEU PERCURSO</div>").replace("<h1>Ciclo</h1>","<h2 style=\\"margin-top:8px\\">Seu percurso de estudos</h2>").replace("<p class=\\"mu\\">Seu GPS de estudos: agora, próximo e depois.</p>","");
+ return html+'<section class="integrated-cycle" style="margin-top:28px">'+cycle+'</section>';
+};
+var goBeforeSidebar=window.go;
+window.go=function(route){if(route==="ciclo")route="home";var result=goBeforeSidebar(route);if(typeof toggleSidebar==="function")toggleSidebar(false);return result};
 window.prog=function(){return '<h1>Relatórios</h1><p class="mu sm">Uma visão organizada da sua evolução, frequência e aprendizagem.</p>'+originalProg()};
 window.save=function(){originalSave();persistDraft()};
 window.start=function(){originalStart();persistDraft()};
@@ -301,6 +314,83 @@ body{overflow-x:clip}
 }
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}
 `;
+css.textContent += `
+/* Navegação lateral completa e formulários com hierarquia consistente */
+.app-topbar-inner{padding-left:clamp(16px,3vw,34px)}
+@media(min-width:701px){
+ body{padding-left:224px!important}
+ #nav{position:fixed!important;inset:0 auto 0 0!important;width:224px!important;height:100dvh!important;max-height:100dvh!important;display:flex!important;flex-direction:column!important;align-items:stretch!important;justify-content:flex-start!important;gap:7px!important;padding:24px 14px!important;overflow-y:auto!important;overflow-x:hidden!important;background:var(--cd)!important;border:0!important;border-right:1px solid var(--ln)!important;border-radius:0!important;box-shadow:4px 0 24px rgba(16,24,40,.04)!important;z-index:1300!important}
+ #nav:before{display:block!important;content:"CICLO"!important;padding:8px 14px 26px!important;font:800 20px Manrope,Inter,sans-serif!important;letter-spacing:.12em!important;color:var(--ac)!important}
+ #nav button{flex:none!important;width:100%!important;max-width:none!important;min-height:48px!important;display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:flex-start!important;gap:13px!important;padding:10px 13px!important;text-align:left!important;font-size:14px!important;white-space:normal!important;border-radius:12px!important}
+ #nav button b{display:inline-grid!important;place-items:center!important;width:25px!important;flex:none!important;font-size:19px!important}
+ #nav button.a{background:color-mix(in srgb,var(--ac) 10%,var(--cd))!important;color:var(--ac)!important;font-weight:750!important}
+ #app{max-width:1120px!important;margin:0 auto!important}
+ .app-topbar-inner{max-width:1120px!important;margin-left:224px!important}
+ #ciclo-sidebar-toggle{display:none!important}
+}
+@media(min-width:701px) and (max-width:1000px){
+ body{padding-left:204px!important}
+ #nav{width:204px!important;padding:18px 10px!important}
+ .app-topbar-inner{margin-left:204px!important}
+ #app{padding-left:20px!important;padding-right:20px!important}
+ #app .home-layout,#app .report-columns{grid-template-columns:minmax(0,1fr)!important}
+}
+#ciclo-sidebar-toggle{border:1px solid var(--ln);background:var(--cd);color:var(--tx);border-radius:11px;min-width:42px;min-height:42px;padding:8px 10px;font-size:20px;line-height:1;cursor:pointer}
+#ciclo-sidebar-backdrop{display:none}
+@media(max-width:700px){
+ body{padding-left:0!important}
+ .app-topbar-inner{margin:0!important;padding:10px 14px!important;gap:10px!important}
+ #ciclo-sidebar-toggle{display:inline-flex!important;align-items:center;justify-content:center;flex:none;order:-1}
+ #nav{position:fixed!important;z-index:1500!important;inset:0 auto 0 0!important;width:min(290px,86vw)!important;height:100dvh!important;max-height:100dvh!important;display:flex!important;flex-direction:column!important;align-items:stretch!important;justify-content:flex-start!important;gap:7px!important;padding:24px 14px calc(24px + env(safe-area-inset-bottom))!important;overflow-y:auto!important;overflow-x:hidden!important;background:var(--cd)!important;border:0!important;border-right:1px solid var(--ln)!important;border-radius:0 18px 18px 0!important;box-shadow:16px 0 48px rgba(0,0,0,.18)!important;transform:translateX(-110%)!important;transition:transform .22s ease!important}
+ #nav.sidebar-open{transform:translateX(0)!important}
+ #nav:before{display:block!important;content:"CICLO"!important;padding:8px 14px 24px!important;font:800 20px Manrope,Inter,sans-serif!important;letter-spacing:.12em!important;color:var(--ac)!important}
+ #nav button{flex:none!important;width:100%!important;max-width:none!important;min-height:50px!important;display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:flex-start!important;gap:13px!important;padding:10px 13px!important;text-align:left!important;font-size:15px!important;white-space:normal!important;border-radius:12px!important}
+ #nav button b{display:inline-grid!important;place-items:center!important;width:26px!important;flex:none!important;font-size:20px!important}
+ #nav button.a{background:color-mix(in srgb,var(--ac) 10%,var(--cd))!important;color:var(--ac)!important;font-weight:750!important}
+ #ciclo-sidebar-backdrop{display:block;position:fixed;inset:0;z-index:1490;background:rgba(8,18,32,.42);opacity:0;pointer-events:none;transition:opacity .2s}
+ #ciclo-sidebar-backdrop.visible{opacity:1;pointer-events:auto}
+ #app{padding:18px 14px calc(40px + env(safe-area-inset-bottom))!important;max-width:100%!important}
+}
+.goal-settings-card{display:grid;gap:12px}
+.goal-setting{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:14px;padding:16px;border:1px solid var(--ln);border-radius:14px;background:var(--cd)}
+.goal-setting-copy b{display:block;font-size:15px;color:var(--tx)}
+.goal-setting-copy p{margin:5px 0 0;color:var(--mu);font-size:13px;line-height:1.45}
+.goal-setting-control{display:flex;align-items:center;gap:10px}
+.goal-setting-control small{font-size:12px;color:var(--mu)}
+.goal-value{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:12px;padding:12px 14px 14px;border:1px solid var(--ln);border-top:0;border-radius:0 0 14px 14px;margin-top:-12px;background:var(--surface2)}
+.goal-value label{font-size:13px;font-weight:650;color:var(--tx)}
+.goal-value input{width:112px!important;min-height:44px;margin:0!important;padding:9px 11px!important;border:1px solid var(--ln)!important;border-radius:10px!important;background:var(--cd)!important;color:var(--tx)!important;text-align:center;font-size:16px!important}
+.goal-setting .sw{width:52px!important;height:30px!important;min-height:30px!important;border-radius:99px!important;padding:0!important;flex:none!important}
+.goal-setting .sw i{width:24px!important;height:24px!important;top:3px!important;left:3px!important}
+.goal-setting .sw.on i{left:25px!important}
+.anki-note-editor{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:14px!important;padding:clamp(16px,3vw,26px)!important;border:1px solid var(--ln)!important;box-shadow:0 8px 28px rgba(16,24,40,.05)}
+.anki-form-title{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:12px!important;margin-bottom:4px}
+.anki-form-title h3{margin:5px 0 0!important;font-size:21px!important}
+.anki-note-editor>label{display:grid!important;gap:7px!important;margin:0!important;font-size:13px!important;color:var(--tx)!important}
+.anki-note-editor input:not([type=file]),.anki-note-editor select,.anki-note-editor textarea{box-sizing:border-box!important;width:100%!important;max-width:100%!important;min-width:0!important;margin:0!important;padding:12px 13px!important;border:1px solid var(--ln)!important;border-radius:11px!important;background:var(--bg)!important;color:var(--tx)!important;font:inherit!important;font-size:16px!important;line-height:1.5!important}
+.anki-note-editor textarea{min-height:140px!important;resize:vertical!important}
+.anki-field-card{display:grid!important;gap:12px!important;min-width:0!important;padding:16px!important;border:1px solid var(--ln)!important;border-radius:14px!important;background:var(--surface2)!important}
+.anki-field-heading{display:flex!important;align-items:center!important;gap:11px!important}
+.anki-field-heading>div{display:grid!important;gap:3px!important}
+.anki-field-heading b{font-size:15px!important;color:var(--tx)!important}
+.anki-field-heading small{font-size:12px!important;color:var(--mu)!important}
+.anki-field-number{display:grid!important;place-items:center!important;width:32px!important;height:32px!important;flex:none!important;border-radius:10px!important;background:var(--ac)!important;color:white!important;font-weight:800!important}
+.anki-field-footer{display:flex!important;justify-content:space-between!important;align-items:center!important;gap:10px!important;flex-wrap:wrap!important;color:var(--mu)!important;font-size:12px!important}
+.anki-note-editor input[type=file]{width:100%!important;max-width:100%!important;padding:10px!important;border:1px dashed var(--ln)!important;border-radius:10px!important;background:var(--surface2)!important;color:var(--tx)!important}
+.anki-note-editor .anki-primary{min-height:50px!important}
+@media(max-width:700px){
+ .goal-setting{grid-template-columns:minmax(0,1fr)!important;gap:12px!important;padding:14px!important}
+ .goal-setting-control{justify-content:space-between!important}
+ .goal-value{grid-template-columns:minmax(0,1fr) 100px!important;padding:11px 12px 13px!important}
+ .goal-value input{width:100%!important}
+ .anki-note-editor{padding:14px!important;gap:12px!important}
+ .anki-field-card{padding:12px!important}
+ .anki-note-editor textarea{min-height:120px!important}
+ .anki-form-title h3{font-size:19px!important}
+ .anki-note-editor .anki-icon-button{flex:none!important}
+}
+@media(prefers-reduced-motion:reduce){#nav,#ciclo-sidebar-backdrop{transition:none!important}}
+`;
 document.head.appendChild(css);
 function e(v){return window.esc(String(v==null?"":v))}
 function topic(block){return Array.isArray(block)?block.join(" · "):String(block||"")}
@@ -416,14 +506,30 @@ window.toggleMoreNav=function(){
  var nav=document.getElementById("nav"),old=nav&&nav.querySelector(".more-menu");if(old){old.remove();return}
  if(!nav)return;var box=document.createElement("div");box.className="more-menu";box.innerHTML='<button onclick="go(\'red\')"><b>✎</b>Redação</button><button onclick="go(\'prog\')"><b>▦</b>Relatórios</button><button onclick="go(\'cfg\')"><b>⚙</b>Ajustes</button>';nav.appendChild(box);
 };
+
+function toggleSidebar(force){
+ var nav=document.getElementById("nav"),back=document.getElementById("ciclo-sidebar-backdrop");
+ if(!nav)return;
+ var open=typeof force==="boolean"?force:!nav.classList.contains("sidebar-open");
+ nav.classList.toggle("sidebar-open",open);
+ if(back)back.classList.toggle("visible",open);
+ var btn=document.getElementById("ciclo-sidebar-toggle");if(btn)btn.setAttribute("aria-expanded",open?"true":"false");
+}
 function updateNavigation(){
  var nav=document.getElementById("nav");if(!nav||!window.S.ob)return;
- var current=window.tab==="sess"?"home":window.tab==="sub"?"cfg":window.tab==="qa"?"prog":["rev","cf","io"].includes(window.tab)?"cards":window.tab;
- var mobile=window.matchMedia("(max-width:1200px), (pointer:coarse) and (hover:none) and (max-width:1400px)").matches;
- var active=mobile&&!["home","ciclo","cards"].includes(current)?"more":current;
- var items=mobile?[["home","◉","Início"],["ciclo","⌁","Ciclo"],["cards","▤","Revisão"],["more","•••","Mais"]]:[["home","◉","Início"],["ciclo","⌁","Ciclo"],["cards","▤","Revisão"],["red","✎","Redação"],["prog","▦","Relatórios"],["cfg","⚙","Ajustes"]];
- nav.innerHTML=items.map(function(x){return '<button class="'+(active===x[0]?"a":"")+'" onclick="'+(x[0]==="more"?"toggleMoreNav()":"go(\'"+x[0]+"\')")+'"><b>'+x[1]+'</b>'+x[2]+'</button>'}).join("");
+ var current=window.tab==="sess"?"home":window.tab==="sub"?"cfg":window.tab==="qa"?"prog":["rev","cf","io"].includes(window.tab)?"cards":window.tab==="ciclo"?"home":window.tab;
+ var items=[["home","◉","Início e ciclo"],["cards","▤","Revisão"],["red","✎","Redação"],["prog","▦","Relatórios"],["cfg","⚙","Ajustes"]];
+ nav.innerHTML=items.map(function(x){return '<button class="'+(current===x[0]?"a":"")+'" onclick="go(\''+x[0]+'\');toggleSidebar(false)"><b>'+x[1]+'</b>'+x[2]+'</button>'}).join("");
+ var inner=document.querySelector(".app-topbar-inner");
+ if(inner&&!document.getElementById("ciclo-sidebar-toggle")){
+  var btn=document.createElement("button");btn.id="ciclo-sidebar-toggle";btn.type="button";btn.setAttribute("aria-label","Abrir menu de navegação");btn.setAttribute("aria-expanded","false");btn.textContent="☰";btn.onclick=function(){toggleSidebar()};
+  inner.insertBefore(btn,inner.firstChild);
+ }
+ if(!document.getElementById("ciclo-sidebar-backdrop")){
+  var back=document.createElement("div");back.id="ciclo-sidebar-backdrop";back.onclick=function(){toggleSidebar(false)};document.body.appendChild(back);
+ }
 }
+
 window.render=function(){oldRender();updateNavigation()};
 window.addEventListener("resize",updateNavigation,{passive:true});
 window.addEventListener("orientationchange",function(){setTimeout(updateNavigation,80)},{passive:true});
@@ -444,6 +550,20 @@ function collapseAnkiTools(){
  var summary=document.createElement("summary");summary.textContent="Gerenciar conteúdos";details.appendChild(summary);
  nodes.forEach(function(node){details.appendChild(node)});el.appendChild(details);
 }
+
+/* Metas em cartões separados: controle e valor ficam juntos e legíveis. */
+var cfgBeforeGoals=window.cfg;
+window.cfg=function(){
+ var html=cfgBeforeGoals();
+ var a=html.indexOf("<h2>Metas</h2>"),b=html.indexOf("<h2>Tempo do bloco de questões</h2>",a);
+ if(a>=0&&b>a){
+  var goals='<h2>Metas diárias</h2><div class="goal-settings-card">'+
+   '<section><div class="goal-setting"><div class="goal-setting-copy"><b>Meta de tempo</b><p>Defina quantos minutos deseja estudar por dia.</p></div><div class="goal-setting-control"><small>'+(window.gOn()?"Ativada":"Desativada")+'</small>'+window.sw(window.gOn(),'S.goalOn=!gOn();save();render()')+'</div></div>'+(window.gOn()?'<div class="goal-value"><label for="cycle-goal-minutes">Minutos por dia</label><input id="cycle-goal-minutes" type="number" min="15" max="1440" step="5" inputmode="numeric" value="'+window.S.goal+'" onchange="setG(this.value)"></div>':'')+'</section>'+
+   '<section><div class="goal-setting"><div class="goal-setting-copy"><b>Meta de questões</b><p>Escolha quantas questões pretende resolver diariamente.</p></div><div class="goal-setting-control"><small>'+(window.qOn()?"Ativada":"Desativada")+'</small>'+window.sw(window.qOn(),'S.qgoalOn=!qOn();save();render()')+'</div></div>'+(window.qOn()?'<div class="goal-value"><label for="cycle-goal-questions">Questões por dia</label><input id="cycle-goal-questions" type="number" min="1" max="1000" step="5" inputmode="numeric" value="'+(window.S.qgoal||30)+'" onchange="S.qgoal=Math.max(1,Math.min(1000,parseInt(this.value)||30));save();render()"></div>':'')+'</section></div>';
+  html=html.slice(0,a)+goals+html.slice(b);
+ }
+ return html;
+};
 var appRoot=document.getElementById("app");if(appRoot){ankiObserver=new MutationObserver(function(){if(document.getElementById("anki-v2")){simplifyAnki();collapseAnkiTools()}});ankiObserver.observe(appRoot,{childList:true,subtree:true})}
 window.render();
 })();
