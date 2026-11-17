@@ -71,7 +71,7 @@ function metrics(state,s,b){
  fragilityStatus:fragility===null?"AMOSTRA INSUFICIENTE":fragility<=15?"CONHECIMENTO SÓLIDO":fragility<=30?"LEVE FRAGILIDADE":fragility<=50?"FRAGILIDADE MODERADA":"FRAGILIDADE ALTA",
  stagnation:stagnation,previousAverageMinutes:prevTime,currentAverageMinutes:currTime,
  resilienceScore:resilience,resilienceReturns:episode?episode.returns:0,resilienceAbandons:episode?episode.abandons:0,
- velocity:velocity,velocityScore:velocityScore,smsScore:null};
+ velocity:velocity,velocityMinutes:velocityMinutes,velocityScore:velocityScore,smsScore:null};
 }
 
 function maturity(state){
@@ -80,7 +80,7 @@ function maturity(state){
  var dm=active.reduce(function(n,x){return n+x.metrics.masteryScore;},0)/active.length;
  var csValues=active.map(function(x){return x.metrics.passRecords.length>=2?x.metrics.consistencyScore:null;});
  var cs=csValues.every(function(v){return v!==null;})?csValues.reduce(function(n,v){return n+v;},0)/csValues.length:null;
- var minutes=active.reduce(function(n,x){return n+x.metrics.passRecords.reduce(function(a,p){return a+p.minutes;},0);},0);
+ var minutes=active.reduce(function(n,x){return n+(x.metrics.velocityMinutes||0);},0);
  var questions=active.reduce(function(n,x){return n+x.metrics.totalQuestions;},0);
  var lv=minutes>0?questions/minutes:null,vs=lv===null?null:clamp((lv-.5)/2.5*100,0,100);
  var returns=active.reduce(function(n,x){return n+x.metrics.resilienceReturns;},0),abandons=active.reduce(function(n,x){return n+x.metrics.resilienceAbandons;},0);
