@@ -390,6 +390,8 @@ function updateNavigation(){
  nav.innerHTML=items.map(function(x){return '<button class="'+(active===x[0]?"a":"")+'" onclick="'+(x[0]==="more"?"toggleMoreNav()":"go(\'"+x[0]+"\')")+'"><b>'+x[1]+'</b>'+x[2]+'</button>'}).join("");
 }
 window.render=function(){oldRender();updateNavigation()};
+window.addEventListener("resize",updateNavigation,{passive:true});
+window.addEventListener("orientationchange",function(){setTimeout(updateNavigation,80)},{passive:true});
 var root=document.getElementById("anki-v2"),ankiObserver;
 function simplifyAnki(){
  var el=document.getElementById("anki-v2");if(!el)return;
