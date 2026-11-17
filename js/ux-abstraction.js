@@ -76,6 +76,28 @@ window.stp=function(f,i,v){originalStep(f,i,v);persistDraft()};
 window.setK=function(i){originalSetK(i);persistDraft()};
 window.go=function(t){if(t!=="sess"&&window.ss){if(window.timerPause)window.timerPause();persistDraft()}originalGo(t)};
 window.adv=function(skip){originalAdv(skip);if(!window.ss)clearDraft()};
+var originalTimerStart=window.timerStart, originalTimerPause=window.timerPause;
+var idleLastActivity=Date.now(), idlePromptTimer=null, idleSaveTimer=null, idlePromptVisible=false;
+function noteActivity(){idleLastActivity=Date.now()}
+["pointerdown","keydown","touchstart","wheel"].forEach(function(ev){document.addEventListener(ev,noteActivity,{passive:true})});
+function removeIdlePrompt(){var el=document.getElementById("ciclo-idle-prompt");if(el)el.remove();idlePromptVisible=false;if(idlePromptTimer){clearTimeout(idlePromptTimer);idlePromptTimer=null}}
+window.continueAfterIdle=function(){removeIdlePrompt();noteActivity();if(window.ss&&window.ss.timer&&!window.ss.timer.running)originalTimerStart();persistDraft()};
+window.pauseAfterIdle=function(){removeIdlePrompt();if(window.ss)originalTimerPause();persistDraft()};
+window.timerPause=function(){originalTimerPause();persistDraft()};
+window.timerStart=function(){
+ originalTimerStart();noteActivity();
+ if(idleSaveTimer)clearInterval(idleSaveTimer);
+ idleSaveTimer=setInterval(function(){
+  if(!window.ss||!window.ss.timer||!window.ss.timer.running)return;
+  persistDraft();
+  if(!idlePromptVisible&&Date.now()-idleLastActivity>=600000){
+   idlePromptVisible=true;
+   var root=document.getElementById("app");
+   if(root){var banner=document.createElement("section");banner.id="ciclo-idle-prompt";banner.className="card";banner.style.cssText="position:fixed;z-index:1000;left:16px;right:16px;bottom:95px;max-width:560px;margin:0 auto;border:2px solid var(--warning);box-shadow:0 12px 34px rgba(0,0,0,.22)";banner.innerHTML='<b>Você ainda está estudando?</b><p class="mu sm">O cronômetro será pausado em 60 segundos se não houver resposta.</p><div style="display:flex;gap:8px"><button class="btn" style="flex:1;margin:0" onclick="continueAfterIdle()">Sim, continuar</button><button class="btn s" style="flex:1;margin:0" onclick="pauseAfterIdle()">Pausar</button></div>';root.appendChild(banner)}
+   idlePromptTimer=setTimeout(function(){removeIdlePrompt();if(window.ss)originalTimerPause();persistDraft()},60000);
+  }
+ },15000);
+};
 window.render=function(){originalRender();var nav=document.getElementById("nav");if(nav)nav.innerHTML=nav.innerHTML.replace("Progresso","Relatórios")};
 try{
  var raw=localStorage.getItem("ciclo-session-draft-v1");
