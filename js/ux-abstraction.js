@@ -266,6 +266,36 @@ input,select,textarea{font-size:16px}
  #app .study-v2-counts{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 `;
+
+/* Correção dedicada ao iPad: Safari pode reportar viewport maior que 1200px
+   por causa do zoom. O ponteiro coarse identifica tablets mesmo nesse caso. */
+css.textContent += `
+@media (pointer:coarse) and (hover:none), (min-width:701px) and (max-width:1200px){
+ html,body{width:100%;max-width:100%;overflow-x:hidden}
+ body{padding-left:0!important;margin:0}
+ #app{box-sizing:border-box;width:100%!important;max-width:1120px!important;margin:0 auto!important;padding:24px 24px 120px!important;min-width:0}
+ #nav{box-sizing:border-box;position:fixed!important;top:auto!important;left:0!important;right:0!important;bottom:0!important;transform:none!important;width:100%!important;height:auto!important;min-height:70px!important;max-height:calc(86px + env(safe-area-inset-bottom))!important;display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;justify-content:space-around!important;align-items:stretch!important;gap:6px!important;padding:7px 16px calc(7px + env(safe-area-inset-bottom))!important;margin:0!important;border:0!important;border-top:1px solid var(--ln)!important;border-radius:0!important;background:var(--cd)!important;box-shadow:0 -8px 24px rgba(16,24,40,.08)!important;overflow:visible!important;z-index:1200!important}
+ #nav:before{display:none!important;content:none!important}
+ #nav button{box-sizing:border-box;flex:1 1 0!important;width:auto!important;min-width:0!important;max-width:none!important;height:auto!important;min-height:52px!important;margin:0!important;padding:5px 3px!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:3px!important;text-align:center!important;white-space:nowrap!important;font-size:12px!important;line-height:1.2!important;border-radius:10px!important}
+ #nav button b{display:block!important;width:auto!important;margin:0!important;font-size:19px!important;line-height:1.1!important}
+ #nav .more-menu{position:absolute!important;left:auto!important;right:14px!important;top:auto!important;bottom:calc(78px + env(safe-area-inset-bottom))!important;width:min(250px,calc(100vw - 28px))!important;max-width:none!important;background:var(--cd)!important;border:1px solid var(--ln)!important;border-radius:14px!important;padding:8px!important;box-shadow:0 12px 30px rgba(0,0,0,.18)!important}
+ #nav .more-menu button{width:100%!important;min-height:46px!important;flex-direction:row!important;justify-content:flex-start!important;text-align:left!important;font-size:14px!important}
+ #app,.home-layout,.home-primary,.home-secondary,.next-action-card,.home-support,.report-box,.report-state{min-width:0!important;max-width:100%}
+ #app .home-layout{grid-template-columns:minmax(0,1fr)!important;gap:14px!important}
+ #app .next-action-card{width:100%!important;min-height:0!important;margin:14px 0!important;padding:26px!important}
+ #app .home-secondary{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:12px!important}
+ #app .home-priorities-card{grid-column:1/-1!important}
+ #app .report-columns{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ #app img,#app video,#app canvas,#app svg{max-width:100%;height:auto}
+ #app table{display:block;max-width:100%;overflow-x:auto}
+ #app input,#app select,#app textarea{box-sizing:border-box;max-width:100%}
+}
+@media (pointer:coarse) and (hover:none) and (max-width:900px){
+ #app{padding:20px 16px 120px!important}
+ #app .home-secondary,#app .report-columns{grid-template-columns:minmax(0,1fr)!important}
+ #app .next-action-card{padding:22px!important}
+}
+`;
 document.head.appendChild(css);
 function e(v){return window.esc(String(v==null?"":v))}
 function topic(block){return Array.isArray(block)?block.join(" · "):String(block||"")}
@@ -384,7 +414,7 @@ window.toggleMoreNav=function(){
 function updateNavigation(){
  var nav=document.getElementById("nav");if(!nav||!window.S.ob)return;
  var current=window.tab==="sess"?"home":window.tab==="sub"?"cfg":window.tab==="qa"?"prog":["rev","cf","io"].includes(window.tab)?"cards":window.tab;
- var mobile=window.matchMedia("(max-width:1200px)").matches;
+ var mobile=window.matchMedia("(max-width:1200px), (pointer:coarse) and (hover:none)").matches;
  var active=mobile&&!["home","ciclo","cards"].includes(current)?"more":current;
  var items=mobile?[["home","◉","Início"],["ciclo","⌁","Ciclo"],["cards","▤","Revisão"],["more","•••","Mais"]]:[["home","◉","Início"],["ciclo","⌁","Ciclo"],["cards","▤","Revisão"],["red","✎","Redação"],["prog","▦","Relatórios"],["cfg","⚙","Ajustes"]];
  nav.innerHTML=items.map(function(x){return '<button class="'+(active===x[0]?"a":"")+'" onclick="'+(x[0]==="more"?"toggleMoreNav()":"go(\'"+x[0]+"\')")+'"><b>'+x[1]+'</b>'+x[2]+'</button>'}).join("");
