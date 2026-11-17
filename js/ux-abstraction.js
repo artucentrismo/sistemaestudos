@@ -309,7 +309,7 @@ window.red=function(){
  var R=window.S.red||[],rated=R.filter(function(x){return x.nota!==null&&x.nota!==undefined}),avg=rated.length?Math.round(rated.reduce(function(a,x){return a+x.nota},0)/rated.length):null,best=rated.length?Math.max.apply(null,rated.map(function(x){return x.nota})):null,compet=R.filter(function(x){return x.c}),labels=["Norma culta","Compreensão","Argumentação","Coesão","Proposta"],means=compet.length?labels.map(function(_,i){return Math.round(compet.reduce(function(a,x){return a+(Number(x.c[i])||0)},0)/compet.length)}):null,weak=means?means.indexOf(Math.min.apply(null,means)):-1,last=R.length?R[R.length-1]:null;
  var h='<div class="up">PRODUÇÃO TEXTUAL</div><h1>Redação</h1><section class="report-state"><div class="up">DESEMPENHO GERAL</div><strong style="font-size:38px">'+(avg===null?"Em construção":avg+" pontos")+'</strong><p class="mu sm">'+R.length+' redação(ões) registrada(s)'+(best!==null?' · melhor nota '+best:'')+'</p></section>';
  h+='<div class="report-columns"><section class="report-box"><h3>Principal ponto de melhoria</h3>'+(weak>=0?'<b>Competência '+(weak+1)+' · '+labels[weak]+'</b><p class="mu sm">Média de '+means[weak]+' pontos.</p>':'<p class="mu sm">Registre competências em uma redação para identificar onde concentrar a prática.</p>')+'</section><section class="report-box"><h3>Próxima ação</h3><b>'+(last?"Continue sua evolução":"Comece sua primeira redação")+'</b><p class="mu sm">'+(last?"Último registro: "+last.d.split("-").reverse().join("/"):"Ainda não há redações registradas.")+'</p><button class="btn" onclick="document.getElementById(\'red-editor\').open=true;document.getElementById(\'red-editor\').scrollIntoView({behavior:\'smooth\'})">Nova redação</button></section></div>';
- h+='<details id="red-editor" class="report-advanced"><summary>Produzir e gerenciar redações</summary><div style="padding-top:12px">'+oldRed().replace(/^<h1>Redação<\/h1>/,"").replace(/<div class="hero"[\s\S]*?<\/div>/,"")+'</div></details>';
+ h+='<details id="red-editor" class="report-advanced"><summary>Produzir e gerenciar redações</summary><div style="padding-top:12px">'+oldRed().replace(/^<h1>Redação<\/h1>/,"").replace(/<div class="hero" style="margin-top:14px">[\s\S]*?<\/div><\/div><\/div><\/div>/,"")+'</div></details>';
  return h;
 };
 window.sess=function(){
@@ -327,8 +327,9 @@ function updateNavigation(){
  var nav=document.getElementById("nav");if(!nav||!window.S.ob)return;
  var current=window.tab==="sess"?"home":window.tab==="sub"?"cfg":window.tab==="qa"?"prog":["rev","cf","io"].includes(window.tab)?"cards":window.tab;
  var mobile=window.matchMedia("(max-width:700px)").matches;
+ var active=mobile&&!["home","ciclo","cards"].includes(current)?"more":current;
  var items=mobile?[["home","◉","Início"],["ciclo","⌁","Ciclo"],["cards","▤","Revisão"],["more","•••","Mais"]]:[["home","◉","Início"],["ciclo","⌁","Ciclo"],["cards","▤","Revisão"],["red","✎","Redação"],["prog","▦","Relatórios"],["cfg","⚙","Ajustes"]];
- nav.innerHTML=items.map(function(x){return '<button class="'+(current===x[0]?"a":"")+'" onclick="'+(x[0]==="more"?"toggleMoreNav()":"go(\'"+x[0]+"\')")+'"><b>'+x[1]+'</b>'+x[2]+'</button>'}).join("");
+ nav.innerHTML=items.map(function(x){return '<button class="'+(active===x[0]?"a":"")+'" onclick="'+(x[0]==="more"?"toggleMoreNav()":"go(\'"+x[0]+"\')")+'"><b>'+x[1]+'</b>'+x[2]+'</button>'}).join("");
 }
 window.render=function(){oldRender();updateNavigation()};
 var root=document.getElementById("anki-v2"),ankiObserver;
