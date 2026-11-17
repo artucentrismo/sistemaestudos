@@ -69,6 +69,16 @@ window.home=function(){
 };
 window.startRecommended=function(si,bi){if(Number.isInteger(si))window.S.cur=si;if(Number.isInteger(bi)&&window.S.subs[si])window.S.subs[si].ptr=bi;window.start()};
 window.resumeStudy=function(){if(!window.ss)return;window.tab="sess";if(window.ss.timer)window.ss.timer.running=false;window.render()};
+window.finalizeStudyV2=function(){
+ var S=window.S,s=S.subs[S.cur],indices=window.idx(s),done=indices.filter(function(_,i){return window.ss&&window.ss.studied&&window.ss.studied[i]}),correct=0,wrong=0;
+ done.forEach(function(_,i){correct+=(window.ss.ac||[])[i]||0;wrong+=(window.ss.er||[])[i]||0});
+ var minutes=done.length*(S.blockMinutes||15),subject=s.n;
+ window.adv(0);
+ var old=document.getElementById("ciclo-finish-overlay");if(old)old.remove();
+ var modal=document.createElement("div");modal.id="ciclo-finish-overlay";modal.className="ciclo-finish-overlay";
+ modal.innerHTML='<section class="ciclo-finish-dialog" role="dialog" aria-modal="true" aria-labelledby="ciclo-finish-title"><div class="up">SESSÃO CONCLUÍDA</div><h2 id="ciclo-finish-title">Ótimo trabalho!</h2><p class="mu sm">'+e(subject)+' · sua atividade foi salva no histórico.</p><div class="ciclo-finish-stats"><div><b>'+minutes+'</b><span class="mu sm">min estimados</span></div><div><b>'+(correct+wrong)+'</b><span class="mu sm">questões</span></div><div><b>'+correct+'</b><span class="mu sm">acertos</span></div></div><p class="mu sm">'+wrong+' erro(s) registrados. Continue no seu ritmo: cada sessão contribui para sua evolução.</p><button class="btn" onclick="backupLocal();document.getElementById(\'ciclo-finish-overlay\').remove()">Baixar backup do Ciclo</button><button class="btn s" onclick="document.getElementById(\'ciclo-finish-overlay\').remove()">Continuar</button></section>';
+ document.body.appendChild(modal);
+};
 window.sess=function(){return originalSess().replace(/ss=null;go\('home'\)/,"timerPause();persistDraft();go('home')")};
 window.prog=function(){return '<h1>Relatórios</h1><p class="mu sm">Uma visão organizada da sua evolução, frequência e aprendizagem.</p>'+originalProg()};
 window.save=function(){originalSave();persistDraft()};
@@ -193,6 +203,14 @@ h1,h2{font-family:Manrope,Inter,system-ui,sans-serif;letter-spacing:-.025em}
 .study-v2-count button.add{background:var(--ac);color:#fff;border-color:var(--ac)}
 .study-v2-actions{max-width:560px;margin:18px auto;display:grid;gap:9px}
 .study-v2-actions button{min-height:50px}
+.ciclo-finish-overlay{position:fixed;inset:0;z-index:2000;background:#071426b8;display:grid;place-items:center;padding:18px}
+.ciclo-finish-dialog{width:min(100%,480px);background:var(--cd);color:var(--tx);border:1px solid var(--ln);border-radius:22px;padding:24px;box-shadow:0 24px 70px #0004}
+.ciclo-finish-dialog h2{margin:6px 0 8px;font-size:27px}
+.ciclo-finish-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:18px 0}
+.ciclo-finish-stats div{background:var(--surface2);border-radius:12px;padding:12px;text-align:center}
+.ciclo-finish-stats b{display:block;font-size:22px}
+.ciclo-finish-dialog button{margin-top:8px}
+
 button,a,summary,input,select,textarea{outline-offset:3px}
 :focus-visible{outline:3px solid var(--info)!important;outline-offset:3px!important}
 button{min-height:44px;cursor:pointer}
@@ -323,7 +341,7 @@ window.sess=function(){
  var s=window.S.subs[window.S.cur],ix=window.idx(s);if(!window.ss)return oldSess();if(!window.ss.timer)window.ss.timer={remaining:(window.S.blockMinutes||15)*60,running:false};
  var html='<div class="study-v2-head"><div class="up">SESSÃO DE ESTUDO</div><h1>'+e(s.n)+'</h1><div class="mu">'+e(s.a)+' · '+e(topic(s.t[ix[0]]))+'</div></div><section class="study-v2-timer card"><div class="up">TEMPO DE ESTUDO</div><div id="study-timer-display" class="study-timer-display">'+window.timerText(window.timerSeconds())+'</div><div id="study-timer-status" class="mu sm">'+(window.ss.timer.running?"Cronômetro em andamento":"Pronto para começar")+'</div><div class="study-timer-actions" style="justify-content:center;margin-top:12px"><button id="study-timer-start" onclick="timerStart()" '+(window.ss.timer.running?'disabled':'')+'>▶ Iniciar</button><button id="study-timer-pause" onclick="timerPause()" '+(!window.ss.timer.running?'disabled':'')+'>Ⅱ Pausar</button></div></section>';
  html+='<div class="study-v2-counts">'+ix.map(function(bi,i){var ac=(window.ss.ac||[])[i]||0,er=(window.ss.er||[])[i]||0;return '<section class="study-v2-count" style="grid-column:1/-1;text-align:left"><div class="up">ASSUNTO '+(i+1)+' DE '+ix.length+'</div><b style="font-size:20px;margin:8px 0">'+e(topic(s.t[bi]))+'</b><div class="study-v2-counts"><div class="study-v2-count"><span class="mu sm">Acertos</span><b>'+ac+'</b><div class="study-stepper"><button onclick="stp(\'ac\','+i+',-1)">−</button><button class="add" onclick="stp(\'ac\','+i+',1)">+</button></div></div><div class="study-v2-count"><span class="mu sm">Erros</span><b>'+er+'</b><div class="study-stepper"><button onclick="stp(\'er\','+i+',-1)">−</button><button class="add" onclick="stp(\'er\','+i+',1)">+</button></div></div></div><details class="difficulty-optional"><summary>Mais opções</summary><select onchange="setDifficulty('+i+',this.value)"><option value="">Dificuldade não classificada</option><option value="easy" '+((window.ss.difficulty||[])[i]==="easy"?"selected":"")+'>Questões fáceis</option><option value="hard" '+((window.ss.difficulty||[])[i]==="hard"?"selected":"")+'>Questões difíceis</option></select></details>'+(er>0?'<button class="cycle-error-flashcard" onclick="createCycleFlashcard('+i+')">Criar flashcard deste erro</button>':'')+'</section>'}).join('')+'</div>';
- html+='<div class="study-v2-actions"><button class="btn" onclick="adv(0)" '+(window.hasStudied()?'':'disabled')+'>Finalizar sessão</button><button class="btn s" onclick="go(\'home\')">Salvar e sair</button><button class="lk r" onclick="adv(1)">Pular esta sessão</button></div>';
+ html+='<div class="study-v2-actions"><button class="btn" onclick="finalizeStudyV2()" '+(window.hasStudied()?'':'disabled')+'>Finalizar sessão</button><button class="btn s" onclick="go(\'home\')">Salvar e sair</button><button class="lk r" onclick="adv(1)">Pular esta sessão</button></div>';
  return html;
 };
 window.toggleMoreNav=function(){
