@@ -544,7 +544,7 @@ function simplifyAnki(){
 }
 function collapseAnkiTools(){
  var el=document.getElementById("anki-v2");if(!el||el.querySelector(".anki-tools-details"))return;
- var nodes=[el.querySelector(".anki-deck-tree"),el.querySelector(".anki-deck-form"),el.querySelector(".anki-toolbar"),el.querySelector("#anki-form-wrap"),el.querySelector("#anki-note-list"),el.querySelector(".anki-footer-actions")].filter(Boolean);
+ var nodes=[el.querySelector(".anki-deck-tree"),el.querySelector(".anki-deck-form"),el.querySelector(".anki-toolbar"),el.querySelector("#anki-note-list"),el.querySelector(".anki-footer-actions")].filter(Boolean);
  if(!nodes.length)return;
  var details=document.createElement("details");details.className="report-advanced anki-tools-details";details.style.marginTop="16px";
  var summary=document.createElement("summary");summary.textContent="Gerenciar conteúdos";details.appendChild(summary);
