@@ -73,6 +73,24 @@ function metrics(state,s,b){
  resilienceScore:resilience,resilienceReturns:episode?episode.returns:0,resilienceAbandons:episode?episode.abandons:0,
  velocity:velocity,velocityScore:velocityScore,smsScore:null};
 }
+
+function maturity(state){
+ var active=all(state).filter(function(x){return x.metrics.totalQuestions>0;});
+ if(!active.length)return{score:null,level:"Aguardando dados",components:{dm:null,cs:null,vs:null,rs:null},bottleneck:null,activeNotebooks:0};
+ var dm=active.reduce(function(n,x){return n+x.metrics.masteryScore;},0)/active.length;
+ var csValues=active.map(function(x){return x.metrics.passRecords.length>=2?x.metrics.consistencyScore:null;});
+ var cs=csValues.every(function(v){return v!==null;})?csValues.reduce(function(n,v){return n+v;},0)/csValues.length:null;
+ var minutes=active.reduce(function(n,x){return n+x.metrics.passRecords.reduce(function(a,p){return a+p.minutes;},0);},0);
+ var questions=active.reduce(function(n,x){return n+x.metrics.totalQuestions;},0);
+ var lv=minutes>0?questions/minutes:null,vs=lv===null?null:clamp((lv-.5)/2.5*100,0,100);
+ var returns=active.reduce(function(n,x){return n+x.metrics.resilienceReturns;},0),abandons=active.reduce(function(n,x){return n+x.metrics.resilienceAbandons;},0);
+ var rs=returns+abandons>0?returns/(returns+abandons)*100:null;
+ var parts={dm:dm,cs:cs,vs:vs,rs:rs};
+ if(cs===null||vs===null||rs===null)return{score:null,level:"Em formação",components:parts,bottleneck:null,activeNotebooks:active.length,missing:["dm","cs","vs","rs"].filter(function(k){return parts[k]===null;})};
+ var score=dm*.4+cs*.3+vs*.15+rs*.15;
+ var names={dm:"Domínio médio",cs:"Consistência",vs:"Velocidade",rs:"Resiliência"},lowest=Object.keys(parts).sort(function(a,b){return parts[a]-parts[b];})[0];
+ return{score:score,level:score<=30?"Sobrevivência":score<=50?"Aprendiz":score<=70?"Competitivo":score<=85?"Alto Nível":"Elite",components:parts,bottleneck:names[lowest],activeNotebooks:active.length,missing:[]};
+}
 function all(state){var out=[];(state.subs||[]).forEach(function(s,si){(s.t||[]).forEach(function(b,bi){out.push({subjectIndex:si,blockIndex:bi,subject:s,block:b,metrics:metrics(state,s,b)});});});return out;}
 function ensure(state){state.learning=state.learning||{};state.learning.version=2;state.learning.notebooks=state.learning.notebooks||{};state.learning.episodes=state.learning.episodes||{};state.unlockMode=state.unlockMode==="advanced"?"advanced":"standard";return state.learning;}
 function sync(state){
@@ -81,6 +99,7 @@ function sync(state){
   if((m.masteryScore<50||m.accuracyScore<50)&&(!e||!e.open)){e={open:true,offered:false,returns:e?e.returns:0,abandons:e?e.abandons:0,startedAt:new Date().toISOString()};learning.episodes[id]=e;}
   learning.notebooks[id]=m;
  });
+ if(state.unlockManual!==true){var maturityScore=maturity(state).score;state.unlockMode=maturityScore!==null&&maturityScore>=70?"advanced":"standard";}
  return learning;
 }
 function maxActive(state){return state.unlockMode==="advanced"?2:1;}
@@ -110,5 +129,5 @@ function summary(state){
  var stuck=valid.filter(function(x){return x.metrics.stuck;}),strong=valid.slice().sort(function(a,b){return b.metrics.masteryScore-a.metrics.masteryScore;})[0],weak=valid.slice().sort(function(a,b){return a.metrics.masteryScore-b.metrics.masteryScore;})[0];
  return{items:items,valid:valid,averageMastery:avg,stuck:stuck,strong:strong,weak:weak,dominated:valid.filter(function(x){return x.metrics.masteryScore>=80;}).length,evolving:valid.filter(function(x){return x.metrics.improvementScore>0&&x.metrics.masteryScore<80;}).length,stagnating:valid.filter(function(x){return x.metrics.stagnation;}),resilience:valid.filter(function(x){return x.metrics.resilienceScore!==null;})};
 }
-global.CicloLearning={metrics:metrics,all:all,sync:sync,selectBlocks:selectBlocks,nextSubjectIndex:nextSubjectIndex,summary:summary,notebookId:notebookId,markOffered:markOffered,recordStudy:recordStudy,recordAbandon:recordAbandon,maxActive:maxActive,unlockedItems:unlockedItems};
+global.CicloLearning={metrics:metrics,all:all,sync:sync,maturity:maturity,selectBlocks:selectBlocks,nextSubjectIndex:nextSubjectIndex,summary:summary,notebookId:notebookId,markOffered:markOffered,recordStudy:recordStudy,recordAbandon:recordAbandon,maxActive:maxActive,unlockedItems:unlockedItems};
 })(window);
