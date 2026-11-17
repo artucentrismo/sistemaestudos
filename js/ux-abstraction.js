@@ -340,6 +340,14 @@ function simplifyAnki(){
  var top=el.querySelector(".anki-topline");if(top&&top.firstElementChild)top.firstElementChild.textContent="REVISÃO ESPAÇADA · FSRS";
  var stats=el.querySelector(".anki-stats");if(stats){var cards=stats.children;if(cards[0])cards[0].querySelector("small").textContent="Cartões";if(cards[1])cards[1].querySelector("small").textContent="Para revisar";if(cards[2])cards[2].querySelector("small").textContent="Revisões recentes";if(cards[3])cards[3].querySelector("small").textContent="Acertos recentes"}
 }
-var appRoot=document.getElementById("app");if(appRoot){ankiObserver=new MutationObserver(function(){if(document.getElementById("anki-v2"))simplifyAnki()});ankiObserver.observe(appRoot,{childList:true,subtree:true})}
+function collapseAnkiTools(){
+ var el=document.getElementById("anki-v2");if(!el||el.querySelector(".anki-tools-details"))return;
+ var nodes=[el.querySelector(".anki-deck-tree"),el.querySelector(".anki-deck-form"),el.querySelector(".anki-toolbar"),el.querySelector("#anki-form-wrap"),el.querySelector("#anki-note-list"),el.querySelector(".anki-footer-actions")].filter(Boolean);
+ if(!nodes.length)return;
+ var details=document.createElement("details");details.className="report-advanced anki-tools-details";details.style.marginTop="16px";
+ var summary=document.createElement("summary");summary.textContent="Gerenciar conteúdos";details.appendChild(summary);
+ nodes.forEach(function(node){details.appendChild(node)});el.appendChild(details);
+}
+var appRoot=document.getElementById("app");if(appRoot){ankiObserver=new MutationObserver(function(){if(document.getElementById("anki-v2")){simplifyAnki();collapseAnkiTools()}});ankiObserver.observe(appRoot,{childList:true,subtree:true})}
 window.render();
 })();
