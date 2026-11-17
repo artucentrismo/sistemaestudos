@@ -514,6 +514,7 @@ function toggleSidebar(force){
  if(back)back.classList.toggle("visible",open);
  var btn=document.getElementById("ciclo-sidebar-toggle");if(btn)btn.setAttribute("aria-expanded",open?"true":"false");
 }
+window.toggleSidebar=toggleSidebar;
 function updateNavigation(){
  var nav=document.getElementById("nav");if(!nav||!window.S.ob)return;
  var current=window.tab==="sess"?"home":window.tab==="sub"?"cfg":window.tab==="qa"?"prog":["rev","cf","io"].includes(window.tab)?"cards":window.tab==="ciclo"?"home":window.tab;
