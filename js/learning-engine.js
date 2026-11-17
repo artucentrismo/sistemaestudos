@@ -89,7 +89,7 @@ function maturity(state){
  if(cs===null||vs===null||rs===null)return{score:null,level:"Em formação",components:parts,bottleneck:null,activeNotebooks:active.length,missing:["dm","cs","vs","rs"].filter(function(k){return parts[k]===null;})};
  var score=dm*.4+cs*.3+vs*.15+rs*.15;
  var names={dm:"Domínio médio",cs:"Consistência",vs:"Velocidade",rs:"Resiliência"},lowest=Object.keys(parts).sort(function(a,b){return parts[a]-parts[b];})[0];
- return{score:score,level:score<=30?"Sobrevivência":score<=50?"Aprendiz":score<=70?"Competitivo":score<=85?"Alto Nível":"Elite",components:parts,bottleneck:names[lowest],activeNotebooks:active.length,missing:[]};
+ var rounded=Math.round(score);return{score:score,level:rounded<=30?"Sobrevivência":rounded<=50?"Aprendiz":rounded<=70?"Competitivo":rounded<=85?"Alto Nível":"Elite",components:parts,bottleneck:names[lowest],activeNotebooks:active.length,missing:[]};
 }
 function all(state){var out=[];(state.subs||[]).forEach(function(s,si){(s.t||[]).forEach(function(b,bi){out.push({subjectIndex:si,blockIndex:bi,subject:s,block:b,metrics:metrics(state,s,b)});});});return out;}
 function ensure(state){state.learning=state.learning||{};state.learning.version=2;state.learning.notebooks=state.learning.notebooks||{};state.learning.episodes=state.learning.episodes||{};state.unlockMode=state.unlockMode==="advanced"?"advanced":"standard";return state.learning;}
