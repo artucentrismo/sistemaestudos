@@ -76,6 +76,26 @@ window.stp=function(f,i,v){originalStep(f,i,v);persistDraft()};
 window.setK=function(i){originalSetK(i);persistDraft()};
 window.go=function(t){if(t!=="sess"&&window.ss){if(window.timerPause)window.timerPause();persistDraft()}originalGo(t)};
 window.adv=function(skip){originalAdv(skip);if(!window.ss)clearDraft()};
+window.restoreLocal=function(){
+ var input=document.createElement("input");input.type="file";input.accept=".json,application/json";
+ input.onchange=function(){
+  var file=input.files&&input.files[0];if(!file)return;
+  var reader=new FileReader();
+  reader.onload=function(){
+   try{
+    var data=JSON.parse(reader.result);
+    if(data.format!=="ciclo-local-backup-v1"||!data.state||!Array.isArray(data.state.subs)||!Array.isArray(data.state.log))throw new Error("Arquivo não reconhecido como backup do Ciclo.");
+    if(!confirm("Este backup substituirá os dados atuais deste navegador. Deseja continuar?"))return;
+    if(confirm("Deseja baixar um backup dos dados atuais antes da substituição?"))window.backupLocal();
+    localStorage.setItem("ciclo-v3",JSON.stringify(data.state));
+    if(data.anki)localStorage.setItem("ciclo-anki-local-v1",data.anki);else localStorage.removeItem("ciclo-anki-local-v1");
+    clearDraft();location.reload();
+   }catch(e){alert(e.message||"Não foi possível importar o backup.")}
+  };
+  reader.readAsText(file);
+ };
+ input.click();
+};
 var originalTimerStart=window.timerStart, originalTimerPause=window.timerPause;
 var idleLastActivity=Date.now(), idlePromptTimer=null, idleSaveTimer=null, idlePromptVisible=false;
 function noteActivity(){idleLastActivity=Date.now()}
