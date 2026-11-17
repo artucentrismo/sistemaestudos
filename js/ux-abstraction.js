@@ -21,7 +21,7 @@ style.textContent=[
 ].join("\n");
 document.head.appendChild(style);
 var originalHome=window.home, originalProg=window.prog, originalRender=window.render;
-var originalSave=window.save, originalStart=window.start, originalStep=window.stp;
+var originalSave=window.save, originalStart=window.start, originalStep=window.stp, originalSess=window.sess;
 var originalSetK=window.setK, originalGo=window.go, originalAdv=window.adv;
 function persistDraft(){
  try{if(!window.ss)return;localStorage.setItem("ciclo-session-draft-v1",JSON.stringify({subjectIndex:window.S.cur,state:window.ss,savedAt:Date.now()}))}catch(e){}
@@ -69,6 +69,7 @@ window.home=function(){
 };
 window.startRecommended=function(si){if(Number.isInteger(si))window.S.cur=si;window.start()};
 window.resumeStudy=function(){if(!window.ss)return;window.tab="sess";if(window.ss.timer)window.ss.timer.running=false;window.render()};
+window.sess=function(){return originalSess().replace(/ss=null;go\('home'\)/,"timerPause();persistDraft();go('home')")};
 window.prog=function(){return '<h1>Relatórios</h1><p class="mu sm">Uma visão organizada da sua evolução, frequência e aprendizagem.</p>'+originalProg()};
 window.save=function(){originalSave();persistDraft()};
 window.start=function(){originalStart();persistDraft()};
