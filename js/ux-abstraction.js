@@ -71,7 +71,7 @@ window.startRecommended=function(si,bi){if(Number.isInteger(si))window.S.cur=si;
 window.resumeStudy=function(){if(!window.ss)return;window.tab="sess";if(window.ss.timer)window.ss.timer.running=false;window.render()};
 window.finalizeStudyV2=function(){
  var S=window.S,s=S.subs[S.cur],indices=window.idx(s),done=indices.filter(function(_,i){return window.ss&&window.ss.studied&&window.ss.studied[i]}),correct=0,wrong=0;
- done.forEach(function(_,i){correct+=(window.ss.ac||[])[i]||0;wrong+=(window.ss.er||[])[i]||0});
+ indices.forEach(function(_,i){if(window.ss&&window.ss.studied&&window.ss.studied[i]){correct+=(window.ss.ac||[])[i]||0;wrong+=(window.ss.er||[])[i]||0}});
  var minutes=done.length*(S.blockMinutes||15),subject=s.n;
  window.adv(0);
  var old=document.getElementById("ciclo-finish-overlay");if(old)old.remove();
