@@ -280,7 +280,7 @@ window.home=function(){
  return html;
 };
 window.toggleSubjectPicker=function(){var x=document.getElementById("home-subject-picker");if(x)x.hidden=!x.hidden};
-window.startRecommended=function(si){if(Number.isInteger(si))window.S.cur=si;window.start()};
+window.startRecommended=function(si,bi){if(Number.isInteger(si))window.S.cur=si;if(Number.isInteger(bi)&&window.S.subs[si])window.S.subs[si].ptr=bi;window.start()};
 window.ciclo=function(){
  var S=window.S;if(!S.subs.length)return '<h1>Seu Ciclo</h1><div class="card"><p class="mu">Adicione matérias e assuntos para montar seu percurso.</p><button class="btn" onclick="go(\'cfg\')">Adicionar matérias</button></div>';
  var cur=S.subs[S.cur]||S.subs[0],items=window.CicloLearning?window.CicloLearning.selectBlocks(S,cur,2):[],bi=items.length?items[0]:cur.ptr||0,rec=candidates(),next=rec.filter(function(x){return !(x.si===S.cur&&x.bi===bi)}).slice(0,3);
