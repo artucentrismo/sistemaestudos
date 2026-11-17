@@ -258,7 +258,7 @@ function priorities(){
 function stateDiagnosis(items){
  var valid=items.filter(function(x){return x.metrics.totalQuestions>0}),logs=window.S.log||[],dates={};
  logs.forEach(function(l){if(l.d)dates[l.d]=true});
- var sessions=Object.keys(dates).length,questions=logs.reduce(function(n,l){return n+(Number(l.ac)||0)+(Number(l.er)||0)},0);
+ var sessions=logs.filter(function(l){return l.source==="block"||l.source==="questions"}).length,questions=logs.reduce(function(n,l){return n+(Number(l.ac)||0)+(Number(l.er)||0)},0);
  if(!valid.length)return{kind:"empty",title:"Seu diagnóstico está sendo construído",text:"Continue registrando seus estudos. O Ciclo precisa de algumas sessões para identificar seus pontos fortes e prioridades."};
  if(sessions<3||questions<50)return{kind:"formation",title:"Você está iniciando sua jornada",text:"Continue estudando e registrando suas questões. Quando houver dados suficientes, o Ciclo mostrará sua evolução e os assuntos que merecem atenção."};
  var stuck=valid.filter(function(x){return x.metrics.stuck});
@@ -299,7 +299,7 @@ window.prog=function(){
  var strengths=strong.map(function(x){return '<div class="report-line">✓ '+e(x.subject.n)+' — '+e(topic(x.block))+'</div>'}).concat(improving.slice(0,3).map(function(x){return '<div class="report-line">↗ '+e(x.subject.n)+' — evolução de '+Math.round(x.metrics.improvementScore)+' pontos</div>'}));
  var attention=weak.map(function(x){return '<div class="report-line">• '+e(x.subject.n)+' — '+e(topic(x.block))+(x.metrics.stuck?' · precisa de nova estratégia':' · vale reforçar')+'</div>'});
  var html='<div class="up">APRENDIZAGEM</div><h1>Relatórios</h1><section class="report-state"><div class="up">SEU DIAGNÓSTICO</div><strong>'+e(diag.title)+'</strong><p class="mu" style="line-height:1.55;margin-bottom:0">'+e(diag.text)+'</p></section><div class="report-columns"><section class="report-box"><h3>Pontos fortes</h3>'+(strengths.join('')||'<p class="mu sm">Suas evoluções e assuntos dominados aparecerão aqui quando houver dados suficientes.</p>')+'</section><section class="report-box"><h3>Precisam de atenção</h3>'+(attention.join('')||'<p class="mu sm">Nenhum gargalo identificado com os dados atuais.</p>')+'</section></div>';
- var rec=candidates()[0];if(rec)html+='<section class="report-box" style="margin-top:14px"><div class="up">PRIORIDADE ATUAL</div><h3 style="margin-top:8px">'+e(rec.s.n)+' — '+e(topic(rec.b))+'</h3><p class="mu sm">'+e(rec.reason)+'</p>'+(rec.strategy?'<p class="sm">'+e(rec.strategy)+'</p>':'')+'<button class="btn" onclick="startRecommended('+rec.si+','+rec.bi+')">Estudar agora</button></section>';
+ var rec=candidates()[0];if(rec&&ready)html+='<section class="report-box" style="margin-top:14px"><div class="up">PRIORIDADE ATUAL</div><h3 style="margin-top:8px">'+e(rec.s.n)+' — '+e(topic(rec.b))+'</h3><p class="mu sm">'+e(rec.reason)+'</p>'+(rec.strategy?'<p class="sm">'+e(rec.strategy)+'</p>':'')+'<button class="btn" onclick="startRecommended('+rec.si+','+rec.bi+')">Estudar agora</button></section>';
  html+='<details class="report-advanced"><summary>Análise avançada</summary><div style="padding-top:12px"><p class="mu sm">Indicadores técnicos disponíveis para quem deseja aprofundar a análise.</p>';
  var mat=window.CicloLearning?window.CicloLearning.maturity(window.S):null;
  html+='<div class="report-line"><b>Maturidade de estudos:</b> '+(mat&&mat.score!==null?Math.round(mat.score)+"/100 · "+e(mat.level):"Em formação")+'</div>';
