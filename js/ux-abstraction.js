@@ -567,3 +567,32 @@ window.cfg=function(){
 var appRoot=document.getElementById("app");if(appRoot){ankiObserver=new MutationObserver(function(){if(document.getElementById("anki-v2")){simplifyAnki();collapseAnkiTools()}});ankiObserver.observe(appRoot,{childList:true,subtree:true})}
 window.render();
 })();
+
+
+/* Identidade visual do Ciclo e identificação do estudante na tela inicial. */
+(function(){
+"use strict";
+var brandStyle=document.createElement("style");
+brandStyle.textContent=`
+#nav:before{content:"Seus estudos em ciclo"!important;display:block;font:800 18px Manrope,Inter,sans-serif!important;letter-spacing:-.025em!important;line-height:1.25;color:var(--ac);padding:8px 14px 2px!important;white-space:normal}
+#nav:after{content:"por artucentrismo";display:block;order:0;font:500 12px Inter,system-ui,sans-serif;color:var(--mu);padding:0 14px 25px;letter-spacing:.01em}
+#nav button{order:1}
+.student-identity{display:flex;align-items:center;gap:11px;margin:0 0 18px;padding:12px 15px;background:var(--cd);border:1px solid var(--ln);border-radius:15px;width:max-content;max-width:100%;box-shadow:0 2px 8px rgba(10,20,40,.035)}
+.student-identity-emoji{display:grid;place-items:center;width:40px;height:40px;flex:none;border-radius:12px;background:color-mix(in srgb,var(--ac) 10%,var(--cd));font-size:25px}
+.student-identity-label{display:block;color:var(--mu);font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin-bottom:2px}
+.student-identity-name{display:block;color:var(--tx);font-size:16px;font-weight:750;line-height:1.3;overflow-wrap:anywhere}
+@media(max-width:700px){.student-identity{margin-top:4px;margin-bottom:14px}}
+`;
+document.head.appendChild(brandStyle);
+document.title="Seus estudos em ciclo";
+var previousHome=window.home;
+window.home=function(){
+ var html=previousHome();
+ var name=window.S&&window.S.profileName?window.esc(window.S.profileName):"Estudante";
+ var identity='<div class="student-identity"><span class="student-identity-emoji" aria-hidden="true">🧑‍🎓</span><span><span class="student-identity-label">Estudante</span><span class="student-identity-name">'+name+'</span></span></div>';
+ html=html.replace(/<h1>Olá, [\s\S]*?<\/h1>/, '<h1>Seu próximo passo</h1>');
+ html=html.replace(/<h1>Seu espaço de estudos<\/h1>/,'<h1>Vamos começar</h1>');
+ return identity+html;
+};
+if(typeof window.render==="function"){var renderWithBrand=window.render;window.render=function(){renderWithBrand();};window.render();}
+})();
