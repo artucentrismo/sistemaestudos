@@ -137,7 +137,7 @@ window.render();
 /* Ciclo 2.0 — experiência aprovada: orientação primeiro, complexidade sob demanda. */
 (function(){
 "use strict";
-var oldHome=window.home,oldCycle=window.ciclo,oldProg=window.prog,oldRed=window.red,oldCards=window.cards,oldSess=window.sess,oldRender=window.render;
+var oldHome=window.home,oldCycle=window.ciclo,oldProg=window.prog,oldRed=window.red,oldCards=window.cards,oldSess=window.sess,oldRender=window.render,oldCfg=window.cfg;
 var css=document.createElement("style");
 css.textContent=`
 :root{--bg:#F7F8FA;--cd:#fff;--tx:#1D2939;--mu:#667085;--ac:#0F2744;--ln:#E4E7EC;--g:#2E7D5B;--rd:#C65353;--surface2:#F2F4F7;--info:#4E7A99;--warning:#D9A441}
@@ -223,23 +223,25 @@ function allItems(){return window.CicloLearning?window.CicloLearning.all(window.
 function day(){return window.dk(new Date())}
 function reviewDue(){var n=null;try{var summary=JSON.parse(localStorage.getItem("ciclo-anki-summary-v1")||"null");if(summary&&Number.isFinite(summary.due))n=summary.due;else{var d=JSON.parse(localStorage.getItem("ciclo-anki-local-v1")||"null");if(d&&Array.isArray(d.cards))n=d.cards.filter(function(c){return c.due&&c.due<=day()}).length}}catch(_){}return n}
 function candidates(){
- var list=[],S=window.S,now=day(),due=reviewDue();
+ var list=[],S=window.S,now=day(),due=reviewDue(),examDays=null;
+ if(S.examDate){var diff=Math.floor((new Date(S.examDate+"T12:00:00")-new Date(now+"T12:00:00"))/86400000);examDays=Math.max(0,diff)}
  (S.subs||[]).forEach(function(s,si){
   var indices=window.CicloLearning?window.CicloLearning.selectBlocks(S,s,2):(s.t.length?[s.ptr||0]:[]);
   indices.forEach(function(bi){
-   var m=getMetrics(s,s.t[bi]),score=0,reason="Próxima etapa do seu ciclo",strategy="";
-   var days=m&&m.lastStudyDate?Math.min(30,Math.max(0,Math.floor((new Date(now+"T12:00:00")-new Date(m.lastStudyDate+"T12:00:00"))/86400000))):null;
-   if(due)score+=30;
-   if(m&&m.totalQuestions){score+=(100-m.masteryScore)*.25;score+=Math.min(100,m.totalWrong/Math.max(1,m.totalQuestions)*100)*.20;score+=(days===null?0:Math.min(100,days/14*100))*.15}
-   else score+=12;
+   var m=getMetrics(s,s.t[bi]),days=m&&m.lastStudyDate?Math.min(30,Math.max(0,Math.floor((new Date(now+"T12:00:00")-new Date(m.lastStudyDate+"T12:00:00"))/86400000))):null;
+   var q=m&&m.totalQuestions?m.totalQuestions:null,errors=q!==null?m.totalWrong/Math.max(1,q)*100:null;
+   var factors={due:due===null?null:(due>0?100:0),mastery:m&&q!==null?Math.max(0,100-m.masteryScore):null,errors:errors,contact:days===null?null:Math.min(100,days/14*100),importance:typeof s.importance==="number"?Math.max(0,Math.min(100,s.importance)):null,exam:examDays===null?null:Math.max(0,100-examDays/120*100)};
+   var weights=examDays===null?{due:30,mastery:25,errors:20,contact:15,importance:5,exam:5}:{exam:30,due:25,mastery:20,errors:15,contact:10};
+   var numerator=0,denominator=0;Object.keys(weights).forEach(function(k){if(factors[k]!==null){numerator+=factors[k]*weights[k];denominator+=weights[k]}});
+   var score=denominator?numerator/denominator:10,reason="Próxima etapa do seu ciclo",strategy="";
    if(days!==null&&days>=7)reason="Já faz "+days+" dias desde seu último contato com este assunto.";
-   if(m&&m.stuck){score+=35;reason="Este assunto precisa de uma retomada com outra estratégia."}
-   if(m&&m.totalQuestions>0&&m.masteryScore>=80)score-=18;
-   if(m&&m.totalQuestions>0){
+   if(m&&m.stuck){score+=12;reason="Este assunto precisa de uma retomada com outra estratégia."}
+   if(m&&q!==null&&m.masteryScore>=80)score-=12;
+   if(m&&q!==null){
     var logs=(window.S.log||[]).filter(function(l){return l.n===s.n&&l.b===topic(s.t[bi])});
-    var q=logs.reduce(function(a,l){return a+(Number(l.ac)||0)+(Number(l.er)||0)},0),err=logs.reduce(function(a,l){return a+(Number(l.er)||0)},0),min=logs.reduce(function(a,l){return a+(Number(l.m)||0)},0);
-    if(min>=30&&q<10&&m.improvementScore<5){strategy="Priorize questões práticas para testar o que já estudou.";reason="Você investiu tempo neste assunto; agora vale praticar com questões."}
-    else if(q>=20&&err/q>.35){strategy="Retome a explicação e os fundamentos antes de continuar praticando.";reason="Alguns erros estão se repetindo. Reforce a teoria antes de novas questões."}
+    var loggedQ=logs.reduce(function(a,l){return a+(Number(l.ac)||0)+(Number(l.er)||0)},0),err=logs.reduce(function(a,l){return a+(Number(l.er)||0)},0),min=logs.reduce(function(a,l){return a+(Number(l.m)||0)},0);
+    if(min>=30&&loggedQ<10&&m.improvementScore<5){strategy="Priorize questões práticas para testar o que já estudou.";reason="Você investiu tempo neste assunto; agora vale praticar com questões."}
+    else if(loggedQ>=20&&err/Math.max(1,loggedQ)>.35){strategy="Retome a explicação e os fundamentos antes de continuar praticando.";reason="Alguns erros estão se repetindo. Reforce a teoria antes de novas questões."}
     else if(m.retention&&m.retention.score<75){strategy="Faça uma revisão curta e transforme os erros em cartões.";reason="A memória deste assunto precisa de reforço após o intervalo."}
     else if(m.stuck){strategy="Volte aos fundamentos e avance em etapas menores.";reason="O progresso está baixo apesar das tentativas. Vamos reconstruir a base."}
    }
@@ -304,6 +306,8 @@ window.prog=function(){
  html+='</div></details><div class="mu sm" style="margin-top:14px">Os diagnósticos aparecem apenas quando há dados suficientes. Assuntos sem amostra válida não são tratados como zero.</div>';
  return html;
 };
+window.saveExamDate=function(value){window.S.examDate=value||"";window.save();window.render()};
+window.cfg=function(){return oldCfg()+'<h2>Prazo da prova ou objetivo</h2><div class="card"><p class="mu sm">Opcional. Se você informar uma data, o Ciclo poderá considerar a proximidade da prova ao recomendar o próximo estudo.</p><label class="sm" for="ciclo-exam-date">Data da prova</label><input id="ciclo-exam-date" type="date" value="'+e(window.S.examDate||"")+'" onchange="saveExamDate(this.value)"><button class="lk" onclick="saveExamDate(\'\')">Remover data</button></div>'};
 window.cards=function(){return '<div class="up">MEMÓRIA DE LONGO PRAZO</div><h1>Revisão</h1><p class="mu">Revise no momento certo para fortalecer o que aprendeu.</p><div id="anki-v2"><p class="mu">Carregando sua biblioteca…</p></div>'};
 window.red=function(){
  var R=window.S.red||[],rated=R.filter(function(x){return x.nota!==null&&x.nota!==undefined}),avg=rated.length?Math.round(rated.reduce(function(a,x){return a+x.nota},0)/rated.length):null,best=rated.length?Math.max.apply(null,rated.map(function(x){return x.nota})):null,compet=R.filter(function(x){return x.c}),labels=["Norma culta","Compreensão","Argumentação","Coesão","Proposta"],means=compet.length?labels.map(function(_,i){return Math.round(compet.reduce(function(a,x){return a+(Number(x.c[i])||0)},0)/compet.length)}):null,weak=means?means.indexOf(Math.min.apply(null,means)):-1,last=R.length?R[R.length-1]:null;
