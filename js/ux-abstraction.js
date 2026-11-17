@@ -221,7 +221,7 @@ function topic(block){return Array.isArray(block)?block.join(" · "):String(bloc
 function getMetrics(subject,block){return window.CicloLearning?window.CicloLearning.metrics(window.S,subject,block):null}
 function allItems(){return window.CicloLearning?window.CicloLearning.all(window.S):[]}
 function day(){return window.dk(new Date())}
-function reviewDue(){var n=0;try{var d=JSON.parse(localStorage.getItem("ciclo-anki-local-v1")||"null");if(d&&Array.isArray(d.cards))n=d.cards.filter(function(c){return c.due&&c.due<=day()}).length}catch(_){}return n}
+function reviewDue(){var n=null;try{var summary=JSON.parse(localStorage.getItem("ciclo-anki-summary-v1")||"null");if(summary&&Number.isFinite(summary.due))n=summary.due;else{var d=JSON.parse(localStorage.getItem("ciclo-anki-local-v1")||"null");if(d&&Array.isArray(d.cards))n=d.cards.filter(function(c){return c.due&&c.due<=day()}).length}}catch(_){}return n}
 function candidates(){
  var list=[],S=window.S,now=day(),due=reviewDue();
  (S.subs||[]).forEach(function(s,si){
@@ -267,7 +267,7 @@ window.home=function(){
  var S=window.S,rec=candidates()[0],dt=new Date().toLocaleDateString("pt-BR",{weekday:"long",day:"numeric",month:"long"}),today=day(),minutes=window.minsOn(today),q=window.qs(function(l){return l.d===today}).t;
  if(!S.subs.length)return '<div class="up">SEU COPILOTO DE APRENDIZAGEM</div><h1>Vamos começar?</h1><p class="mu">O Ciclo organiza seus estudos e ajuda você a decidir o próximo passo.</p><section class="card" style="max-width:650px"><h2 style="margin:0 0 8px">Prepare seu primeiro ciclo</h2><p class="mu">Adicione suas matérias e assuntos. Você poderá ajustar tudo depois.</p><button class="btn" onclick="go(\'cfg\')">Organizar meus estudos</button></section>';
  var meta=window.gOn()?'<div class="home-support"><h3>Meta diária</h3><b>'+window.fm(minutes)+' / '+window.fm(S.goal)+'</b><div class="bar"><i style="width:'+Math.min(100,minutes/Math.max(1,S.goal)*100)+'%"></i></div>'+(window.qOn()?'<p class="mu sm" style="margin:9px 0 0">'+q+' / '+(S.qgoal||30)+' questões</p>':'')+'</div>':(window.qOn()?'<div class="home-support"><h3>Meta de questões</h3><b>'+q+' / '+(S.qgoal||30)+'</b><div class="bar"><i style="width:'+Math.min(100,q/Math.max(1,S.qgoal||30)*100)+'%"></i></div></div>':'');
- var due=reviewDue(),review='<div class="home-support"><h3>Revisões</h3><b>'+(due?due+" pendentes":"Ver revisões")+'</b><button class="lk" onclick="go(\'cards\')">Revisar agora →</button></div>';
+ var due=reviewDue(),review='<div class="home-support"><h3>Revisões</h3><b>'+(due===null?"Consultar revisões":due?due+" pendentes":"Tudo em dia")+'</b><button class="lk" onclick="go(\'cards\')">Revisar agora →</button></div>';
  var diag=stateDiagnosis(allItems()),p=priorities();
  var prioritiesHtml=p.length?p.map(function(x){return '<div class="home-priority"><span>•</span><span>'+e(x.subject.n)+' — '+e(topic(x.block))+'</span></div>'}).join(''):'<div class="mu sm">Suas prioridades aparecerão conforme você estuda.</div>';
  var title=rec?e(rec.s.n):"Seu ciclo está pronto",sub=rec?e(topic(rec.b)):"Adicione assuntos ao ciclo para receber uma recomendação.",reason=rec?e(rec.reason):"Você pode organizar seu percurso e começar quando quiser.";
