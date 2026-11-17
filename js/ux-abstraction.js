@@ -300,6 +300,7 @@ body{overflow-x:clip}
  #nav button{font-size:10px!important}
 }
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}
+`;
 document.head.appendChild(css);
 function e(v){return window.esc(String(v==null?"":v))}
 function topic(block){return Array.isArray(block)?block.join(" · "):String(block||"")}
