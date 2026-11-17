@@ -459,13 +459,14 @@ window.ciclo=function(){
  return html;
 };
 
+
 /* Início e percurso passam a ser uma única tela. */
 var homeBeforeCycle=window.home;
 window.home=function(){
  var html=homeBeforeCycle();
- html=html.replace('<button onclick="go(\\'ciclo\\')"><b>↻ Ciclo</b><span>Ver matérias e cadernos</span></button>','');
+ html=html.replace("<button onclick=\"go('ciclo')\"><b>↻ Ciclo</b><span>Ver matérias e cadernos</span></button>","");
  var cycle=window.ciclo?window.ciclo():"";
- cycle=cycle.replace('<div class="up">SEU PERCURSO</div>','<div class="up">SEU PERCURSO</div>').replace("<h1>Ciclo</h1>","<h2 style=\\"margin-top:8px\\">Seu percurso de estudos</h2>").replace('<p class="mu">Seu GPS de estudos: agora, próximo e depois.</p>','');
+ cycle=cycle.replace("<h1>Ciclo</h1>","<h2 style='margin-top:8px'>Seu percurso de estudos</h2>").replace('<p class="mu">Seu GPS de estudos: agora, próximo e depois.</p>','');
  return html+'<section class="integrated-cycle" style="margin-top:28px">'+cycle+'</section>';
 };
 window.prog=function(){
