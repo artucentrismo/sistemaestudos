@@ -256,8 +256,11 @@ function priorities(){
  .slice(0,3);
 }
 function stateDiagnosis(items){
- var valid=items.filter(function(x){return x.metrics.totalQuestions>0});
+ var valid=items.filter(function(x){return x.metrics.totalQuestions>0}),logs=window.S.log||[],dates={};
+ logs.forEach(function(l){if(l.d)dates[l.d]=true});
+ var sessions=Object.keys(dates).length,questions=logs.reduce(function(n,l){return n+(Number(l.ac)||0)+(Number(l.er)||0)},0);
  if(!valid.length)return{kind:"empty",title:"Seu diagnóstico está sendo construído",text:"Continue registrando seus estudos. O Ciclo precisa de algumas sessões para identificar seus pontos fortes e prioridades."};
+ if(sessions<3||questions<50)return{kind:"formation",title:"Você está iniciando sua jornada",text:"Continue estudando e registrando suas questões. Quando houver dados suficientes, o Ciclo mostrará sua evolução e os assuntos que merecem atenção."};
  var stuck=valid.filter(function(x){return x.metrics.stuck});
  var evolving=valid.filter(function(x){return x.metrics.improvementScore>0});
  var weak=valid.filter(function(x){return x.metrics.masteryScore<60});
@@ -270,7 +273,7 @@ window.home=function(){
  if(!S.subs.length)return '<div class="up">SEU COPILOTO DE APRENDIZAGEM</div><h1>Vamos começar?</h1><p class="mu">O Ciclo organiza seus estudos e ajuda você a decidir o próximo passo.</p><section class="card" style="max-width:650px"><h2 style="margin:0 0 8px">Prepare seu primeiro ciclo</h2><p class="mu">Adicione suas matérias e assuntos. Você poderá ajustar tudo depois.</p><button class="btn" onclick="go(\'cfg\')">Organizar meus estudos</button></section>';
  var meta=window.gOn()?'<div class="home-support"><h3>Meta diária</h3><b>'+window.fm(minutes)+' / '+window.fm(S.goal)+'</b><div class="bar"><i style="width:'+Math.min(100,minutes/Math.max(1,S.goal)*100)+'%"></i></div>'+(window.qOn()?'<p class="mu sm" style="margin:9px 0 0">'+q+' / '+(S.qgoal||30)+' questões</p>':'')+'</div>':(window.qOn()?'<div class="home-support"><h3>Meta de questões</h3><b>'+q+' / '+(S.qgoal||30)+'</b><div class="bar"><i style="width:'+Math.min(100,q/Math.max(1,S.qgoal||30)*100)+'%"></i></div></div>':'');
  var due=reviewDue(),review='<div class="home-support"><h3>Revisões</h3><b>'+(due===null?"Consultar revisões":due?due+" pendentes":"Tudo em dia")+'</b><button class="lk" onclick="go(\'cards\')">Revisar agora →</button></div>';
- var diag=stateDiagnosis(allItems()),p=priorities();
+ var diag=stateDiagnosis(allItems()),p=(diag.kind==="formation"||diag.kind==="empty")?[]:priorities();
  var prioritiesHtml=p.length?p.map(function(x){return '<div class="home-priority"><span>•</span><span>'+e(x.subject.n)+' — '+e(topic(x.block))+'</span></div>'}).join(''):'<div class="mu sm">Suas prioridades aparecerão conforme você estuda.</div>';
  var title=rec?e(rec.s.n):"Seu ciclo está pronto",sub=rec?e(topic(rec.b)):"Adicione assuntos ao ciclo para receber uma recomendação.",reason=rec?e(rec.reason):"Você pode organizar seu percurso e começar quando quiser.";
  var recMeta=rec?(window.fm(rec.s.min)+" · 20 questões sugeridas"):(S.blockMinutes||15)+" min";
@@ -292,7 +295,7 @@ window.ciclo=function(){
  return html;
 };
 window.prog=function(){
- var items=allItems(),diag=stateDiagnosis(items),valid=items.filter(function(x){return x.metrics.totalQuestions>0}),strong=valid.filter(function(x){return x.metrics.masteryScore>=80&&x.metrics.passRecords.length>=3&&x.metrics.retention&&x.metrics.retention.score>=75}),improving=valid.filter(function(x){return x.metrics.improvementScore>=15}).sort(function(a,b){return b.metrics.improvementScore-a.metrics.improvementScore}),weak=valid.filter(function(x){return x.metrics.stuck||x.metrics.masteryScore<60||x.metrics.stagnation}).sort(function(a,b){return a.metrics.masteryScore-b.metrics.masteryScore}).slice(0,4);
+ var items=allItems(),diag=stateDiagnosis(items),valid=items.filter(function(x){return x.metrics.totalQuestions>0}),ready=diag.kind!=="formation"&&diag.kind!=="empty",strong=ready?valid.filter(function(x){return x.metrics.masteryScore>=80&&x.metrics.passRecords.length>=3&&x.metrics.retention&&x.metrics.retention.score>=75}):[],improving=ready?valid.filter(function(x){return x.metrics.improvementScore>=15}).sort(function(a,b){return b.metrics.improvementScore-a.metrics.improvementScore}):[],weak=ready?valid.filter(function(x){return x.metrics.stuck||x.metrics.masteryScore<60||x.metrics.stagnation}).sort(function(a,b){return a.metrics.masteryScore-b.metrics.masteryScore}).slice(0,4):[];
  var strengths=strong.map(function(x){return '<div class="report-line">✓ '+e(x.subject.n)+' — '+e(topic(x.block))+'</div>'}).concat(improving.slice(0,3).map(function(x){return '<div class="report-line">↗ '+e(x.subject.n)+' — evolução de '+Math.round(x.metrics.improvementScore)+' pontos</div>'}));
  var attention=weak.map(function(x){return '<div class="report-line">• '+e(x.subject.n)+' — '+e(topic(x.block))+(x.metrics.stuck?' · precisa de nova estratégia':' · vale reforçar')+'</div>'});
  var html='<div class="up">APRENDIZAGEM</div><h1>Relatórios</h1><section class="report-state"><div class="up">SEU DIAGNÓSTICO</div><strong>'+e(diag.title)+'</strong><p class="mu" style="line-height:1.55;margin-bottom:0">'+e(diag.text)+'</p></section><div class="report-columns"><section class="report-box"><h3>Pontos fortes</h3>'+(strengths.join('')||'<p class="mu sm">Suas evoluções e assuntos dominados aparecerão aqui quando houver dados suficientes.</p>')+'</section><section class="report-box"><h3>Precisam de atenção</h3>'+(attention.join('')||'<p class="mu sm">Nenhum gargalo identificado com os dados atuais.</p>')+'</section></div>';
