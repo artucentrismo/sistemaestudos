@@ -334,11 +334,11 @@ window.render=function(){oldRender();updateNavigation()};
 var root=document.getElementById("anki-v2"),ankiObserver;
 function simplifyAnki(){
  var el=document.getElementById("anki-v2");if(!el)return;
- var heading=el.querySelector(".anki-welcome h2");if(heading)heading.textContent="Revisão";
+ var heading=el.querySelector(".anki-welcome h2");if(!heading||heading.textContent==="Revisão")return;
+ heading.textContent="Revisão";
  var tagline=el.querySelector(".anki-welcome p");if(tagline)tagline.textContent="Seus cartões no momento certo, sem precisar organizar tudo antes.";
- var top=el.querySelector(".anki-topline");if(top)top.firstElementChild.textContent="REVISÃO ESPAÇADA · FSRS";
+ var top=el.querySelector(".anki-topline");if(top&&top.firstElementChild)top.firstElementChild.textContent="REVISÃO ESPAÇADA · FSRS";
  var stats=el.querySelector(".anki-stats");if(stats){var cards=stats.children;if(cards[0])cards[0].querySelector("small").textContent="Cartões";if(cards[1])cards[1].querySelector("small").textContent="Para revisar";if(cards[2])cards[2].querySelector("small").textContent="Revisões recentes";if(cards[3])cards[3].querySelector("small").textContent="Acertos recentes"}
- var actions=el.querySelector(".anki-actions");if(actions){var b=actions.querySelector("#anki-review");if(b)b.textContent="Revisar agora"+(b.disabled?"":" · "+(b.textContent.match(/\d+/)||[""])[0]);}
 }
 var appRoot=document.getElementById("app");if(appRoot){ankiObserver=new MutationObserver(function(){if(document.getElementById("anki-v2"))simplifyAnki()});ankiObserver.observe(appRoot,{childList:true,subtree:true})}
 window.render();
