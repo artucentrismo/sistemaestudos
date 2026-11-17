@@ -577,10 +577,10 @@ brandStyle.textContent=`
 #nav:before{content:"Seus estudos em ciclo"!important;display:block;font:800 18px Manrope,Inter,sans-serif!important;letter-spacing:-.025em!important;line-height:1.25;color:var(--ac);padding:8px 14px 2px!important;white-space:normal}
 #nav:after{content:"por artucentrismo";display:block;order:0;font:500 12px Inter,system-ui,sans-serif;color:var(--mu);padding:0 14px 25px;letter-spacing:.01em}
 #nav button{order:1}
-.student-identity{display:flex;align-items:center;gap:11px;margin:0 0 18px;padding:12px 15px;background:var(--cd);border:1px solid var(--ln);border-radius:15px;width:max-content;max-width:100%;box-shadow:0 2px 8px rgba(10,20,40,.035)}
-.student-identity-emoji{display:grid;place-items:center;width:40px;height:40px;flex:none;border-radius:12px;background:color-mix(in srgb,var(--ac) 10%,var(--cd));font-size:25px}
-.student-identity-label{display:block;color:var(--mu);font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin-bottom:2px}
-.student-identity-name{display:block;color:var(--tx);font-size:16px;font-weight:750;line-height:1.3;overflow-wrap:anywhere}
+.student-identity{display:flex;align-items:center;gap:16px;margin:0 0 22px;padding:17px 21px;background:var(--cd);border:1px solid var(--ln);border-radius:18px;width:max-content;max-width:100%;min-height:88px;box-shadow:0 3px 12px rgba(10,20,40,.06)}
+.student-identity-emoji{display:grid;place-items:center;width:64px;height:64px;flex:none;border-radius:17px;background:color-mix(in srgb,var(--ac) 10%,var(--cd));font-size:42px}
+.student-identity-label{display:block;color:var(--mu);font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px}
+.student-identity-name{display:block;color:var(--tx);font-size:21px;font-weight:800;line-height:1.3;overflow-wrap:anywhere}
 @media(max-width:700px){.student-identity{margin-top:4px;margin-bottom:14px}}
 `;
 document.head.appendChild(brandStyle);
@@ -589,7 +589,8 @@ var previousHome=window.home;
 window.home=function(){
  var html=previousHome();
  var name=window.S&&window.S.profileName?window.esc(window.S.profileName):"Estudante";
- var identity='<div class="student-identity"><span class="student-identity-emoji" aria-hidden="true">🧑‍🎓</span><span><span class="student-identity-label">Estudante</span><span class="student-identity-name">'+name+'</span></span></div>';
+ var emoji=window.S&&window.S.profileEmoji?window.esc(window.S.profileEmoji):'🎯';
+ var identity='<div class="student-identity"><span class="student-identity-emoji" aria-hidden="true">'+emoji+'</span><span><span class="student-identity-label">Estudante</span><span class="student-identity-name">'+name+'</span></span></div>';
  html=html.replace(/<h1>Olá, [\s\S]*?<\/h1>/, '<h1>Seu próximo passo</h1>');
  html=html.replace(/<h1>Seu espaço de estudos<\/h1>/,'<h1>Vamos começar</h1>');
  return identity+html;
