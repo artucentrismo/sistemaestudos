@@ -337,6 +337,7 @@ function StudyPage({disciplines,notebooks,blocks,reload}:{disciplines:Row[];note
    const a=valid.reduce((sum,x)=>sum+Math.min(Math.max(0,Number(x.questions)||0),Math.max(0,Number(x.correct)||0)),0);
    const saved=await sessionRepository.save({disciplineId,notebookId:visitedNotebookIds.length===1?visitedNotebookIds[0]:undefined,notebookIds:visitedNotebookIds,durationSeconds:sessionElapsed,questions:q,correct:a,date:now});
    for(const segment of segments){const count=Math.max(0,Number(segment.questions)||0);if(count>0)await sessionSegmentRepository.save({sessionId:saved.id,notebookId:segment.notebookId,questions:count,correct:Math.min(count,Math.max(0,Number(segment.correct)||0)),difficulties:segment.difficulties,date:now});}
+   setEngineSegments(await sessionSegmentRepository.list() as SegmentRecord[]);
    setSessionElapsed(0);setSegments([{key:makeId(),notebookId,questions:"",correct:"",difficulties:[],flashcards:[{key:makeId(),front:"",back:""}]}]);setVisitedNotebookIds([]);setSessionStartedAt(undefined);sessionDraftRef.current=null;await settingsRepository.set("activeStudySession",null);
    setMessage("Sessão finalizada e registrada. Suas passadas concluídas permanecem salvas.");
    reload();
