@@ -1,50 +1,42 @@
-# Ciclo de Estudos
+# EstudosFlix
 
-Aplicação web gratuita de ciclo de estudos para o ENEM, otimizada para celular e iPad.
+**Seu GPS pedagógico para estudar por questões.**
 
-## Versão básica local-first
+O EstudosFlix é um WebApp responsivo, gratuito e multiplataforma para organização de estudos por ciclos de cadernos. Usa o **Método EstudosFlix**, criado por Artucentrismo, para reduzir o esforço de planejamento e apresentar sempre o próximo passo possível.
 
-Esta versão não exige cadastro, login, banco de dados ou serviço pago. O Ciclo e o Anki salvam os dados no armazenamento local (\`localStorage\`) do navegador. Cada pessoa usa seus próprios dados no próprio navegador; não há sincronização entre dispositivos nem compartilhamento de progresso entre amigos.
+## Princípios
 
-**Importante:** o site do GitHub Pages é público e pode ser aberto por qualquer pessoa com o link. O que fica local é o progresso de cada navegador, não o acesso ao site. Não use este modo para guardar dados em computadores compartilhados. Baixe backups regularmente em Ajustes → Dados neste aparelho.
+- Acessível por navegador em computadores, iPads e celulares.
+- Aplicação estática, hospedável gratuitamente no GitHub Pages.
+- Dados armazenados localmente no navegador com IndexedDB.
+- Sem serviços pagos, contas online, nuvem, APIs externas, telemetria ou sincronização automática.
+- Backup e importação manuais para transferir os dados entre dispositivos.
+- Metas de tempo flexíveis: não há atraso, dívida ou punição por não cumprir o planejado.
 
-## Recursos
+## Como funciona
 
-- Ciclo de matérias em blocos de 15 minutos
-- Registro de acertos, erros, metas, calendário e redações
-- Escore adaptativo de urgência por matéria
-- Ajuste de tempo por matéria ao completar cada volta
-- Reforço de blocos com desempenho crítico e ocultação temporária de blocos dominados
-- XP, níveis, sequência, escudos de sequência e missão de retorno
-- Tema claro, escuro ou automático
-- Anki local com baralhos hierárquicos e subbaralhos, notas Básicas, reversas e Cloze
-- Editor do Anki com campos separados para frente e verso, inserção de lacunas Cloze, tags, busca, suspensão, estatísticas básicas e importação/exportação TSV
-- Organização em árvore com subbaralhos ilimitados; selecionar um baralho principal inclui automaticamente seus subbaralhos nas notas, estatísticas e revisões
-- Backup e restauração dos dados do Ciclo e do Anki em JSON
+- **Início:** apresenta a matéria atual e o próximo caderno, além do tempo investido e das revisões.
+- **Disciplinas e ciclo:** configura a ordem das matérias, a quantidade de cadernos por passagem e os cadernos dentro de cada disciplina.
+- **Revisões:** organiza flashcards vinculados ao caderno de origem.
+- **Evolução:** acompanha domínio, retenção, confiança, tendências, gargalos e histórico por caderno.
 
-## Dados e privacidade
+O ciclo geral trabalha em blocos por disciplina, definidos pela quantidade de cadernos escolhida pela pessoa. Cada caderno possui duração própria, configurável em múltiplos de cinco minutos (15 minutos por padrão). A fila é circular e contínua: com cinco cadernos e limite quatro, a primeira passagem percorre 1–2–3–4; a próxima começa no 5 e segue 1–2–3. Se a pessoa interromper uma passagem, o próximo acesso retoma no caderno pendente. A quantidade é limitada aos cadernos disponíveis, sem repetição artificial.
 
-- Todos os dados de estudo ficam exclusivamente no `localStorage` do navegador. O aplicativo não possui backend, banco de dados remoto, login ou sincronização.
-- Limpar os dados do site, trocar de navegador ou de aparelho pode apagar ou deixar os dados inacessíveis.
-- Use **Ajustes → Baixar backup completo** antes de trocar de dispositivo ou limpar o navegador.
-- **Restaurar backup** substitui os dados locais atuais pelos dados do arquivo escolhido.
+Um bloco de referência dura 15 minutos. Pausar preserva o tempo e não conclui uma visita. O estudante também pode encerrar manualmente a atividade de um caderno antes dos 15 minutos; o tempo real é registrado e a visita pode contar para a passada. Uma passagem termina quando a quantidade configurada de cadernos distintos for concluída, limitada ao total disponível.
 
-## Limitações desta versão
+## Documentação
 
-- Não há contas de usuário, login, sincronização em nuvem, API de dados ou compartilhamento de progresso entre pessoas.
-- O Anki ainda não importa/exporta \`.apkg\`; por enquanto, oferece TSV.
-- O agendador FSRS-7 é código de uma biblioteca pública carregada via CDN; essa dependência fornece apenas a lógica de repetição espaçada. Dados de estudo não são enviados para ela. A primeira inicialização do Anki exige internet.
-- A evolução visual do Canto de Estudos e a trilha de checkpoints ainda serão ampliadas em versões futuras.
-- Não há paridade completa com Anki Desktop (tipos de nota customizáveis, mídia/áudio/LaTeX, estatísticas avançadas e todos os recursos de agendamento).
+- [Método EstudosFlix](docs/METODO-ESTUDOSFLIX.md)
+- [Especificação do produto](docs/ESPECIFICACAO-PRODUTO.md)
+- [Arquitetura técnica](docs/ARQUITETURA-TECNICA.md)
+- [Decisões e pontos de validação](docs/DECISOES-PENDENTES.md)
+- [Requisitos pedagógicos do ciclo e dos blocos](docs/requisitos-blocos-15-minutos.md)
+- [UX estruturada v3.0](docs/UX-ESTUDOSFLIX-v2.md)
 
-## Desenvolvimento
+## Stack e privacidade
 
-O projeto usa HTML, CSS e JavaScript nativo, sem etapa de build. Os módulos em \`js/\` são carregados como ES modules.
+React + TypeScript + Vite + PWA + IndexedDB. O GitHub Pages hospeda apenas os arquivos estáticos; não hospeda dados pessoais. Cada navegador mantém sua própria base local.
 
-Para testar localmente, sirva a pasta por HTTP (por exemplo, com a extensão Live Server ou \`python -m http.server\`). Não abra \`index.html\` diretamente com \`file://\`, pois os módulos ES precisam de origem HTTP/HTTPS.
+## Estado do projeto
 
-## Publicação
-
-Site: https://artucentrismo.github.io/sistemaestudos/
-
-A hospedagem estática do GitHub Pages não exige um servidor próprio. Como o repositório é público, qualquer pessoa pode acessar o site; cada navegador mantém seus próprios dados locais.
+A arquitetura v3 foi integrada à branch `main` pelo PR #4. Os testes automatizados e o build de produção passaram antes da integração. A publicação no GitHub Pages é automática; confirme a conclusão da ação de deploy antes de considerar a nova versão disponível publicamente.

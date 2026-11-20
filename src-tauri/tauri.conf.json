@@ -1,0 +1,31 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "EstudosFlix",
+  "version": "0.1.0",
+  "identifier": "br.estudosflix.desktop",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "EstudosFlix",
+        "width": 1440,
+        "height": 920,
+        "minWidth": 900,
+        "minHeight": 650
+      }
+    ],
+    "security": { "csp": null }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "category": "Education",
+    "shortDescription": "GPS pedagógico para estudar por questões",
+    "longDescription": "Aplicativo local e offline para organizar estudos, analisar desempenho e orientar revisões."
+  }
+}
