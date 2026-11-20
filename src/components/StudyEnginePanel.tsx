@@ -7,8 +7,6 @@ type Discipline = { id: string; name: string };
 type Segment = { notebookId?: string; questions: number; correct: number; date: string };
 type Props = { disciplines: Discipline[]; notebooks: Notebook[]; segments: Segment[] };
 
-const levelNames = ["Iniciante", "Fundamentos", "Desenvolvimento", "Consolidação"];
-
 export default function StudyEnginePanel({ disciplines, notebooks, segments }: Props) {
   const attempts: EngineAttempt[] = useMemo(() => segments.filter(x => x.notebookId).map(x => ({
     notebookId: x.notebookId!, questions: x.questions, correct: x.correct, date: x.date
