@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { FormEvent, ReactNode } from "react";
 import MethodWelcome from "./components/MethodWelcome";
+import StudyEnginePanel from "./components/StudyEnginePanel";
+import { evaluateNotebookGates } from "./domain/studyEngine";
 import { reactivateFlashcard, selectDailyReviewQueue, type Flashcard, type FlashcardReview } from "./domain/flashcards";
 import { calculateEssayScore, type EssayCompetencies } from "./domain/essays";
 import { createNewFsrsCard, formatReviewInterval, previewFsrsIntervals, scheduleFsrsReview, type ReviewGrade } from "./domain/ankiScheduler";
@@ -270,6 +272,8 @@ function StudyPage({disciplines,notebooks,blocks,reload}:{disciplines:Row[];note
  const [flashcardBack,setFlashcardBack]=useState("");
 
  const [segments,setSegments]=useState<SegmentDraft[]>([{key:makeId(),notebookId:paused?.notebookId??"",questions:"",correct:"",difficulties:[],flashcards:[{key:makeId(),front:"",back:""}]}]);
+ const [engineSegments,setEngineSegments]=useState<SegmentRecord[]>([]);
+ useEffect(()=>{let alive=true;void sessionSegmentRepository.list().then(rows=>{if(alive)setEngineSegments(rows as SegmentRecord[]);});return()=>{alive=false;};},[disciplineId]);
  const [block,setBlock]=useState<StudyBlock|undefined>(paused?{...paused,status:"paused"}:undefined);
  const [cycleProgress,setCycleProgress]=useState<StudyCycleProgress>();
  const [cycleReady,setCycleReady]=useState(false);
@@ -284,14 +288,17 @@ function StudyPage({disciplines,notebooks,blocks,reload}:{disciplines:Row[];note
  useEffect(()=>{elapsedRef.current=elapsed;},[elapsed]);
  const [saving,setSaving]=useState(false);const [message,setMessage]=useState("");
  const available=notebooks.filter(n=>n.disciplineId===disciplineId).sort((a,b)=>(a.cycleOrder??0)-(b.cycleOrder??0)||a.createdAt.localeCompare(b.createdAt));
- const eligibleNotebooks=available;
+ const engineAttempts=engineSegments.filter(row=>row.notebookId&&available.some(n=>n.id===row.notebookId)).map(row=>({notebookId:row.notebookId!,questions:row.questions,correct:row.correct,date:row.date}));
+ const gateResults=evaluateNotebookGates(available.map(n=>n.id),engineAttempts);
+ const releasedIds=new Set(gateResults.filter(g=>g.released).map(g=>g.notebookId));
+ const eligibleNotebooks=available.filter(n=>releasedIds.has(n.id));
  const eligibleIdsKey=eligibleNotebooks.map(n=>n.id).join("|");
  const configuredDurationMinutes=Math.max(5,Number(disciplines.find(d=>d.id===disciplineId)?.durationMinutes??15));
  const blockDurationSeconds=import.meta.env.DEV?configuredDurationMinutes:configuredDurationMinutes*60;
  useEffect(()=>{let alive=true;setCycleReady(false);void settingsRepository.get("studyCycle:"+disciplineId).then(value=>{if(!alive)return;const saved=value&&typeof value==="object"?value as StudyCycleProgress:undefined;const reconciled=reconcileStudyCycle(saved,disciplineId,eligibleNotebooks.map(n=>n.id));if(!saved&&paused){const pausedIndex=eligibleNotebooks.findIndex(n=>n.id===paused.notebookId);if(pausedIndex>=0)reconciled.currentNotebookIndex=pausedIndex;}setCycleProgress(reconciled);void settingsRepository.set("studyCycle:"+disciplineId,reconciled);setCycleReady(true);});return()=>{alive=false;};},[disciplineId,eligibleIdsKey]);
  const progress=getStudyBlockProgress({elapsedSeconds:elapsed},blockDurationSeconds);const configuredPassCount=Math.max(1,Number(disciplines.find(d=>d.id===disciplineId)?.notebooksPerPass??4));const cyclePassLimit=Math.min(eligibleNotebooks.length,configuredPassCount);const cyclePassPercent=cyclePassLimit?Math.min(100,Math.round((cycleProgress?.visitedNotebookIds?.length??0)/cyclePassLimit*100)):0;
 
- useEffect(()=>{if(!notebookId&&available[0])setNotebookId(available[0].id);},[available,notebookId]);
+ useEffect(()=>{if((!notebookId||!eligibleNotebooks.some(n=>n.id===notebookId))&&eligibleNotebooks[0])setNotebookId(eligibleNotebooks[0].id);},[eligibleIdsKey,notebookId]);
  useEffect(()=>{if(notebookId)setSegments(v=>v.map((segment,index)=>index===0&&!segment.notebookId?{...segment,notebookId}:segment));},[notebookId]);
  useEffect(()=>{if(!block&&cycleProgress?.notebookIds.length){const currentId=cycleProgress.notebookIds[cycleProgress.currentNotebookIndex];if(currentId)setNotebookId(currentId);}},[cycleProgress,block?.id]);
  useEffect(()=>{if(!running)return;const timer=window.setInterval(()=>{setElapsed(v=>v+1);setSessionElapsed(v=>v+1);},1000);return()=>window.clearInterval(timer);},[running]);
@@ -409,6 +416,7 @@ function EvolutionPage({disciplines,segments,sessions,notebooks,cards}:{discipli
  const totalActiveCards=cards.filter(card=>!card.archived).length;
  return <><Header eyebrow="MÉTODO ESTUDOSFLIX" title="Evolução" subtitle="Acompanhe sua aprendizagem por caderno. A disciplina consolida os resultados, mas não esconde as dificuldades individuais."/>
  <div className="metric-grid"><Metric icon={<Target/>} label="Domínio geral" value={overallDomain===null?"—":Math.round(overallDomain)+"%"} detail="Ponderado por questões respondidas"/><Metric icon={<Activity/>} label="Retenção" value={overallRetention===null?"—":Math.round(overallRetention)+"%"} detail="Comparação entre exposições válidas"/><Metric icon={<Check/>} label="Cadernos dominados" value={mastered+"/"+notebooks.length} detail="Mínimo de 50 questões e domínio ≥ 80%"/><Metric icon={<BookOpen/>} label="Questões respondidas" value={String(totalQuestions)} detail={fmt(totalTime)+" de estudo líquido · "+totalActiveCards+" flashcards ativos"}/></div>
+ <StudyEnginePanel disciplines={disciplines} notebooks={notebooks} segments={segments}/>
  <div className="panel evolution-panel"><div className="panel-heading"><div><span className="eyebrow">CONSOLIDAÇÃO</span><h2>Evolução por disciplina</h2></div></div>{disciplineStats.map(item=><div className="analysis-row" key={item.discipline.id}><div className="analysis-main"><strong>{item.discipline.name}</strong><small>{item.questions} questões somadas nos cadernos</small></div><div className="analysis-value"><b>{item.domain===null?"—":Math.round(item.domain)+"%"}</b><small>Domínio ponderado</small></div><div className="analysis-value"><b>{item.retention===null?"—":Math.round(item.retention)+"%"}</b><small>Retenção</small></div></div>)}</div>
  <div className="panel evolution-panel"><div className="panel-heading"><div><span className="eyebrow">PONTOS DE ATENÇÃO</span><h2>Onde estão as dificuldades?</h2></div><TriangleAlert/></div>{bottlenecks.length===0?<p className="muted-copy">Ainda não há evidências suficientes para identificar dificuldades persistentes. Continue registrando questões.</p>:bottlenecks.map(item=><div className="diagnostic-row" key={item.notebook.id}><span className="diagnostic-dot amber-dot"/><div><strong>{item.notebook.name}</strong><small>{disciplines.find(d=>d.id===item.notebook.disciplineId)?.name} · {item.domain.value===null?"Dados insuficientes":"Domínio "+Math.round(item.domain.value)+"%"} · {item.domain.totalQuestions} questões{item.trend!==null&&item.trend<=-10?" · tendência em queda":""}</small></div></div>)}</div>
  <div className="panel evolution-panel"><div className="panel-heading"><div><span className="eyebrow">PRÓXIMA AÇÃO</span><h2>O que fazer agora?</h2></div><Compass/></div>{bottlenecks[0]?<><p className="muted-copy">Continue a sequência do ciclo e dê atenção especial a <strong>{bottlenecks[0].notebook.name}</strong>. O ciclo não será bloqueado por dificuldades.</p><span className="status-label warning">Atenção recomendada</span></>:<p className="muted-copy">Siga o próximo caderno indicado na aba Início. O sistema não exige recuperar dias ou cumprir metas atrasadas.</p>}</div>
