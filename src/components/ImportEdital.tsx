@@ -7,7 +7,7 @@ import { parseEditalText } from "../domain/editalText";
 type ExistingRow = { id: string; name: string; disciplineId?: string; cycleOrder?: number };
 type Props = { reload: () => void };
 const clean = (value: string) => value.trim().toLocaleLowerCase("pt-BR");
-const aiPrompt = "Analise o edital/conteúdo programático que vou fornecer e organize-o para cadastro no EstudosFlix.\n\nREGRAS OBRIGATÓRIAS:\n- Identifique as disciplinas e agrupe os tópicos em cadernos coerentes.\n- Cada caderno deve representar um assunto principal que será usado para organizar questões.\n- NÃO crie uma categoria separada chamada \"assuntos\".\n- Responda exclusivamente no formato abaixo, sem introdução, explicações, tabelas, marcadores ou comentários.\n- Use exatamente os rótulos \"disciplina:\" e \"caderno:\".\n- Não invente conteúdos que não estejam no edital.\n- Se houver tópicos muito específicos, agrupe-os no caderno principal correspondente.\n- Não inclua linhas que não sejam disciplinas ou cadernos.\n\nFORMATO:\ndisciplina: Nome da disciplina\ncaderno 01: Nome do primeiro caderno\ncaderno 02: Nome do segundo caderno\n\ndisciplina: Outra disciplina\ncaderno 01: Nome do caderno\n\nAgora organize este edital:\n[COLE AQUI O EDITAL]";
+const aiPrompt = "Analise o edital/conteúdo programático que vou fornecer e organize-o para cadastro no EstudosFlix.\n\nREGRAS OBRIGATÓRIAS:\n- Identifique todas as disciplinas e agrupe os tópicos do edital em cadernos coerentes.\n- Cada caderno deve representar um núcleo de conteúdo que possa ser estudado e avaliado por questões.\n- Organize os cadernos em sequência pedagógica, do conhecimento básico aos conteúdos mais específicos/avançados.\n- Preserve os tópicos relevantes do edital dentro do nome do caderno, sem criar dezenas de cadernos minúsculos.\n- Quando houver pré-requisitos evidentes, coloque o conteúdo-base antes do conteúdo que depende dele.\n- NÃO crie uma categoria separada chamada \"assuntos\".\n- Responda exclusivamente no formato abaixo, sem introdução, explicações, tabelas, marcadores ou comentários.\n- Use exatamente os rótulos \"disciplina:\" e \"caderno:\".\n- Não invente conteúdos que não estejam no edital.\n- Se houver tópicos muito específicos, agrupe-os no caderno principal correspondente.\n- Não inclua linhas que não sejam disciplinas ou cadernos.\n\nFORMATO:\ndisciplina: Nome da disciplina\ncaderno 01: Nome do primeiro caderno\ncaderno 02: Nome do segundo caderno\n\ndisciplina: Outra disciplina\ncaderno 01: Nome do caderno\n\nAgora organize este edital:\n[COLE AQUI O EDITAL]";
 
 export default function ImportEdital({ reload }: Props) {
   const [text, setText] = useState("");
@@ -98,7 +98,7 @@ export default function ImportEdital({ reload }: Props) {
 
     <div className="edital-text-instructions">
       <div className="edital-instruction-title"><Sparkles size={16}/> 1. Copie o prompt para a IA</div>
-      <p>O prompt já orienta a IA a separar disciplinas e cadernos no padrão aceito pelo EstudosFlix.</p>
+      <p>Baixe ou abra o edital do concurso, copie o prompt e cole-o em qualquer IA (ChatGPT, Gemini, Claude ou outra) junto com o conteúdo programático. Peça a organização e, depois, cole aqui a resposta. A IA organiza a estrutura; o motor do sistema acompanha suas métricas e libera os próximos cadernos conforme sua evolução.</p>
       <button type="button" className="button secondary edital-example-button" onClick={() => void copyPrompt()}>
         <Copy size={15}/> {copied ? "Prompt copiado!" : "Copiar prompt"}
       </button>
